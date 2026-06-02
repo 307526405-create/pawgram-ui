@@ -1,118 +1,209 @@
-import { Plus, Image as ImageIcon, MapPin, Hash, AtSign, Dog, X } from "lucide-react";
-import { BottomNav } from "../components/BottomNav";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ChevronLeft, MapPin, Hash } from "lucide-react";
 import { useState } from "react";
-import { useLocation } from "react-router";
-
-const selectedMedia = [
-  { id: 1, src: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=600", alt: "已选择的宠物照片" }
-];
+import { useNavigate } from "react-router";
+import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
+import { postsApi } from "../api/client";
 
 const myPets = [
-  { id: 1, name: "旺财", avatar: "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?auto=format&fit=crop&q=80&w=150" },
-  { id: 2, name: "咪咪", avatar: "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?auto=format&fit=crop&q=80&w=150" },
-  { id: 3, name: "大黑", avatar: "https://images.unsplash.com/photo-1489924034176-2e678c29d4c6?auto=format&fit=crop&q=80&w=150" }
+  { id:1, name:"旺财", avatar:"https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=80", type:"金毛" },
+  { id:2, name:"咪咪", avatar:"https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=80", type:"布偶猫" },
+  { id:3, name:"大黑", avatar:"https://images.unsplash.com/photo-1489924034176-2e678c29d4c6?w=80", type:"泰迪" },
 ];
 
 export function PostCreate() {
-  const [selectedPet, setSelectedPet] = useState<number | null>(1);
-  const location = useLocation();
-  const source = location.state?.source === "camera" ? "相机拍摄" : "相册选择";
+  const navigate = useNavigate();
+  const [content, setContent] = useState("");
+  const [images, setImages] = useState<string[]>([]);
+  const [petId, setPetId] = useState<number | null>(null);
+  const [tags, setTags] = useState<string[]>([]);
+  const [tagInput, setTagInput] = useState("");
+  const [loc, setLoc] = useState("");
+  const [showPets, setShowPets] = useState(false);
+  const [showTags, setShowTags] = useState(false);
+  const [showLocation, setShowLocation] = useState(false);
+  const [showPicker, setShowPicker] = useState(false);
+  const [dragIdx, setDragIdx] = useState<number | null>(null);
+  const [publishing, setPublishing] = useState(false);
+
+  const pickFromAlbum = async () => {
+    setShowPicker(false);
+    try {
+      const result = await Camera.pickImages({ quality: 90, limit: 9 - images.length });
+      for (const photo of result.photos) {
+        if (photo.webPath) {
+          const response = await fetch(photo.webPath);
+          const blob = await response.blob();
+          const dataUrl = await new Promise<string>(resolve => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          setImages(prev => [...prev, dataUrl]);
+        }
+      }
+    } catch {}
+  };
+
+  const takePhoto = async () => {
+    setShowPicker(false);
+    try {
+      const photo = await Camera.getPhoto({ resultType: CameraResultType.Base64, source: CameraSource.Camera, quality: 90 });
+      if (photo.base64String) setImages(prev => [...prev, `data:image/jpeg;base64,${photo.base64String}`]);
+    } catch {}
+  };
+
+  const removeImage = (idx: number) => setImages(prev => prev.filter((_, i) => i !== idx));
+  const addTag = () => {
+    const t = tagInput.trim();
+    if (t && !tags.includes(t)) { setTags(prev => [...prev, t]); setTagInput(""); }
+  };
+  const removeTag = (t: string) => setTags(prev => prev.filter(x => x !== t));
+  const onDragStart = (idx: number) => setDragIdx(idx);
+  const onDragOver = (e: React.DragEvent, idx: number) => {
+    e.preventDefault();
+    if (dragIdx === null || dragIdx === idx) return;
+    const next = [...images];
+    const [item] = next.splice(dragIdx, 1);
+    next.splice(idx, 0, item);
+    setImages(next);
+    setDragIdx(idx);
+  };
+  const onDragEnd = () => setDragIdx(null);
+  const selectedPet = myPets.find(p => p.id === petId);
+
+  const handlePublish = async () => {
+    if (!content.trim() && images.length === 0) return;
+    setPublishing(true);
+    try {
+      await postsApi.create({
+        content: content.trim(),
+        images,
+        tags,
+        breed: selectedPet?.type || '',
+        location: loc,
+      });
+      navigate("/");
+    } catch {
+      setPublishing(false);
+    }
+  };
 
   return (
-    <div className="h-full bg-[#FAFAFA] relative flex flex-col">
-      {/* Header: 顶部留白54px给状态栏，总体高98px，无橙色背景 */}
-      <div className="bg-[#FAFAFA]/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-40 border-b border-transparent">
-        <div className="w-16"></div> {/* Spacer */}
-        <h1 className="text-[#333333] text-[17px] font-bold tracking-wider">发布</h1>
-        <div className="w-16 flex justify-end">
-          <button className="bg-[#FF8C42] text-white text-[13px] font-bold px-3.5 py-1.5 rounded-full active:scale-95 transition-transform shadow-sm">
-            发布
-          </button>
+    <div className="h-full bg-white relative flex flex-col">
+      {showPicker && (
+        <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/40" onClick={() => setShowPicker(false)}>
+          <div className="bg-white rounded-t-[16px]" onClick={e => e.stopPropagation()}>
+            <button onClick={takePhoto} className="w-full py-4 text-[15px] text-[#333] border-b border-[#F0F0F0] active:bg-[#F9F9F9]">拍摄</button>
+            <button onClick={pickFromAlbum} className="w-full py-4 text-[15px] text-[#333] border-b border-[#F0F0F0] active:bg-[#F9F9F9]">从手机相册选择</button>
+            <button onClick={() => setShowPicker(false)} className="w-full py-4 text-[15px] text-[#999] active:bg-[#F9F9F9]">取消</button>
+          </div>
         </div>
+      )}
+
+      {/* Header */}
+      <div className="flex items-center justify-between px-4 pt-[var(--app-safe-top)] h-[var(--app-header-height)] shrink-0 border-b border-[#F0F0F0]">
+        <button onClick={() => navigate(-1)} className="p-1 -ml-1"><ChevronLeft className="w-6 h-6 text-[#333]" /></button>
+        <h1 className="text-[17px] font-bold text-[#333]">发布</h1>
+        <button onClick={handlePublish} disabled={publishing || (!content.trim() && images.length === 0)}
+          className={`text-[14px] font-bold px-4 py-1.5 rounded-full ${content.trim() || images.length > 0 ? 'bg-[#FF8C42] text-white' : 'bg-[#F0F0F0] text-[#BBB]'}`}>
+          {publishing ? '发布中...' : '发布'}
+        </button>
       </div>
 
-      {/* Content */}
-      <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        {/* Text Input & Grid */}
-        <div className="p-4 bg-white mb-2 shadow-sm border-b border-gray-50">
-          <textarea
-            className="w-full h-24 bg-transparent text-[14px] text-gray-900 placeholder:text-gray-400 outline-none resize-none"
-            placeholder={`通过${source}，分享你和宠物的精彩瞬间...`}
-          />
-          
-          {/* Media Preview */}
-          <div className="mt-3 flex gap-2 overflow-x-auto pb-1 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {selectedMedia.map((media, index) => (
-              <div key={media.id} className="relative h-[108px] w-[108px] shrink-0 overflow-hidden rounded-[10px] bg-[#F5F5F5]">
-                <ImageWithFallback
-                  src={media.src}
-                  alt={media.alt}
-                  className="h-full w-full object-cover"
-                />
-                <button className="absolute right-1.5 top-1.5 flex h-[20px] w-[20px] items-center justify-center rounded-full bg-black/45 text-white active:scale-95">
-                  <X className="h-3.5 w-3.5" />
-                </button>
-                <div className="absolute bottom-1.5 left-1.5 rounded-full bg-black/45 px-1.5 py-0.5 text-[10px] text-white">
-                  {index + 1}
-                </div>
+      <div className="flex-1 overflow-y-auto">
+        <textarea value={content} onChange={e => setContent(e.target.value)}
+          placeholder="这一刻的想法..."
+          className="w-full px-4 py-4 text-[15px] leading-relaxed outline-none resize-none min-h-[120px] placeholder:text-[#CCC]" />
+
+        <div className="px-4 pb-3">
+          <div className="grid grid-cols-3 gap-1.5">
+            {images.map((img, i) => (
+              <div key={i} draggable onDragStart={() => onDragStart(i)} onDragOver={(e) => onDragOver(e, i)} onDragEnd={onDragEnd}
+                className={`aspect-square rounded overflow-hidden bg-[#F5F5F5] relative ${dragIdx === i ? 'opacity-40' : ''}`}>
+                <img src={img} className="w-full h-full object-cover" />
+                <button onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/50 rounded-full flex items-center justify-center text-white text-[10px]">✕</button>
               </div>
             ))}
-            <button className="flex h-[108px] w-[108px] shrink-0 flex-col items-center justify-center rounded-[10px] border border-dashed border-[#DDDDDD] bg-[#FAFAFA] active:bg-[#F5F5F5] transition-colors">
-              <Plus className="mb-1 h-6 w-6 text-[#999999]" />
-              <span className="text-[12px] text-[#999999]">继续添加</span>
-            </button>
+            {images.length < 9 && (
+              <button onClick={() => setShowPicker(true)} className="aspect-square rounded border border-[#E5E5E5] flex items-center justify-center active:bg-[#F9F9F9]">
+                <span className="text-[32px] text-[#CCC] font-light">+</span>
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Toolbar */}
-        <div className="px-6 py-3.5 bg-white mb-2 flex items-center justify-between border-y border-gray-50 shadow-sm">
-          <button className="flex flex-col items-center gap-1 group active:scale-95">
-            <ImageIcon className="w-6 h-6 text-gray-700" />
-          </button>
-          <button className="flex flex-col items-center gap-1 group active:scale-95">
-            <MapPin className="w-6 h-6 text-gray-700" />
-          </button>
-          <button className="flex flex-col items-center gap-1 group active:scale-95">
-            <Hash className="w-6 h-6 text-gray-700" />
-          </button>
-          <button className="flex flex-col items-center gap-1 group active:scale-95">
-            <AtSign className="w-6 h-6 text-gray-700" />
-          </button>
-          <button className="flex flex-col items-center gap-1 group active:scale-95">
-            <Dog className="w-6 h-6 text-gray-700" />
-          </button>
-        </div>
-
-        {/* Select Pet */}
-        <div className="bg-white p-4 shadow-sm border-y border-gray-50">
-          <h2 className="text-[14px] font-bold text-gray-900 mb-4">选择宠物</h2>
-          <div className="flex gap-4 overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden -mx-4 px-4 pb-2">
-            {myPets.map(pet => (
-              <button 
-                key={pet.id} 
-                onClick={() => setSelectedPet(pet.id)}
-                className={`shrink-0 snap-start flex flex-col items-center gap-1.5 transition-transform active:scale-95 ${
-                  selectedPet === pet.id ? 'opacity-100' : 'opacity-50 grayscale'
-                }`}
-              >
-                <div className={`rounded-full p-[2px] ${selectedPet === pet.id ? 'bg-[#FF8C42]' : 'bg-transparent'}`}>
-                  <ImageWithFallback 
-                    src={pet.avatar} 
-                    alt={pet.name} 
-                    className="w-[36px] h-[36px] rounded-full object-cover border-2 border-white" 
-                  />
-                </div>
-                <span className={`text-[12px] ${selectedPet === pet.id ? 'text-[#FF8C42] font-bold' : 'text-gray-600'}`}>
-                  {pet.name}
-                </span>
-              </button>
+        {/* Tags row */}
+        {tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5 px-4 pb-2">
+            {tags.map(t => (
+              <span key={t} className="flex items-center gap-0.5 bg-[#FFF3E6] text-[#FF8C42] px-2 py-0.5 rounded-full text-[11px]">
+                #{t}
+                <button onClick={() => removeTag(t)} className="w-3.5 h-3.5 flex items-center justify-center text-[10px]">✕</button>
+              </span>
             ))}
           </div>
-        </div>
-      </div>
+        )}
 
-      <BottomNav />
+        {/* Toolbar */}
+        <div className="flex items-center gap-1 px-4 py-3 border-t border-[#F0F0F0]">
+          <button onClick={() => { setShowPets(!showPets); setShowTags(false); setShowLocation(false); }}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] ${petId ? 'bg-[#FFF3E6] text-[#FF8C42]' : 'bg-[#F5F5F5] text-[#999]'}`}>
+            {selectedPet ? (
+              <><img src={selectedPet.avatar} className="w-4 h-4 rounded-full object-cover" />{selectedPet.name}</>
+            ) : '我的宠物'}
+          </button>
+          <button onClick={() => { setShowTags(!showTags); setShowPets(false); setShowLocation(false); }}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] ${tags.length > 0 ? 'bg-[#FFF3E6] text-[#FF8C42]' : 'bg-[#F5F5F5] text-[#999]'}`}>
+            <Hash className="w-3.5 h-3.5" />{tags.length > 0 ? `${tags.length}个话题` : '话题'}
+          </button>
+          <button onClick={() => { setShowLocation(!showLocation); setShowPets(false); setShowTags(false); }}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] ${loc ? 'bg-[#FFF3E6] text-[#FF8C42]' : 'bg-[#F5F5F5] text-[#999]'}`}>
+            <MapPin className="w-3.5 h-3.5" />{loc || '位置'}
+          </button>
+        </div>
+
+        {showPets && (
+          <div className="px-4 pb-3">
+            <div className="flex gap-3">
+              <button onClick={() => { setPetId(null); setShowPets(false); }}
+                className={`shrink-0 flex flex-col items-center gap-1 ${!petId ? 'opacity-100' : 'opacity-40'}`}>
+                <div className="w-12 h-12 rounded-full bg-[#F5F5F5] flex items-center justify-center border-2 border-[#E5E5E5]">
+                  <span className="text-lg">🐾</span>
+                </div>
+                <span className="text-[10px] text-[#999]">不选</span>
+              </button>
+              {myPets.map(p => (
+                <button key={p.id} onClick={() => { setPetId(p.id); setShowPets(false); }}
+                  className={`shrink-0 flex flex-col items-center gap-1 ${petId === p.id ? 'opacity-100' : 'opacity-60'}`}>
+                  <div className={`w-12 h-12 rounded-full p-[2px] ${petId === p.id ? 'bg-[#FF8C42]' : 'bg-transparent'}`}>
+                    <img src={p.avatar} className="w-full h-full rounded-full object-cover border-2 border-white" />
+                  </div>
+                  <span className={`text-[10px] ${petId === p.id ? 'text-[#FF8C42] font-bold' : 'text-[#666]'}`}>{p.name}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {showTags && (
+          <div className="px-4 pb-3 flex items-center gap-2">
+            <input autoFocus value={tagInput} onChange={e => setTagInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && addTag()}
+              placeholder="输入话题标签..."
+              className="flex-1 h-10 bg-[#F5F5F5] rounded-lg px-3 text-[14px] outline-none" />
+            <button onClick={addTag} className="h-10 px-4 bg-[#FF8C42] text-white text-[13px] rounded-lg font-medium">添加</button>
+          </div>
+        )}
+
+        {showLocation && (
+          <div className="px-4 pb-3">
+            <input autoFocus value={loc} onChange={e => setLoc(e.target.value)}
+              onBlur={() => setShowLocation(false)}
+              placeholder="输入地点名称..."
+              className="w-full h-10 bg-[#F5F5F5] rounded-lg px-3 text-[14px] outline-none" />
+          </div>
+        )}
+      </div>
     </div>
   );
 }
