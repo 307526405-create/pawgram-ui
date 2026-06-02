@@ -86,7 +86,7 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center gap-0.5 text-[#FF8C42]"><Star className="w-3.5 h-3.5 fill-[#FF8C42]" /><span className="text-[13px] font-medium">{place.rating}</span></div>
           <span className="text-[12px] text-[#999]">{place.reviews}条 · {place.type || ''}</span>
-          <span className="text-[12px] text-[#999]">{userLoc ? `${getDistanceKm(place).toFixed(1)}km` : place.distance}</span>
+          <span className="text-[12px] text-[#999]">{place.distance_km !== undefined ? `${place.distance_km.toFixed(1)}km` : (userLoc ? `${getDistanceKm(place).toFixed(1)}km` : place.distance)}</span>
           <span className="text-[12px] text-[#FF8C42]">已有{wantCount}人想去</span>
         </div>
         <p className="text-[14px] text-[#666] leading-relaxed mb-4">{place.desc}</p>
@@ -231,6 +231,7 @@ export function Discover() {
   if (favoritesOnly) filteredPlaces = filteredPlaces.filter(p => favorites.has(p.id));
 
   const getDistanceKm = (p: any) => {
+    if (p.distance_km !== undefined) return p.distance_km;
     if (!userLoc) return Infinity;
     const R = 6371, dLat = (p.lat - userLoc.lat) * Math.PI / 180, dLng = (p.lng - userLoc.lng) * Math.PI / 180;
     return R * 2 * Math.atan2(Math.sqrt(Math.sin(dLat/2)**2+Math.cos(userLoc.lat*Math.PI/180)*Math.cos(p.lat*Math.PI/180)*Math.sin(dLng/2)**2), Math.sqrt(1-(Math.sin(dLat/2)**2+Math.cos(userLoc.lat*Math.PI/180)*Math.cos(p.lat*Math.PI/180)*Math.sin(dLng/2)**2)));
@@ -256,7 +257,7 @@ export function Discover() {
     setFeedLoading(false);
   };
 
-  useEffect(() => { placesApi.list().then(d => setPlaces(d.list)).catch(() => {}); }, []);
+  useEffect(() => { placesApi.list(userLoc?.lat, userLoc?.lng).then(d => setPlaces(d.list)).catch(() => {}); }, [userLoc]);
   useEffect(() => { fetchFeed(feedLimit); }, [feedLimit]);
   const loadMore = () => { if (feed.length < feedTotal && !feedLoading) setFeedLimit(l => l + 6); };
 
@@ -264,12 +265,12 @@ export function Discover() {
   const handleTouchMove = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop!==0||touchStartY.current===0) return; const d=e.touches[0].clientY-touchStartY.current; if(d>0){setPullDist(Math.min(d*.5,80));setPullState(d>60?'ready':'pulling');} };
   const handleTouchEnd = async () => { if(pullState==='ready'){setPullState('loading');setPullDist(40);setFeedLimit(6);await fetchFeed(6);setPullState('idle');setPullDist(0);}else{setPullState('idle');setPullDist(0);} touchStartY.current=0; };
   const handleScroll = () => { const el=scrollRef.current; if(!el)return; if(el.scrollHeight-el.scrollTop-el.clientHeight<200)loadMore(); };
-  useEffect(() => { navigator.geolocation?.getCurrentPosition(p=>setUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),()=>setUserLoc({lat:23.132,lng:113.321})); },[]);
+  useEffect(() => { navigator.geolocation?.getCurrentPosition(p=>setUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),()=>setUserLoc({lat:23.1291,lng:113.2644})); },[]);
   useEffect(() => { if (userLoc) { discoverApi.nearby(userLoc.lat, userLoc.lng, 8).then(d => setNearbyUsers(d.users || [])).catch(() => {}); } }, [userLoc]);
   useEffect(() => { const h=()=>{setShowMap(false);setSelectedPlace(null);setMarkForm(null);}; window.addEventListener('pawgram:discover-tab-click',h); return ()=>window.removeEventListener('pawgram:discover-tab-click',h); },[]);
 
   useEffect(() => { if(!showMap||places.length===0)return; const L=(window as any).L; if(!L){const link=document.createElement('link');link.rel='stylesheet';link.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(link);const script=document.createElement('script');script.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';script.onload=()=>initMap(L);document.head.appendChild(script);}else{initMap(L);}
-    function initMap(L:any){const el=document.getElementById('pawgram-leaflet-map');if(!el||(el as any)._leaflet_map)return;const map=L.map(el).setView([23.132,113.321],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);if(userLoc)L.circleMarker([userLoc.lat,userLoc.lng],{radius:6,color:'#4A90D9',fillColor:'#4A90D9',fillOpacity:1,weight:3}).addTo(map).bindPopup('我的位置');addMarkers(L,map,filteredPlaces);
+    function initMap(L:any){const el=document.getElementById('pawgram-leaflet-map');if(!el||(el as any)._leaflet_map)return;const map=L.map(el).setView([23.1291,113.2644],13);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19}).addTo(map);if(userLoc)L.circleMarker([userLoc.lat,userLoc.lng],{radius:6,color:'#4A90D9',fillColor:'#4A90D9',fillOpacity:1,weight:3}).addTo(map).bindPopup('我的位置');addMarkers(L,map,filteredPlaces);
       let pressTimer:any,startX=0,startY=0;const container=map.getContainer();container.addEventListener('pointerdown',(e:PointerEvent)=>{startX=e.clientX;startY=e.clientY;pressTimer=setTimeout(()=>{const ll=map.containerPointToLatLng(map.mouseEventToContainerPoint(e));setMarkForm({lat:ll.lat,lng:ll.lng});},600);});container.addEventListener('pointermove',(e:PointerEvent)=>{if(Math.abs(e.clientX-startX)>8||Math.abs(e.clientY-startY)>8)clearTimeout(pressTimer);});container.addEventListener('pointerup',()=>clearTimeout(pressTimer));container.addEventListener('pointercancel',()=>clearTimeout(pressTimer));
       (el as any)._leaflet_map=map;mapRef.current=map;setTimeout(()=>map.invalidateSize(),200);}
   },[showMap,places,userLoc]);
@@ -310,15 +311,17 @@ export function Discover() {
         <div className="mt-8 mb-6">
           <h2 className="px-4 text-[14px] font-bold text-[#333] mb-3">附近的人</h2>
           <div className="flex gap-3 px-4 overflow-x-auto pb-2">
-            {[{name:"大黄铲屎官",av:"https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w=200",dist:"0.5km",pet:"金毛"},{name:"橘猫日记",av:"https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=200",dist:"1.2km",pet:"橘猫"},{name:"柯基小短腿",av:"https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=200",dist:"1.8km",pet:"柯基"},{name:"布偶猫主人",av:"https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=200",dist:"2.1km",pet:"布偶猫"}].map(u=>(
-            <div key={u.name} className="shrink-0 w-[100px] bg-white rounded-xl p-3 flex flex-col items-center border border-[#F0F0F0] shadow-sm">
+            {nearbyUsers.length > 0 ? nearbyUsers.map((u: any) => (
+            <div key={u.id} className="shrink-0 w-[100px] bg-white rounded-xl p-3 flex flex-col items-center border border-[#F0F0F0] shadow-sm">
               <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#FF8C42] to-[#FFB380] p-[2px] mb-2">
-                <img src={u.av} className="w-full h-full rounded-full object-cover border-2 border-white"/>
+                <img src={u.avatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200'} className="w-full h-full rounded-full object-cover border-2 border-white"/>
               </div>
-              <span className="text-[12px] font-bold text-[#333] truncate w-full text-center">{u.name}</span>
-              <span className="text-[10px] text-[#999]">{u.pet} · {u.dist}</span>
+              <span className="text-[12px] font-bold text-[#333] truncate w-full text-center">{u.nickname}</span>
+              <span className="text-[10px] text-[#999]">{u.distance_km != null ? `${u.distance_km}km` : ''}</span>
             </div>
-            ))}
+            )) : (
+              <div className="text-[12px] text-[#999] w-full text-center py-4">获取位置中...</div>
+            )}
           </div>
         </div>
       </div>
