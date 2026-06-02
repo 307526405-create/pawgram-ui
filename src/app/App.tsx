@@ -3,6 +3,7 @@ import { RouterProvider } from "react-router";
 import { router } from "./routes";
 import { useDarkMode } from "./hooks/useDarkMode";
 import { SplashScreen } from "./components/SplashScreen";
+import { Onboarding } from "./components/Onboarding";
 
 function DarkModeInit() {
   const { theme, setTheme } = useDarkMode();
@@ -20,13 +21,21 @@ function DarkModeInit() {
 
 export default function App() {
   const [showSplash, setShowSplash] = useState(true);
+  const [showOnboarding, setShowOnboarding] = useState(false);
+
+  const handleSplashDone = () => {
+    setShowSplash(false);
+    if (!localStorage.getItem("pawgram_onboarding_done")) {
+      setShowOnboarding(true);
+    }
+  };
 
   return (
     <>
       <DarkModeInit />
       <RouterProvider router={router} />
-      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+      {showSplash && <SplashScreen onDone={handleSplashDone} />}
+      {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
     </>
   );
 }
-

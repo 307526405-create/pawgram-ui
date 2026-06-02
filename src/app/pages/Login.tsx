@@ -72,12 +72,18 @@ export function Login() {
         <div className="flex-1"></div>
 
         {/* 注册账号链接 */}
-        <div className="mb-6 mt-8 shrink-0">
-          <button 
+        <div className="mb-6 mt-8 shrink-0 flex items-center gap-4">
+          <button
             onClick={() => navigate('/register')}
             className="text-[14px] text-[#FF8C42] font-medium active:opacity-70 transition-opacity"
           >
             注册账号
+          </button>
+          <button
+            onClick={() => navigate('/privacy')}
+            className="text-[12px] text-[#999] dark:text-gray-400 active:opacity-70 transition-opacity"
+          >
+            隐私政策
           </button>
         </div>
       </div>

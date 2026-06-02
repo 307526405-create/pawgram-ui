@@ -146,6 +146,8 @@
     "blockSettings": "Block Settings",
     "privateMessages": "Messages",
     "noMessages": "No messages yet",
+    "noMessagesTitle": "No messages yet",
+    "goMeetFriends": "Go meet new friends on Discover",
     "receivedLikes": "Likes & Favorites",
     "newFollowers": "New Followers",
     "commentsAndAt": "Comments & @ Mentions"

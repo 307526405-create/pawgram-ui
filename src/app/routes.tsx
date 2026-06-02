@@ -15,6 +15,7 @@ import { Settings } from "./pages/Settings";
 import { FollowList } from "./pages/FollowList";
 import { ChatDetail } from "./pages/ChatDetail";
 import { Scan } from "./pages/Scan";
+import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 
 function Root() {
   const location = useLocation();
@@ -53,6 +54,7 @@ export const router = createHashRouter([
       { path: "scan", Component: Scan },
       { path: "chat/:id", Component: ChatDetail },
       { path: "post/edit/:id", Component: PostCreate },
+      { path: "privacy", Component: PrivacyPolicy },
     ],
   },
 ]);

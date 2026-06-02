@@ -146,6 +146,8 @@
     "blockSettings": "屏蔽设置",
     "privateMessages": "私信",
     "noMessages": "暂无私信",
+    "noMessagesTitle": "暂无消息",
+    "goMeetFriends": "去发现页认识新朋友吧",
     "receivedLikes": "收到的赞和收藏",
     "newFollowers": "新增关注",
     "commentsAndAt": "评论和@"

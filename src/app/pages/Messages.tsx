@@ -1,5 +1,5 @@
 import { useState, useRef } from "react";
-import { useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -121,9 +121,15 @@ export function Messages() {
             <span className="text-[13px] font-bold text-[#333] dark:text-gray-100">{t('messages.privateMessages')}</span>
           </div>
           {convs.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="w-14 h-14 rounded-full bg-[#F5F5F5] dark:bg-gray-800 flex items-center justify-center mb-2"><span className="text-xl">💬</span></div>
-              <p className="text-[13px] text-[#999] dark:text-gray-400">{t('messages.noMessages')}</p>
+            <div className="flex flex-col items-center justify-center py-12 text-center">
+              <div className="w-16 h-16 rounded-full bg-[#FFF3E6] dark:bg-orange-900/30 flex items-center justify-center mb-3">
+                <span className="text-2xl">🐾</span>
+              </div>
+              <p className="text-[14px] text-[#999] dark:text-gray-400 mb-1">{t('messages.noMessagesTitle')}</p>
+              <p className="text-[12px] text-[#BBB] dark:text-gray-500 mb-4">{t('messages.goMeetFriends')}</p>
+              <Link to="/discover" className="bg-[#FF8C42] text-white px-6 py-2 rounded-full text-[13px] font-bold active:bg-[#E67A35]">
+                {t('home.goDiscover')}
+              </Link>
             </div>
           ) : (
             convs.map(c => (
