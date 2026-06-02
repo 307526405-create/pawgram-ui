@@ -1,7 +1,8 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { RouterProvider } from "react-router";
 import { router } from "./routes";
 import { useDarkMode } from "./hooks/useDarkMode";
+import { SplashScreen } from "./components/SplashScreen";
 
 function DarkModeInit() {
   const { theme, setTheme } = useDarkMode();
@@ -18,10 +19,13 @@ function DarkModeInit() {
 }
 
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
+
   return (
     <>
       <DarkModeInit />
       <RouterProvider router={router} />
+      {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
     </>
   );
 }

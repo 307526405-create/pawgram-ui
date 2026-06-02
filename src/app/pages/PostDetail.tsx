@@ -11,9 +11,9 @@ function formatTime(iso: string, t: any): string {
   if (!iso) return '';
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
   if (diff < 60) return t('time.justNow');
-  if (diff < 3600) return t('time.minutesAgo', { count: Math.floor(diff / 60) });
-  if (diff < 86400) return t('time.hoursAgo', { count: Math.floor(diff / 3600) });
-  if (diff < 604800) return t('time.daysAgo', { count: Math.floor(diff / 86400) });
+  if (diff < 3600) return t('time.minAgo', { n: Math.floor(diff / 60) });
+  if (diff < 86400) return t('time.hoursAgo', { n: Math.floor(diff / 3600) });
+  if (diff < 604800) return t('time.daysAgo', { n: Math.floor(diff / 86400) });
   return new Date(iso).toLocaleDateString('zh-CN');
 }
 
