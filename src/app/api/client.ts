@@ -17,6 +17,7 @@ export async function apiPost(path: string, body?: any) {
 // Posts
 export const postsApi = {
   list: (page = 1) => apiGet(`/posts?page=${page}&pageSize=10`),
+  detail: (id: number) => apiGet(`/posts/${id}`),
 };
 
 // Places

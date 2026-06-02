@@ -1,64 +1,270 @@
-import { Search, Bell } from "lucide-react";
-import { useState, useEffect } from "react";
-import { Link } from "react-router";
-import { PostCard } from "../components/PostCard";
+import { Search, Bell, X } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { Link, useNavigate } from "react-router";
+import { PostCard, PostCardSkeleton } from "../components/PostCard";
 import { BottomNav } from "../components/BottomNav";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { postsApi } from "../api/client";
 
+const stories = [
+  { id:1, name:"金毛阿福", avatar:"https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=120", pet:"金毛", images:["https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600"] },
+  { id:2, name:"柯基小短腿", avatar:"https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=120", pet:"柯基", images:["https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=600"] },
+  { id:3, name:"布偶汤圆", avatar:"https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=120", pet:"布偶猫", images:["https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=600"] },
+  { id:4, name:"萨摩耶球球", avatar:"https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=120", pet:"萨摩耶", images:["https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=600"] },
+  { id:5, name:"泰迪豆豆", avatar:"https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=120", pet:"泰迪", images:["https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600"] },
+  { id:6, name:"橘猫滚滚", avatar:"https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=120", pet:"橘猫", images:["https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=600"] },
+];
+
+const recommendUsers = [
+  { id:1, name:"大黄铲屎官", avatar:"https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w=150", bio:"金毛&柯基的快乐生活", followers:"2.3k" },
+  { id:2, name:"橘猫日记", avatar:"https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=150", bio:"三只猫的日常", followers:"5.1k" },
+  { id:3, name:"汪星人阿呆", avatar:"https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=150", bio:"萨摩耶的快乐", followers:"8.7k" },
+];
+
+const notifications = [
+  { id:1, text:"大黄铲屎官 赞了你的帖子", time:"3分钟前", avatar:"https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w=80", unread:true },
+  { id:2, text:"橘猫日记 关注了你", time:"15分钟前", avatar:"https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=80", unread:true },
+  { id:3, text:"官方小助手 发布了新活动", time:"1小时前", avatar:"https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=80", unread:false },
+];
+
 export function Home() {
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<'hot' | 'following'>('hot');
   const [posts, setPosts] = useState<any[]>([]);
+  const [page, setPage] = useState(2);
+  const [hasMore, setHasMore] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadMoreLoading, setLoadMoreLoading] = useState(false);
+  const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
+  const [followedUsers, setFollowedUsers] = useState<Set<number>>(new Set());
+  const [viewedStories, setViewedStories] = useState<Set<number>>(new Set());
+  const [notifViewed, setNotifViewed] = useState(false);
+  const [activeStory, setActiveStory] = useState<any>(null);
+  const [storyProgress, setStoryProgress] = useState(0);
+  const storyTimer = useRef<any>(null);
+  const [showNotifications, setShowNotifications] = useState(false);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [pullState, setPullState] = useState<'idle'|'pulling'|'ready'|'loading'>('idle');
+  const [pullDist, setPullDist] = useState(0);
+  const touchStartY = useRef(0);
 
+  const fetchPosts = async (p?: number) => {
+    if (p === 1) setLoading(true); else setLoadMoreLoading(true);
+    try {
+      const d = await postsApi.list(p || page);
+      if (p === 1) { setPosts(d.list); setPage(2); }
+      else { setPosts(prev => [...prev, ...d.list]); setPage(prev => prev + 1); }
+      setHasMore(d.pagination.hasMore);
+    } catch {}
+    setLoading(false);
+    setLoadMoreLoading(false);
+  };
+  useEffect(() => { fetchPosts(1); }, []);
+
+  // Story auto-play timer
   useEffect(() => {
-    postsApi.list().then(d => setPosts(d.list)).catch(() => {});
-  }, []);
+    if (!activeStory) { setStoryProgress(0); return; }
+    setStoryProgress(0);
+    const duration = 3000;
+    const interval = 30;
+    storyTimer.current = setInterval(() => {
+      setStoryProgress(prev => {
+        if (prev >= 100) { clearInterval(storyTimer.current); setActiveStory(null); return 0; }
+        return prev + (interval / duration) * 100;
+      });
+    }, interval);
+    return () => clearInterval(storyTimer.current);
+  }, [activeStory]);
+
+  const handleOpenStory = (s: any) => {
+    setActiveStory(s);
+    setViewedStories(prev => new Set([...prev, s.id]));
+  };
+  const handleOpenNotifications = () => {
+    setShowNotifications(true);
+    setNotifViewed(true);
+  };
+  const toggleLike = (postId: number) => {
+    setLikedPosts(prev => { const next = new Set(prev); if (next.has(postId)) next.delete(postId); else next.add(postId); return next; });
+  };
+  const toggleFollow = (userId: number) => {
+    setFollowedUsers(prev => { const next = new Set(prev); if (next.has(userId)) next.delete(userId); else next.add(userId); return next; });
+  };
+  const handleShare = (post: any) => {
+    const text = `爪印 PawGram\n${post.user?.name ? post.user.name + ': ' : ''}${post.content}`;
+    if (navigator.share) navigator.share({ title: '爪印', text }).catch(() => {});
+    else navigator.clipboard?.writeText(text);
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop===0) touchStartY.current=e.touches[0].clientY; };
+  const handleTouchMove = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop!==0||touchStartY.current===0) return; const d=e.touches[0].clientY-touchStartY.current; if(d>0){setPullDist(Math.min(d*.5,80));setPullState(d>60?'ready':'pulling');} };
+  const handleTouchEnd = async () => {
+    if(pullState==='ready'){setPullState('loading');setPullDist(40);await fetchPosts(1);setPullState('idle');setPullDist(0);}
+    else{setPullState('idle');setPullDist(0);} touchStartY.current=0;
+  };
+  const handleScroll = () => {
+    const el=scrollRef.current; if(!el)return;
+    if(posts.length > 0 && el.scrollHeight-el.scrollTop-el.clientHeight<300&&hasMore&&!loadMoreLoading) fetchPosts();
+  };
+
+  const postsWithLike = posts.map(p => ({...p, is_liked: likedPosts.has(p.id), like_count: (p.like_count||0) + (likedPosts.has(p.id)?1:0), user: {...p.user, followed: followedUsers.has(p.user_id||p.user?.id)} }));
 
   return (
     <div className="h-full bg-[#FAFAFA] relative flex flex-col">
-      {/* Scrollable content area */}
-      <div className="flex-1 overflow-y-auto pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        {/* Header: iOS App 全屏布局，59pt 安全区 + 44pt 导航栏 */}
+      {/* Story Viewer */}
+      {activeStory && (
+        <div className="fixed inset-0 z-[90] bg-black flex flex-col" onClick={() => setActiveStory(null)}>
+          {/* Progress bar */}
+          <div className="absolute top-2 left-4 right-4 z-10 h-0.5 bg-white/30 rounded-full" style={{top: 'calc(env(safe-area-inset-top) + 60px)'}}>
+            <div className="h-full bg-white rounded-full transition-all duration-30 ease-linear" style={{width: `${storyProgress}%`}}/>
+          </div>
+          <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 pb-2" style={{paddingTop:'calc(env(safe-area-inset-top) + 8px)'}}>
+            <ImageWithFallback src={activeStory.avatar} className="w-8 h-8 rounded-full object-cover border border-white/30" />
+            <span className="text-white text-[14px] font-semibold flex-1">{activeStory.name}</span>
+            <span className="text-white/60 text-[12px]">{activeStory.pet}</span>
+            <button onClick={() => setActiveStory(null)} className="p-1"><X className="w-5 h-5 text-white" /></button>
+          </div>
+          <div className="flex-1 flex items-center justify-center" onClick={e => e.stopPropagation()}>
+            <ImageWithFallback src={activeStory.images[0]} className="w-full h-full object-contain max-h-[80vh]" />
+          </div>
+        </div>
+      )}
+
+      {/* Notification Panel */}
+      {showNotifications && (
+        <div className="fixed inset-0 z-[90] bg-black/40 flex items-end" onClick={() => setShowNotifications(false)}>
+          <div className="w-full bg-white rounded-t-[20px] px-5 pt-4 pb-8 max-h-[60vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-[17px] font-bold text-[#333]">通知</h2>
+              <button onClick={() => setShowNotifications(false)}><X className="w-5 h-5 text-[#999]"/></button>
+            </div>
+            <div className="space-y-2">
+              {notifications.map(n => (
+                <div key={n.id} className="flex items-center gap-3 p-3 rounded-xl bg-[#F8F8F8]">
+                  <ImageWithFallback src={n.avatar} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <div className="text-[13px] text-[#333] flex items-center gap-1.5">
+                      {n.text}
+                      {n.unread && <span className="w-2 h-2 rounded-full bg-[#FF8C42] shrink-0"/>}
+                    </div>
+                    <div className="text-[11px] text-[#999] mt-0.5">{n.time}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <button onClick={() => setShowNotifications(false)} className="w-full h-10 mt-4 text-[#999] text-[13px]">关闭</button>
+          </div>
+        </div>
+      )}
+
+      <div className="flex-1 overflow-y-auto pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" ref={scrollRef}
+        onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onScroll={handleScroll}>
+        
+        {pullState!=='idle'&&(<div className="flex items-center justify-center text-[12px] text-[#999]" style={{height:pullDist}}>
+          {pullState==='pulling'&&'下拉刷新'}{pullState==='ready'&&'释放刷新'}{pullState==='loading'&&'刷新中...'}
+        </div>)}
+
+        {/* Header */}
         <div className="sticky top-0 bg-[#FAFAFA]/90 backdrop-blur-md z-40 px-4 pt-[var(--app-safe-top)] pb-2">
           <div className="flex items-center justify-between h-[var(--app-nav-height)]">
-            <h1 className="text-[17px] font-bold text-[#333333] tracking-wider">爪印 PawGram</h1>
-            <div className="flex items-center gap-4 text-[#333333]">
-              <Link to="/search" className="active:scale-95 transition-transform"><Search className="w-6 h-6" /></Link>
-              <button className="active:scale-95 transition-transform relative">
-                <Bell className="w-6 h-6" />
-                <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+            <h1 className="text-[17px] font-bold text-[#333]">爪印 PawGram</h1>
+            <div className="flex items-center gap-4">
+              <Link to="/search" className="active:scale-95"><Search className="w-5 h-5 text-[#333]" /></Link>
+              <button onClick={handleOpenNotifications} className="active:scale-95 relative">
+                <Bell className="w-5 h-5 text-[#333]" />
+                {!notifViewed && notifications.some(n => n.unread) && (
+                  <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                )}
               </button>
             </div>
           </div>
           
           {/* Tabs */}
           <div className="flex items-center gap-6 mt-1">
-            <button 
-              className={`text-[17px] font-bold transition-colors relative pb-2 ${activeTab === 'hot' ? 'text-gray-900' : 'text-gray-400 font-medium'}`}
-              onClick={() => setActiveTab('hot')}
-            >
-              热门
-              {activeTab === 'hot' && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"></span>
-              )}
+            <button onClick={()=>setActiveTab('hot')} className={`text-[17px] font-bold relative pb-2 ${activeTab==='hot'?'text-[#333]':'text-[#999]'}`}>
+              热门{activeTab==='hot'&&<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"/>}
             </button>
-            <button 
-              className={`text-[17px] font-bold transition-colors relative pb-2 ${activeTab === 'following' ? 'text-gray-900' : 'text-gray-400 font-medium'}`}
-              onClick={() => setActiveTab('following')}
-            >
-              关注
-              {activeTab === 'following' && (
-                <span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"></span>
-              )}
+            <button onClick={()=>setActiveTab('following')} className={`text-[17px] font-bold relative pb-2 ${activeTab==='following'?'text-[#333]':'text-[#999]'}`}>
+              关注{activeTab==='following'&&<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"/>}
             </button>
+          </div>
+
+          {/* Stories Bar */}
+          <div className="flex items-center gap-3 overflow-x-auto pt-2 pb-1 [&::-webkit-scrollbar]:hidden">
+            <div onClick={() => navigate('/post')} className="shrink-0 flex flex-col items-center gap-1 cursor-pointer active:opacity-70">
+              <div className="w-[62px] h-[62px] rounded-full bg-gradient-to-br from-[#FF8C42] to-[#FFB380] p-[2px]">
+                <div className="w-full h-full rounded-full bg-[#FAFAFA] flex items-center justify-center">
+                  <span className="text-xl">+</span>
+                </div>
+              </div>
+              <span className="text-[10px] text-[#999]">你的故事</span>
+            </div>
+            {stories.map(s => {
+              const viewed = viewedStories.has(s.id);
+              return (
+              <div key={s.id} onClick={() => handleOpenStory(s)} className="shrink-0 flex flex-col items-center gap-1 cursor-pointer active:opacity-70">
+                <div className={`w-[62px] h-[62px] rounded-full p-[2px] ${viewed ? 'bg-gray-300' : 'bg-gradient-to-br from-[#FF8C42] to-[#FFB380]'}`}>
+                  <ImageWithFallback src={s.avatar} className="w-full h-full rounded-full object-cover border-2 border-white" />
+                </div>
+                <span className="text-[10px] text-[#666] w-[62px] text-center truncate">{s.name}</span>
+              </div>
+            )})}
           </div>
         </div>
 
-        {/* Feed */}
-        <div className="px-4 mt-2">
-          {posts.map(post => (
-            <PostCard key={post.id} post={post} />
-          ))}
+        {/* Feed or Empty */}
+        <div className="px-4 mt-1">
+          {(() => {
+            if (activeTab === 'following') {
+              const followedPosts = postsWithLike.filter(p => followedUsers.has(p.user_id || p.user?.id));
+              if (followedPosts.length > 0) return followedPosts.map(post => (
+                <PostCard key={post.id} post={post} 
+                  onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id); }}
+                  onShare={(e: any) => { e?.stopPropagation(); handleShare(post); }}
+                  onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id); }}
+                />
+              ));
+              return (
+                <div className="mt-4">
+                  <h2 className="text-[14px] font-bold text-[#333] mb-3">为你推荐</h2>
+                  <div className="space-y-3">
+                    {recommendUsers.map(u => (
+                      <div key={u.id} className="bg-white rounded-2xl p-3 flex items-center gap-3 border border-[#EEE]">
+                        <ImageWithFallback src={u.avatar} className="w-12 h-12 rounded-full object-cover shrink-0" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-[14px] font-bold text-[#333]">{u.name}</div>
+                          <div className="text-[11px] text-[#999]">{u.bio} · 粉丝 {u.followers}</div>
+                        </div>
+                        <button onClick={() => toggleFollow(u.id)} className={`shrink-0 px-4 py-1.5 rounded-full text-[12px] font-bold ${followedUsers.has(u.id) ? 'bg-gray-100 text-[#999]' : 'bg-[#FF8C42] text-white active:bg-[#E67A35]'}`}>
+                          {followedUsers.has(u.id) ? '已关注' : '关注'}
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              );
+            }
+            if (posts.length === 0 && loading) return <>{[1,2,3].map(i => <PostCardSkeleton key={i} />)}</>;
+            if (posts.length === 0 && !loading) return (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="w-16 h-16 rounded-full bg-[#FFF3E6] flex items-center justify-center mb-4"><span className="text-2xl">🐾</span></div>
+                <p className="text-[14px] text-[#999] mb-1">还没有动态</p>
+                <p className="text-[12px] text-[#BBB] mb-4">去看看附近有什么好玩的吧</p>
+                <Link to="/discover" className="bg-[#FF8C42] text-white px-6 py-2 rounded-full text-[13px] font-bold active:bg-[#E67A35]">去发现</Link>
+              </div>
+            );
+            return postsWithLike.map(post => (
+              <PostCard key={post.id} post={post} 
+                onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id); }}
+                onShare={(e: any) => { e?.stopPropagation(); handleShare(post); }}
+                onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id); }}
+              />
+            ));
+          })()}
         </div>
+
+        {loadMoreLoading && <div className="text-center py-4 text-[12px] text-[#999]">加载中...</div>}
+        {!loadMoreLoading && hasMore && activeTab !== 'following' && <div className="text-center py-3 text-[12px] text-[#BBB]">上拉加载更多</div>}
       </div>
 
       <BottomNav />
