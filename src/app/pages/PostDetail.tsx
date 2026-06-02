@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { BottomNav } from "../components/BottomNav";
 import { postsApi } from "../api/client";
+import { sendLikeNotification, sendCommentNotification, sendFollowNotification } from "../utils/notifications";
 
 function formatTime(iso: string): string {
   if (!iso) return '';
@@ -86,7 +87,12 @@ export function PostDetail() {
     fetchComments();
   }, [id, fetchComments]);
 
-  const handleLike = () => setIsLiked(!isLiked);
+  const handleLike = () => {
+    setIsLiked(prev => {
+      if (!prev && post?.user?.name) sendLikeNotification(post.user.name);
+      return !prev;
+    });
+  };
   const handleShare = () => {
     if (!post) return;
     const text = `爪印 PawGram\n${post.user?.name}: ${post.content}`;
@@ -103,6 +109,7 @@ export function PostDetail() {
     if (!commentText.trim() || !id) return;
     try {
       await postsApi.addComment(Number(id), commentText.trim());
+      if (post?.user?.name) sendCommentNotification(post.user.name, commentText.trim());
       setCommentText("");
       fetchComments();
     } catch {
@@ -114,6 +121,7 @@ export function PostDetail() {
     if (!replyText.trim() || !id) return;
     try {
       await postsApi.addComment(Number(id), replyText.trim(), parentId);
+      if (post?.user?.name) sendCommentNotification(post.user.name, replyText.trim());
       setReplyText("");
       setReplyTarget(null);
       fetchComments();
@@ -252,7 +260,12 @@ export function PostDetail() {
             <ImageWithFallback src={post.user?.avatar} className="w-9 h-9 rounded-full object-cover"/>
             <span className="text-[14px] font-bold text-[#333]">{post.user?.name || '用户'}</span>
           </div>
-          <button onClick={() => setIsFollowing(!isFollowing)}
+          <button onClick={() => {
+            setIsFollowing(prev => {
+              if (!prev && post?.user?.name) sendFollowNotification(post.user.name);
+              return !prev;
+            });
+          }}
             className={`text-[13px] font-bold px-3 py-1 rounded-full ${isFollowing ? 'text-[#999] bg-[#F5F5F5]' : 'text-[#FF8C42] bg-[#FFF3E6]'}`}>
             {isFollowing ? '已关注' : '关注'}
           </button>

@@ -5,6 +5,7 @@ import { PostCard, PostCardSkeleton } from "../components/PostCard";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { postsApi } from "../api/client";
+import { sendLikeNotification, sendFollowNotification, sendNewNotification } from "../utils/notifications";
 
 const stories = [
   { id:1, name:"金毛阿福", avatar:"https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=120", pet:"金毛", images:["https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600"] },
@@ -83,12 +84,24 @@ export function Home() {
   const handleOpenNotifications = () => {
     setShowNotifications(true);
     setNotifViewed(true);
+    const unread = notifications.filter(n => n.unread);
+    if (unread.length > 0) sendNewNotification(unread[0].text);
   };
-  const toggleLike = (postId: number) => {
-    setLikedPosts(prev => { const next = new Set(prev); if (next.has(postId)) next.delete(postId); else next.add(postId); return next; });
+  const toggleLike = (postId: number, userName?: string) => {
+    setLikedPosts(prev => {
+      const next = new Set(prev);
+      if (next.has(postId)) { next.delete(postId); }
+      else { next.add(postId); if (userName) sendLikeNotification(userName); }
+      return next;
+    });
   };
-  const toggleFollow = (userId: number) => {
-    setFollowedUsers(prev => { const next = new Set(prev); if (next.has(userId)) next.delete(userId); else next.add(userId); return next; });
+  const toggleFollow = (userId: number, userName?: string) => {
+    setFollowedUsers(prev => {
+      const next = new Set(prev);
+      if (next.has(userId)) { next.delete(userId); }
+      else { next.add(userId); if (userName) sendFollowNotification(userName); }
+      return next;
+    });
   };
   const handleShare = (post: any) => {
     const text = `爪印 PawGram\n${post.user?.name ? post.user.name + ': ' : ''}${post.content}`;
@@ -218,10 +231,10 @@ export function Home() {
             if (activeTab === 'following') {
               const followedPosts = postsWithLike.filter(p => followedUsers.has(p.user_id || p.user?.id));
               if (followedPosts.length > 0) return followedPosts.map(post => (
-                <PostCard key={post.id} post={post} 
-                  onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id); }}
+                <PostCard key={post.id} post={post}
+                  onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id, post.user?.name); }}
                   onShare={(e: any) => { e?.stopPropagation(); handleShare(post); }}
-                  onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id); }}
+                  onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id, post.user?.name); }}
                 />
               ));
               return (
@@ -235,7 +248,7 @@ export function Home() {
                           <div className="text-[14px] font-bold text-[#333]">{u.name}</div>
                           <div className="text-[11px] text-[#999]">{u.bio} · 粉丝 {u.followers}</div>
                         </div>
-                        <button onClick={() => toggleFollow(u.id)} className={`shrink-0 px-4 py-1.5 rounded-full text-[12px] font-bold ${followedUsers.has(u.id) ? 'bg-gray-100 text-[#999]' : 'bg-[#FF8C42] text-white active:bg-[#E67A35]'}`}>
+                        <button onClick={() => toggleFollow(u.id, u.name)} className={`shrink-0 px-4 py-1.5 rounded-full text-[12px] font-bold ${followedUsers.has(u.id) ? 'bg-gray-100 text-[#999]' : 'bg-[#FF8C42] text-white active:bg-[#E67A35]'}`}>
                           {followedUsers.has(u.id) ? '已关注' : '关注'}
                         </button>
                       </div>
@@ -254,10 +267,10 @@ export function Home() {
               </div>
             );
             return postsWithLike.map(post => (
-              <PostCard key={post.id} post={post} 
-                onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id); }}
+              <PostCard key={post.id} post={post}
+                onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id, post.user?.name); }}
                 onShare={(e: any) => { e?.stopPropagation(); handleShare(post); }}
-                onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id); }}
+                onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id, post.user?.name); }}
               />
             ));
           })()}

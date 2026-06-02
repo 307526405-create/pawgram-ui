@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { mapPreviewImage } from "../data/mockData";
-import { placesApi } from "../api/client";
+import { placesApi, discoverApi } from "../api/client";
 
 /* ─── Note Expanded Modal ─── */
 function NoteExpanded({ note, onClose }: any) {
@@ -32,7 +32,7 @@ function NoteExpanded({ note, onClose }: any) {
 }
 
 /* ───────── Place Detail Panel ───────── */
-function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, onClose }: any) {
+function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, onClose, distanceKm }: any) {
   const [notes, setNotes] = useState<any[]>([]);
   const [routes, setRoutes] = useState<any[]>([]);
   const [routesLoading, setRoutesLoading] = useState(true);
@@ -86,7 +86,7 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
         <div className="flex items-center gap-2 mb-4">
           <div className="flex items-center gap-0.5 text-[#FF8C42]"><Star className="w-3.5 h-3.5 fill-[#FF8C42]" /><span className="text-[13px] font-medium">{place.rating}</span></div>
           <span className="text-[12px] text-[#999]">{place.reviews}条 · {place.type || ''}</span>
-          <span className="text-[12px] text-[#999]">{place.distance}</span>
+          <span className="text-[12px] text-[#999]">{userLoc ? `${getDistanceKm(place).toFixed(1)}km` : place.distance}</span>
           <span className="text-[12px] text-[#FF8C42]">已有{wantCount}人想去</span>
         </div>
         <p className="text-[14px] text-[#666] leading-relaxed mb-4">{place.desc}</p>
@@ -219,6 +219,7 @@ export function Discover() {
   const [favorites, setFavorites] = useState<Set<number>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem('pawgram_favorites') || '[]')); } catch { return new Set(); }
   });
+  const [nearbyUsers, setNearbyUsers] = useState<any[]>([]);
   const mapRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pullState, setPullState] = useState<'idle' | 'pulling' | 'ready' | 'loading'>('idle');
@@ -264,6 +265,7 @@ export function Discover() {
   const handleTouchEnd = async () => { if(pullState==='ready'){setPullState('loading');setPullDist(40);setFeedLimit(6);await fetchFeed(6);setPullState('idle');setPullDist(0);}else{setPullState('idle');setPullDist(0);} touchStartY.current=0; };
   const handleScroll = () => { const el=scrollRef.current; if(!el)return; if(el.scrollHeight-el.scrollTop-el.clientHeight<200)loadMore(); };
   useEffect(() => { navigator.geolocation?.getCurrentPosition(p=>setUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),()=>setUserLoc({lat:23.132,lng:113.321})); },[]);
+  useEffect(() => { if (userLoc) { discoverApi.nearby(userLoc.lat, userLoc.lng, 8).then(d => setNearbyUsers(d.users || [])).catch(() => {}); } }, [userLoc]);
   useEffect(() => { const h=()=>{setShowMap(false);setSelectedPlace(null);setMarkForm(null);}; window.addEventListener('pawgram:discover-tab-click',h); return ()=>window.removeEventListener('pawgram:discover-tab-click',h); },[]);
 
   useEffect(() => { if(!showMap||places.length===0)return; const L=(window as any).L; if(!L){const link=document.createElement('link');link.rel='stylesheet';link.href='https://unpkg.com/leaflet@1.9.4/dist/leaflet.css';document.head.appendChild(link);const script=document.createElement('script');script.src='https://unpkg.com/leaflet@1.9.4/dist/leaflet.js';script.onload=()=>initMap(L);document.head.appendChild(script);}else{initMap(L);}

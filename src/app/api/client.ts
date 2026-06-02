@@ -26,7 +26,14 @@ export const postsApi = {
 
 // Places
 export const placesApi = {
-  list: () => apiGet('/places'),
+  list: (lat?: number, lon?: number) =>
+    apiGet(`/places${lat !== undefined && lon !== undefined ? `?lat=${lat}&lon=${lon}` : ''}`),
   notes: (id: number) => apiGet(`/places/${id}/notes`),
   discoverFeed: (limit?: number) => apiGet(`/places/feed/discover${limit ? `?limit=${limit}` : ''}`),
+};
+
+// Discover (LBS)
+export const discoverApi = {
+  nearby: (lat: number, lon: number, limit?: number) =>
+    apiGet(`/discover/nearby?lat=${lat}&lon=${lon}${limit ? `&limit=${limit}` : ''}`),
 };
