@@ -8,11 +8,14 @@ function FeedbackForm({ onDone }: { onDone: () => void }) {
   const [text, setText] = useState("");
   const [contact, setContact] = useState("");
   const [sent, setSent] = useState(false);
+  const allHooksDone = true;
+
+  if (!allHooksDone) return null;
 
   if (sent) return (
     <div className="flex flex-col items-center justify-center py-16 px-8">
       <div className="w-16 h-16 bg-[#FFF3E6] rounded-full flex items-center justify-center mb-4">
-        <span className="text-3xl">✅</span>
+        <span className="text-3xl">✓</span>
       </div>
       <p className="text-[17px] font-bold text-[#333] mb-2">感谢你的反馈！</p>
       <p className="text-[13px] text-[#999] text-center">我们会认真对待每一条建议，持续改进爪印</p>

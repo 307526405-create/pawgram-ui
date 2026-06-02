@@ -18,7 +18,12 @@ export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLik
     return Math.floor(hours / 24) + '天前';
   };
 
-  const isVideo = (url: string) => url?.match(/\.(mp4|mov|webm)/i) || url?.includes('video');
+  const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.url || item?.poster || '';
+  const isVideo = (item: any) => {
+    if (typeof item === 'object' && item !== null) return item.type === 'video';
+    if (typeof item === 'string') return item.match(/\.(mp4|mov|webm)/i) || item.includes('video');
+    return false;
+  };
 
   const handleDoubleTap = useCallback((e: React.MouseEvent) => {
     const now = Date.now();
@@ -61,7 +66,7 @@ export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLik
         <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden" onClick={handleDoubleTap}>
           {(post.images||[]).map((img: string, idx: number) => (
             <div key={idx} className="w-full h-full shrink-0 snap-center relative">
-              <ImageWithFallback src={img} className="w-full h-full object-cover"/>
+              <ImageWithFallback src={getMediaUrl(img)} className="w-full h-full object-cover"/>
               {isVideo(img) && (
                 <div className="absolute inset-0 flex items-center justify-center bg-black/20">
                   <div className="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center">
