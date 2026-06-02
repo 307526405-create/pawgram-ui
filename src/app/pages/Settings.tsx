@@ -1,8 +1,51 @@
 import { useNavigate } from "react-router";
 import { BottomNav } from "../components/BottomNav";
-import { ChevronLeft, UserPen, Shield, Lock, Bell, Info, Trash2, ChevronRight, X } from "lucide-react";
+import { ChevronLeft, UserPen, Shield, Lock, Bell, Info, Trash2, ChevronRight, X, MessageSquare } from "lucide-react";
 import { useState } from "react";
 import { logout } from "../api/auth";
+
+function FeedbackForm({ onDone }: { onDone: () => void }) {
+  const [text, setText] = useState("");
+  const [contact, setContact] = useState("");
+  const [sent, setSent] = useState(false);
+
+  if (sent) return (
+    <div className="flex flex-col items-center justify-center py-16 px-8">
+      <div className="w-16 h-16 bg-[#FFF3E6] rounded-full flex items-center justify-center mb-4">
+        <span className="text-3xl">✅</span>
+      </div>
+      <p className="text-[17px] font-bold text-[#333] mb-2">感谢你的反馈！</p>
+      <p className="text-[13px] text-[#999] text-center">我们会认真对待每一条建议，持续改进爪印</p>
+      <button onClick={onDone} className="mt-8 w-full h-11 bg-[#FF8C42] text-white rounded-xl text-[15px] font-bold">返回</button>
+    </div>
+  );
+
+  return (
+    <div className="p-4 space-y-4">
+      <textarea value={text} onChange={e => setText(e.target.value)}
+        placeholder="请描述你的建议或遇到的问题..."
+        rows={5}
+        className="w-full bg-[#F5F5F5] rounded-xl px-4 py-3 text-[14px] outline-none resize-none"
+      />
+      <div className="bg-[#F5F5F5] rounded-xl p-4 text-center">
+        <div className="w-12 h-12 rounded-lg bg-[#E5E5E5] flex items-center justify-center mx-auto mb-2">
+          <span className="text-2xl text-[#CCC]">+</span>
+        </div>
+        <p className="text-[12px] text-[#999]">添加截图（可选）</p>
+      </div>
+      <input value={contact} onChange={e => setContact(e.target.value)}
+        placeholder="联系方式（可选，方便我们回复）"
+        className="w-full h-11 bg-[#F5F5F5] rounded-xl px-4 text-[14px] outline-none"
+      />
+      <p className="text-[11px] text-[#BBB]">你的反馈将直接发送给爪印团队，不会公开</p>
+      <button onClick={() => { if (text.trim()) { setSent(true); setTimeout(onDone, 2000); } }}
+        disabled={!text.trim()}
+        className={`w-full h-11 rounded-xl text-[15px] font-bold ${text.trim() ? 'bg-[#FF8C42] text-white' : 'bg-[#E5E5E5] text-[#BBB]'}`}>
+        提交反馈
+      </button>
+    </div>
+  );
+}
 
 function SubPage({ title, onClose, children }: { title:string; onClose:()=>void; children:React.ReactNode }) {
   return (
@@ -91,6 +134,11 @@ export function Settings() {
           </div>
         </SubPage>
       );
+      case 'feedback': return (
+        <SubPage title="意见反馈" onClose={() => setPage(null)}>
+          <FeedbackForm onDone={() => setPage(null)} />
+        </SubPage>
+      );
       default: return null;
     }
   };
@@ -111,9 +159,10 @@ export function Settings() {
             { icon:Shield, label:'账号与安全', page:'security' },
             { icon:Lock, label:'隐私设置', page:'privacy' },
             { icon:Bell, label:'通知设置', page:'notification' },
+            { icon:MessageSquare, label:'意见反馈', page:'feedback' },
             { icon:Info, label:'关于爪印', page:'about' },
           ].map((m, i) => (
-            <div key={i} onClick={() => setPage(m.page)} className={`px-4 h-14 flex items-center justify-between ${i<4?'border-b border-[#F5F5F5]':''} cursor-pointer active:bg-[#F9F9F9]`}>
+            <div key={i} onClick={() => setPage(m.page)} className={`px-4 h-14 flex items-center justify-between ${i<5?'border-b border-[#F5F5F5]':''} cursor-pointer active:bg-[#F9F9F9]`}>
               <div className="flex items-center gap-3">
                 <m.icon className="w-4 h-4 text-[#666]"/>
                 <span className="text-[14px] text-[#333] font-medium">{m.label}</span>
