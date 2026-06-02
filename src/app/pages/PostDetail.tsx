@@ -25,6 +25,7 @@ export function PostDetail() {
   const [showHeart, setShowHeart] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const lastTap = useRef(0);
+  const [playingMediaIndex, setPlayingMediaIndex] = useState<number | null>(null);
 
   useEffect(() => {
     if (!id) return;
@@ -61,6 +62,7 @@ export function PostDetail() {
     setIsPrivate(!isPrivate);
     setShowMenu(false);
   };
+  const getMediaItems = (p: any) => (p?.images || []).map((item: any) => typeof item === 'string' ? { type: 'image', url: item } : item);
 
   const isOwner = post?.user?.id === 1;
 
@@ -121,21 +123,48 @@ export function PostDetail() {
           </button>
         </div>
 
-        {/* Image Carousel */}
-        <div className="w-full aspect-square bg-gray-50 overflow-hidden" onClick={handleDoubleTap}>
+        {/* Media Carousel */}
+        <div className="w-full aspect-square bg-gray-50 overflow-hidden relative" onClick={handleDoubleTap}>
           <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
-            {(post.images||[]).map((img: string, idx: number) => (
+            {(() => { const mediaItems = getMediaItems(post); return mediaItems.map((item: any, idx: number) => (
               <div key={idx} className="w-full h-full shrink-0 snap-center relative">
-                <ImageWithFallback src={img} className="w-full h-full object-cover"/>
-                {(post.images||[]).length > 1 && (
+                {item.type === 'video' ? (
+                  playingMediaIndex === idx ? (
+                    <video
+                      src={item.url}
+                      poster={item.poster}
+                      controls
+                      playsInline
+                      className="w-full h-full object-cover"
+                      autoPlay
+                    />
+                  ) : (
+                    <>
+                      <ImageWithFallback src={item.poster} className="w-full h-full object-cover"/>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); setPlayingMediaIndex(idx); }}
+                        className="absolute inset-0 flex items-center justify-center"
+                      >
+                        <div className="w-16 h-16 bg-black/50 rounded-full flex items-center justify-center active:bg-black/60">
+                          <svg width="22" height="26" viewBox="0 0 22 26" fill="white" className="ml-1">
+                            <path d="M22 13L0 26V0z"/>
+                          </svg>
+                        </div>
+                      </button>
+                    </>
+                  )
+                ) : (
+                  <ImageWithFallback src={item.url} className="w-full h-full object-cover"/>
+                )}
+                {mediaItems.length > 1 && (
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                    {(post.images||[]).map((_:string, di:number) => (
+                    {mediaItems.map((_: any, di: number) => (
                       <div key={di} className={`w-1.5 h-1.5 rounded-full ${di===idx?'bg-white':'bg-white/40'}`}/>
                     ))}
                   </div>
                 )}
               </div>
-            ))}
+            )); })()}
           </div>
           {showHeart && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{marginTop:'-60%'}}>
