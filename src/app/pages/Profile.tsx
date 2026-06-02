@@ -25,6 +25,7 @@ export function Profile() {
   const [showAvatar, setShowAvatar] = useState(false);
   const [editingBio, setEditingBio] = useState(false);
   const [bio, setBio] = useState(myUser.bio);
+  const [showAddPet, setShowAddPet] = useState(false);
 
   useEffect(() => {
     const h = () => setLoggedIn(isLoggedIn());
@@ -98,6 +99,22 @@ export function Profile() {
         </div>
       )}
 
+      {/* Add Pet Sheet */}
+      {showAddPet && (
+        <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/40" onClick={() => setShowAddPet(false)}>
+          <div className="bg-white rounded-t-[16px]" onClick={e => e.stopPropagation()}>
+            <div className="text-center py-4 border-b border-[#F0F0F0]">
+              <div className="w-14 h-14 rounded-full bg-[#FFF3E6] flex items-center justify-center mx-auto mb-2">
+                <span className="text-2xl">🐾</span>
+              </div>
+              <p className="text-[14px] font-bold text-[#333]">添加宠物</p>
+            </div>
+            <button onClick={() => { setShowAddPet(false); navigate('/pet', { state: { new: true } }); }} className="w-full py-4 text-[15px] text-[#333] border-b border-[#F0F0F0] active:bg-[#F9F9F9]">创建宠物档案</button>
+            <button onClick={() => setShowAddPet(false)} className="w-full py-4 text-[15px] text-[#999] active:bg-[#F9F9F9]">取消</button>
+          </div>
+        </div>
+      )}
+
       <div className="absolute top-0 w-full pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 z-40">
         <div className="flex items-center gap-1">
           <button onClick={() => setShowQR(true)} className="p-2"><QrCode className="w-5 h-5 text-[#666]"/></button>
@@ -139,13 +156,13 @@ export function Profile() {
           <div className="px-4 mb-3"><h3 className="text-[14px] font-bold text-[#333]">我的宠物</h3></div>
           <div className="flex gap-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
             {myPets.map(p => (
-              <div key={p.id} onClick={() => navigate('/pet')} className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer">
+              <div key={p.id} onClick={() => navigate('/pet', { state: { pet: p } })} className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer">
                 <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#FF8C42] to-[#FFB380] p-[2px]">
                   <ImageWithFallback src={p.avatar} className="w-full h-full rounded-full object-cover border-2 border-white"/>
                 </div><span className="text-[11px] text-[#666]">{p.name}</span>
               </div>
             ))}
-            <div className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer">
+            <div onClick={() => navigate('/pet', { state: { new: true } })} className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer">
               <div className="w-14 h-14 rounded-full border border-dashed border-[#DDD] flex items-center justify-center"><span className="text-xl text-[#CCC]">+</span></div>
               <span className="text-[11px] text-[#CCC]">添加</span>
             </div>
