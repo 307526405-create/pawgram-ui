@@ -51,7 +51,11 @@ export function Home() {
   const [pullDist, setPullDist] = useState(0);
   const touchStartY = useRef(0);
 
+  const fetchingRef = useRef(false);
+
   const fetchPosts = async (p?: number) => {
+    if (fetchingRef.current) return;
+    fetchingRef.current = true;
     if (p === 1) setLoading(true); else setLoadMoreLoading(true);
     try {
       const d = await postsApi.list(p || page);
@@ -61,6 +65,7 @@ export function Home() {
     } catch {}
     setLoading(false);
     setLoadMoreLoading(false);
+    fetchingRef.current = false;
   };
   useEffect(() => { fetchPosts(1); }, []);
 
