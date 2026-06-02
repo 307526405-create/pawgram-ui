@@ -1,4 +1,4 @@
-import { ChevronLeft, MapPin, Hash, AtSign } from "lucide-react";
+import { ChevronLeft, MapPin, Hash, AtSign, Image, Film } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -124,7 +124,7 @@ export function PostCreate() {
           </button>
           <button onClick={() => { setPostMode("video"); setImages([]); }}
             className={`px-4 py-1.5 rounded-full text-[13px] font-medium ${postMode === "video" ? "bg-[#FF8C42] text-white" : "bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400"}`}>
-            <Video className="w-3.5 h-3.5 inline mr-1" />视频
+            <Film className="w-3.5 h-3.5 inline mr-1" />视频
           </button>
         </div>
 
