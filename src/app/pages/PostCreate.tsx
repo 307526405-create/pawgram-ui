@@ -1,5 +1,5 @@
 import { ChevronLeft, MapPin, Hash, AtSign } from "lucide-react";
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
@@ -27,9 +27,27 @@ export function PostCreate() {
   const [showPicker, setShowPicker] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [publishing, setPublishing] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const pickFromAlbum = () => { setShowPicker(false); fileInputRef.current?.click(); };
+  const pickFromAlbum = async () => {
+    setShowPicker(false);
+    try {
+      const limit = mediaType === "video" ? 1 : mediaType === "image" ? 9 - images.length : 9;
+      const result = await Camera.pickImages({ quality: 90, limit });
+      for (const photo of result.photos) {
+        if (photo.webPath) {
+          const response = await fetch(photo.webPath);
+          const blob = await response.blob();
+          const dataUrl = await new Promise<string>(resolve => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          if (mediaType === "video") { setImages([dataUrl]); }
+          else { setMediaType("image"); setImages(prev => [...prev, dataUrl]); }
+        }
+      }
+    } catch {}
+  };
 
   const takePhoto = async () => {
     setShowPicker(false);
@@ -91,30 +109,6 @@ export function PostCreate() {
           </div>
         </div>
       )}
-
-      <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple className="hidden"
-        onChange={async (e) => {
-          const files = e.target.files;
-          if (!files || files.length === 0) return;
-          for (const file of Array.from(files)) {
-            const isVideo = file.type.startsWith('video/');
-            const dataUrl = await new Promise<string>(resolve => {
-              const reader = new FileReader();
-              reader.onload = () => resolve(reader.result as string);
-              reader.readAsDataURL(file);
-            });
-            if (isVideo) {
-              setMediaType("video");
-              setImages([dataUrl]);
-              break;
-            } else {
-              setMediaType("image");
-              setImages(prev => prev.length < 9 ? [...prev, dataUrl] : prev);
-            }
-          }
-          e.target.value = "";
-        }}
-      />
 
       <div className="flex items-center justify-between px-4 pt-[var(--app-safe-top)] h-[var(--app-header-height)] shrink-0 border-b border-[#F0F0F0] dark:border-gray-700">
         <button onClick={() => navigate(-1)} className="p-1 -ml-1"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100" /></button>
