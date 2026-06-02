@@ -1,10 +1,12 @@
 import { Camera, ChevronLeft, Zap } from "lucide-react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useEffect, useRef, useState } from "react";
 import jsQR from "jsqr";
 
 export function Scan() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -42,14 +44,14 @@ export function Scan() {
       }
       scanLoop();
     } catch (e: any) {
-      setError(e.message || "无法打开摄像头");
+      setError(e.message || t('scan.cameraError'));
     }
   };
 
   const stopCamera = () => {
     scanning.current = false;
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
   };
@@ -99,7 +101,7 @@ export function Scan() {
       if (code) {
         handleResult(code.data);
       } else {
-        setError("未识别到二维码，请重试");
+        setError(t('scan.qrNotRecognized'));
       }
       URL.revokeObjectURL(img.src);
     };
@@ -110,7 +112,6 @@ export function Scan() {
   const handleResult = (text: string) => {
     stopCamera();
     setResult(text);
-    // 如果是URL直接打开
     if (/^https?:\/\//i.test(text)) {
       setTimeout(() => {
         window.open(text, '_blank');
@@ -132,10 +133,9 @@ export function Scan() {
 
   return (
     <div className="h-full bg-black relative flex flex-col">
-      {/* header */}
       <div className="absolute top-0 w-full pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 z-20">
         <button onClick={() => navigate(-1)} className="p-1 -ml-1 text-white"><ChevronLeft className="w-6 h-6" /></button>
-        <h1 className="text-[17px] font-bold text-white">扫一扫</h1>
+        <h1 className="text-[17px] font-bold text-white">{t('scan.title')}</h1>
         <button onClick={toggleTorch} className="p-2">
           <Zap className={`w-5 h-5 ${torch ? 'text-yellow-400' : 'text-white'}`} />
         </button>
@@ -144,7 +144,7 @@ export function Scan() {
       {error ? (
         <div className="flex-1 flex flex-col items-center justify-center px-8">
           <p className="text-white/60 text-[15px] text-center mb-4">{error}</p>
-          <button onClick={() => { setError(''); startCamera(); }} className="px-6 py-2 bg-white/20 text-white rounded-lg text-[14px]">重试</button>
+          <button onClick={() => { setError(''); startCamera(); }} className="px-6 py-2 bg-white/20 text-white rounded-lg text-[14px]">{t('common.retry')}</button>
         </div>
       ) : (
         <>
@@ -152,10 +152,8 @@ export function Scan() {
           <canvas ref={canvasRef} className="hidden" />
           <input ref={fileRef} type="file" capture="environment" accept="image/*" className="hidden" onChange={handlePhoto} />
 
-          {/* scan frame */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
             <div className="w-[240px] h-[240px] relative">
-              {/* corners */}
               <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white rounded-tl-lg" />
               <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white rounded-tr-lg" />
               <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white rounded-bl-lg" />
@@ -163,9 +161,8 @@ export function Scan() {
             </div>
           </div>
 
-          {/* hint */}
           <p className="absolute bottom-[120px] left-0 right-0 text-center text-white/50 text-[13px] z-10">
-            {barcodeSupported ? '将二维码放入框内自动识别' : ''}
+            {barcodeSupported ? t('scan.autoScanHint') : ''}
           </p>
 
           {!barcodeSupported && (
@@ -175,21 +172,20 @@ export function Scan() {
                 className="flex items-center gap-2 px-5 py-3 bg-white/20 backdrop-blur text-white rounded-xl text-[14px] font-medium active:bg-white/30"
               >
                 <Camera className="w-5 h-5" />
-                拍照识别
+                {t('scan.takePhotoScan')}
               </button>
             </div>
           )}
         </>
       )}
 
-      {/* result */}
       {result && (
         <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 px-8">
-          <div className="bg-white rounded-2xl p-6 w-full max-w-[300px]">
-            <p className="text-[14px] font-bold text-[#333] mb-3">扫描结果</p>
-            <p className="text-[13px] text-[#666] break-all mb-5 bg-[#F5F5F5] rounded-lg p-3">{result}</p>
-            <button onClick={() => { navigator.clipboard.writeText(result); }} className="w-full h-10 bg-[#F5F5F5] rounded-lg text-[14px] text-[#666] mb-2">复制</button>
-            <button onClick={() => { setResult(''); startCamera(); }} className="w-full h-10 bg-[#FF8C42] text-white rounded-lg text-[14px] font-bold">继续扫描</button>
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-[300px]">
+            <p className="text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">{t('scan.scanResult')}</p>
+            <p className="text-[13px] text-[#666] dark:text-gray-400 break-all mb-5 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg p-3">{result}</p>
+            <button onClick={() => { navigator.clipboard.writeText(result); }} className="w-full h-10 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg text-[14px] text-[#666] dark:text-gray-400 mb-2">{t('common.copy')}</button>
+            <button onClick={() => { setResult(''); startCamera(); }} className="w-full h-10 bg-[#FF8C42] text-white rounded-lg text-[14px] font-bold">{t('scan.continueScan')}</button>
           </div>
         </div>
       )}

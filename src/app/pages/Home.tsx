@@ -1,6 +1,7 @@
 import { Search, Bell, X } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { Link, useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { PostCard, PostCardSkeleton } from "../components/PostCard";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -30,6 +31,7 @@ const notifications = [
 
 export function Home() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<'hot' | 'following'>('hot');
   const [posts, setPosts] = useState<any[]>([]);
   const [page, setPage] = useState(2);
@@ -62,7 +64,6 @@ export function Home() {
   };
   useEffect(() => { fetchPosts(1); }, []);
 
-  // Story auto-play timer
   useEffect(() => {
     if (!activeStory) { setStoryProgress(0); return; }
     setStoryProgress(0);
@@ -122,12 +123,16 @@ export function Home() {
 
   const postsWithLike = posts.map(p => ({...p, is_liked: likedPosts.has(p.id), like_count: (p.like_count||0) + (likedPosts.has(p.id)?1:0), user: {...p.user, followed: followedUsers.has(p.user_id||p.user?.id)} }));
 
+  const pullLabels: Record<string, string> = {
+    pulling: t('common.pullRefresh'),
+    ready: t('common.releaseRefresh'),
+    loading: t('common.refreshing'),
+  };
+
   return (
-    <div className="h-full bg-[#FAFAFA] relative flex flex-col">
-      {/* Story Viewer */}
+    <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
       {activeStory && (
         <div className="fixed inset-0 z-[90] bg-black flex flex-col" onClick={() => setActiveStory(null)}>
-          {/* Progress bar */}
           <div className="absolute top-2 left-4 right-4 z-10 h-0.5 bg-white/30 rounded-full" style={{top: 'calc(env(safe-area-inset-top) + 60px)'}}>
             <div className="h-full bg-white rounded-full transition-all duration-30 ease-linear" style={{width: `${storyProgress}%`}}/>
           </div>
@@ -143,89 +148,84 @@ export function Home() {
         </div>
       )}
 
-      {/* Notification Panel */}
       {showNotifications && (
         <div className="fixed inset-0 z-[90] bg-black/40 flex items-end" onClick={() => setShowNotifications(false)}>
-          <div className="w-full bg-white rounded-t-[20px] px-5 pt-4 pb-8 max-h-[60vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+          <div className="w-full bg-white dark:bg-gray-900 rounded-t-[20px] px-5 pt-4 pb-8 max-h-[60vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[17px] font-bold text-[#333]">通知</h2>
-              <button onClick={() => setShowNotifications(false)}><X className="w-5 h-5 text-[#999]"/></button>
+              <h2 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('home.notifications')}</h2>
+              <button onClick={() => setShowNotifications(false)}><X className="w-5 h-5 text-[#999] dark:text-gray-400"/></button>
             </div>
             <div className="space-y-2">
               {notifications.map(n => (
-                <div key={n.id} className="flex items-center gap-3 p-3 rounded-xl bg-[#F8F8F8]">
+                <div key={n.id} className="flex items-center gap-3 p-3 rounded-xl bg-[#F8F8F8] dark:bg-gray-800">
                   <ImageWithFallback src={n.avatar} className="w-10 h-10 rounded-full object-cover shrink-0" />
                   <div className="flex-1 min-w-0">
-                    <div className="text-[13px] text-[#333] flex items-center gap-1.5">
+                    <div className="text-[13px] text-[#333] dark:text-gray-100 flex items-center gap-1.5">
                       {n.text}
                       {n.unread && <span className="w-2 h-2 rounded-full bg-[#FF8C42] shrink-0"/>}
                     </div>
-                    <div className="text-[11px] text-[#999] mt-0.5">{n.time}</div>
+                    <div className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{n.time}</div>
                   </div>
                 </div>
               ))}
             </div>
-            <button onClick={() => setShowNotifications(false)} className="w-full h-10 mt-4 text-[#999] text-[13px]">关闭</button>
+            <button onClick={() => setShowNotifications(false)} className="w-full h-10 mt-4 text-[#999] dark:text-gray-400 text-[13px]">{t('common.close')}</button>
           </div>
         </div>
       )}
 
       <div className="flex-1 overflow-y-auto pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" ref={scrollRef}
         onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onScroll={handleScroll}>
-        
-        {pullState!=='idle'&&(<div className="flex items-center justify-center text-[12px] text-[#999]" style={{height:pullDist}}>
-          {pullState==='pulling'&&'下拉刷新'}{pullState==='ready'&&'释放刷新'}{pullState==='loading'&&'刷新中...'}
+
+        {pullState!=='idle'&&(<div className="flex items-center justify-center text-[12px] text-[#999] dark:text-gray-400" style={{height:pullDist}}>
+          {pullLabels[pullState]}
         </div>)}
 
-        {/* Header */}
-        <div className="sticky top-0 bg-[#FAFAFA]/90 backdrop-blur-md z-40 px-4 pt-[var(--app-safe-top)] pb-2">
+        <div className="sticky top-0 bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md z-40 px-4 pt-[var(--app-safe-top)] pb-2">
           <div className="flex items-center justify-between h-[var(--app-nav-height)]">
-            <h1 className="text-[17px] font-bold text-[#333]">爪印 PawGram</h1>
+            <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('home.brandName')}</h1>
             <div className="flex items-center gap-4">
-              <Link to="/search" className="active:scale-95"><Search className="w-5 h-5 text-[#333]" /></Link>
+              <Link to="/search" className="active:scale-95"><Search className="w-5 h-5 text-[#333] dark:text-gray-100" /></Link>
               <button onClick={handleOpenNotifications} className="active:scale-95 relative">
-                <Bell className="w-5 h-5 text-[#333]" />
+                <Bell className="w-5 h-5 text-[#333] dark:text-gray-100" />
                 {!notifViewed && notifications.some(n => n.unread) && (
-                  <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
+                  <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span>
                 )}
               </button>
             </div>
           </div>
-          
-          {/* Tabs */}
+
           <div className="flex items-center gap-6 mt-1">
-            <button onClick={()=>setActiveTab('hot')} className={`text-[17px] font-bold relative pb-2 ${activeTab==='hot'?'text-[#333]':'text-[#999]'}`}>
-              热门{activeTab==='hot'&&<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"/>}
+            <button onClick={()=>setActiveTab('hot')} className={`text-[17px] font-bold relative pb-2 ${activeTab==='hot'?'text-[#333] dark:text-gray-100':'text-[#999] dark:text-gray-400'}`}>
+              {t('home.hot')}{activeTab==='hot'&&<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"/>}
             </button>
-            <button onClick={()=>setActiveTab('following')} className={`text-[17px] font-bold relative pb-2 ${activeTab==='following'?'text-[#333]':'text-[#999]'}`}>
-              关注{activeTab==='following'&&<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"/>}
+            <button onClick={()=>setActiveTab('following')} className={`text-[17px] font-bold relative pb-2 ${activeTab==='following'?'text-[#333] dark:text-gray-100':'text-[#999] dark:text-gray-400'}`}>
+              {t('home.following')}{activeTab==='following'&&<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"/>}
             </button>
           </div>
 
-          {/* Stories Bar */}
           <div className="flex items-center gap-3 overflow-x-auto pt-2 pb-1 [&::-webkit-scrollbar]:hidden">
             <div onClick={() => navigate('/post')} className="shrink-0 flex flex-col items-center gap-1 cursor-pointer active:opacity-70">
               <div className="w-[62px] h-[62px] rounded-full bg-gradient-to-br from-[#FF8C42] to-[#FFB380] p-[2px]">
-                <div className="w-full h-full rounded-full bg-[#FAFAFA] flex items-center justify-center">
-                  <span className="text-xl">+</span>
+                <div className="w-full h-full rounded-full bg-[#FAFAFA] dark:bg-gray-950 flex items-center justify-center">
+                  <span className="text-xl dark:text-gray-100">+</span>
                 </div>
               </div>
-              <span className="text-[10px] text-[#999]">你的故事</span>
+              <span className="text-[10px] text-[#999] dark:text-gray-400">{t('home.yourStory')}</span>
             </div>
             {stories.map(s => {
               const viewed = viewedStories.has(s.id);
               return (
               <div key={s.id} onClick={() => handleOpenStory(s)} className="shrink-0 flex flex-col items-center gap-1 cursor-pointer active:opacity-70">
-                <div className={`w-[62px] h-[62px] rounded-full p-[2px] ${viewed ? 'bg-gray-300' : 'bg-gradient-to-br from-[#FF8C42] to-[#FFB380]'}`}>
-                  <ImageWithFallback src={s.avatar} className="w-full h-full rounded-full object-cover border-2 border-white" />
+                <div className={`w-[62px] h-[62px] rounded-full p-[2px] ${viewed ? 'bg-gray-300 dark:bg-gray-600' : 'bg-gradient-to-br from-[#FF8C42] to-[#FFB380]'}`}>
+                  <ImageWithFallback src={s.avatar} className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-900" />
                 </div>
-                <span className="text-[10px] text-[#666] w-[62px] text-center truncate">{s.name}</span>
+                <span className="text-[10px] text-[#666] dark:text-gray-400 w-[62px] text-center truncate">{s.name}</span>
               </div>
             )})}
           </div>
         </div>
 
-        {/* Feed or Empty */}
         <div className="px-4 mt-1">
           {(() => {
             if (activeTab === 'following') {
@@ -239,17 +239,17 @@ export function Home() {
               ));
               return (
                 <div className="mt-4">
-                  <h2 className="text-[14px] font-bold text-[#333] mb-3">为你推荐</h2>
+                  <h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">{t('home.recommendedForYou')}</h2>
                   <div className="space-y-3">
                     {recommendUsers.map(u => (
-                      <div key={u.id} className="bg-white rounded-2xl p-3 flex items-center gap-3 border border-[#EEE]">
+                      <div key={u.id} className="bg-white dark:bg-gray-900 rounded-2xl p-3 flex items-center gap-3 border border-[#EEE] dark:border-gray-700">
                         <ImageWithFallback src={u.avatar} className="w-12 h-12 rounded-full object-cover shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <div className="text-[14px] font-bold text-[#333]">{u.name}</div>
-                          <div className="text-[11px] text-[#999]">{u.bio} · 粉丝 {u.followers}</div>
+                          <div className="text-[14px] font-bold text-[#333] dark:text-gray-100">{u.name}</div>
+                          <div className="text-[11px] text-[#999] dark:text-gray-400">{u.bio} · {t('home.followers')} {u.followers}</div>
                         </div>
-                        <button onClick={() => toggleFollow(u.id, u.name)} className={`shrink-0 px-4 py-1.5 rounded-full text-[12px] font-bold ${followedUsers.has(u.id) ? 'bg-gray-100 text-[#999]' : 'bg-[#FF8C42] text-white active:bg-[#E67A35]'}`}>
-                          {followedUsers.has(u.id) ? '已关注' : '关注'}
+                        <button onClick={() => toggleFollow(u.id, u.name)} className={`shrink-0 px-4 py-1.5 rounded-full text-[12px] font-bold ${followedUsers.has(u.id) ? 'bg-gray-100 dark:bg-gray-800 text-[#999] dark:text-gray-400' : 'bg-[#FF8C42] text-white active:bg-[#E67A35]'}`}>
+                          {followedUsers.has(u.id) ? t('common.followed') : t('common.follow')}
                         </button>
                       </div>
                     ))}
@@ -260,10 +260,10 @@ export function Home() {
             if (posts.length === 0 && loading) return <>{[1,2,3].map(i => <PostCardSkeleton key={i} />)}</>;
             if (posts.length === 0 && !loading) return (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="w-16 h-16 rounded-full bg-[#FFF3E6] flex items-center justify-center mb-4"><span className="text-2xl">🐾</span></div>
-                <p className="text-[14px] text-[#999] mb-1">还没有动态</p>
-                <p className="text-[12px] text-[#BBB] mb-4">去看看附近有什么好玩的吧</p>
-                <Link to="/discover" className="bg-[#FF8C42] text-white px-6 py-2 rounded-full text-[13px] font-bold active:bg-[#E67A35]">去发现</Link>
+                <div className="w-16 h-16 rounded-full bg-[#FFF3E6] dark:bg-orange-900/30 flex items-center justify-center mb-4"><span className="text-2xl">🐾</span></div>
+                <p className="text-[14px] text-[#999] dark:text-gray-400 mb-1">{t('home.noPostsYet')}</p>
+                <p className="text-[12px] text-[#BBB] dark:text-gray-500 mb-4">{t('home.goExplore')}</p>
+                <Link to="/discover" className="bg-[#FF8C42] text-white px-6 py-2 rounded-full text-[13px] font-bold active:bg-[#E67A35]">{t('home.goDiscover')}</Link>
               </div>
             );
             return postsWithLike.map(post => (
@@ -276,8 +276,8 @@ export function Home() {
           })()}
         </div>
 
-        {loadMoreLoading && <div className="text-center py-4 text-[12px] text-[#999]">加载中...</div>}
-        {!loadMoreLoading && hasMore && activeTab !== 'following' && <div className="text-center py-3 text-[12px] text-[#BBB]">上拉加载更多</div>}
+        {loadMoreLoading && <div className="text-center py-4 text-[12px] text-[#999] dark:text-gray-400">{t('common.loading')}</div>}
+        {!loadMoreLoading && hasMore && activeTab !== 'following' && <div className="text-center py-3 text-[12px] text-[#BBB] dark:text-gray-500">{t('common.loadMore')}</div>}
       </div>
 
       <BottomNav />

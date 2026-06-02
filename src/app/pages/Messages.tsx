@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router";
+import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { MoreHorizontal, ChevronRight, CheckCheck, Settings, Ban, Search } from "lucide-react";
@@ -26,6 +27,7 @@ const conversations = [
 
 export function Messages() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [convs, setConvs] = useState(conversations);
   const [notifs, setNotifs] = useState(notifGroups);
   const [showMenu, setShowMenu] = useState(false);
@@ -41,40 +43,39 @@ export function Messages() {
   };
 
   return (
-    <div className="h-full bg-[#FAFAFA] relative flex flex-col">
-      {/* Header */}
-      <div className="bg-[#FAFAFA]/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0">
+    <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
+      <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0">
         {showSearch ? (
           <div className="flex-1 flex items-center gap-2">
-            <div className="flex-1 bg-[#F0F0F0] rounded-full flex items-center px-3 h-8">
-              <Search className="w-4 h-4 text-[#999] mr-1.5"/>
+            <div className="flex-1 bg-[#F0F0F0] dark:bg-gray-800 rounded-full flex items-center px-3 h-8">
+              <Search className="w-4 h-4 text-[#999] dark:text-gray-400 mr-1.5"/>
               <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                placeholder="搜索聊天记录" className="flex-1 bg-transparent text-[14px] outline-none"/>
+                placeholder={t('messages.searchChats')} className="flex-1 bg-transparent text-[14px] dark:text-gray-100 outline-none"/>
             </div>
-            <button onClick={() => { setShowSearch(false); setSearchQuery(""); }} className="text-[14px] text-[#FF8C42] shrink-0">取消</button>
+            <button onClick={() => { setShowSearch(false); setSearchQuery(""); }} className="text-[14px] text-[#FF8C42] shrink-0">{t('common.cancel')}</button>
           </div>
         ) : (
           <>
-            <h1 className="text-[17px] font-bold text-[#333]">
-              消息
+            <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">
+              {t('messages.title')}
               {totalUnread > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-[#FF4D4F] text-white text-[10px] font-bold px-1 ml-2 align-middle">{totalUnread}</span>}
             </h1>
             <div className="flex items-center gap-1">
-              <button onClick={() => setShowSearch(true)} className="p-1.5"><Search className="w-5 h-5 text-[#333]"/></button>
+              <button onClick={() => setShowSearch(true)} className="p-1.5"><Search className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
               <div className="relative">
-                <button onClick={() => setShowMenu(!showMenu)} className="p-1"><MoreHorizontal className="w-5 h-5 text-[#333]"/></button>
+                <button onClick={() => setShowMenu(!showMenu)} className="p-1"><MoreHorizontal className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
                 {showMenu && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)}/>
-                    <div className="absolute right-0 top-10 bg-white rounded-xl shadow-lg border border-[#F0F0F0] py-1 z-50 min-w-[150px]">
-                      <button onClick={markAllRead} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] active:bg-[#F9F9F9]">
-                        <CheckCheck className="w-4 h-4"/>全部已读
+                    <div className="absolute right-0 top-10 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-[#F0F0F0] dark:border-gray-700 py-1 z-50 min-w-[150px]">
+                      <button onClick={markAllRead} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">
+                        <CheckCheck className="w-4 h-4"/>{t('messages.markAllRead')}
                       </button>
-                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] active:bg-[#F9F9F9]">
-                        <Settings className="w-4 h-4"/>消息设置
+                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">
+                        <Settings className="w-4 h-4"/>{t('messages.messageSettings')}
                       </button>
-                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] active:bg-[#F9F9F9]">
-                        <Ban className="w-4 h-4"/>屏蔽设置
+                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">
+                        <Ban className="w-4 h-4"/>{t('messages.blockSettings')}
                       </button>
                     </div>
                   </>
@@ -86,61 +87,58 @@ export function Messages() {
       </div>
 
       <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden">
-        {/* New Friends */}
-        <div className="bg-white mb-2">
+        <div className="bg-white dark:bg-gray-900 mb-2">
           <div className="flex gap-3 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
             {newFriends.map(f => (
               <div key={f.id} className="shrink-0 flex flex-col items-center gap-1.5 w-[64px]">
                 <ImageWithFallback src={f.avatar} className="w-[52px] h-[52px] rounded-full object-cover"/>
-                <span className="text-[11px] text-[#333] text-center leading-tight line-clamp-2">{f.name}</span>
+                <span className="text-[11px] text-[#333] dark:text-gray-100 text-center leading-tight line-clamp-2">{f.name}</span>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Notifications */}
-        <div className="bg-white mb-2">
+        <div className="bg-white dark:bg-gray-900 mb-2">
           {notifs.map(g => (
-            <div key={g.key} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] last:border-b-0 active:bg-[#F9F9F9]">
+            <div key={g.key} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 active:bg-[#F9F9F9] dark:active:bg-gray-800">
               <ImageWithFallback src={g.avatar} className="w-11 h-11 rounded-full object-cover shrink-0"/>
               <div className="flex-1 min-w-0">
-                <div className="text-[14px] font-bold text-[#333]">{g.label}</div>
-                <div className="text-[12px] text-[#999] truncate mt-0.5">{g.desc}</div>
+                <div className="text-[14px] font-bold text-[#333] dark:text-gray-100">{g.label}</div>
+                <div className="text-[12px] text-[#999] dark:text-gray-400 truncate mt-0.5">{g.desc}</div>
               </div>
               {g.count > 0 && (
                 <div className="min-w-[20px] h-5 bg-[#FF4D4F] rounded-full flex items-center justify-center px-1.5">
                   <span className="text-[10px] text-white font-bold">{g.count > 99 ? '99+' : g.count}</span>
                 </div>
               )}
-              <ChevronRight className="w-4 h-4 text-[#CCC] shrink-0"/>
+              <ChevronRight className="w-4 h-4 text-[#CCC] dark:text-gray-600 shrink-0"/>
             </div>
           ))}
         </div>
 
-        {/* Conversations */}
-        <div className="bg-white">
-          <div className="px-4 py-3 border-b border-[#F5F5F5]">
-            <span className="text-[13px] font-bold text-[#333]">私信</span>
+        <div className="bg-white dark:bg-gray-900">
+          <div className="px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700">
+            <span className="text-[13px] font-bold text-[#333] dark:text-gray-100">{t('messages.privateMessages')}</span>
           </div>
           {convs.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-12">
-              <div className="w-14 h-14 rounded-full bg-[#F5F5F5] flex items-center justify-center mb-2"><span className="text-xl">💬</span></div>
-              <p className="text-[13px] text-[#999]">暂无私信</p>
+              <div className="w-14 h-14 rounded-full bg-[#F5F5F5] dark:bg-gray-800 flex items-center justify-center mb-2"><span className="text-xl">💬</span></div>
+              <p className="text-[13px] text-[#999] dark:text-gray-400">{t('messages.noMessages')}</p>
             </div>
           ) : (
             convs.map(c => (
               <SwipeDelete key={c.id} onDelete={() => deleteConv(c.id)}>
-                <div onClick={() => navigate(`/chat/${c.id}`)} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] last:border-b-0 active:bg-[#F9F9F9]">
+                <div onClick={() => navigate(`/chat/${c.id}`)} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 active:bg-[#F9F9F9] dark:active:bg-gray-800">
                   <div className="relative shrink-0">
                     <ImageWithFallback src={c.avatar} className="w-12 h-12 rounded-full object-cover"/>
-                    {c.unread > 0 && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#FF4D4F] border-2 border-white"/>}
+                    {c.unread > 0 && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#FF4D4F] border-2 border-white dark:border-gray-900"/>}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-[14px] font-bold text-[#333]">{c.name}</span>
-                      <span className="text-[10px] text-[#BBB] shrink-0 ml-2">{c.time}</span>
+                      <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{c.name}</span>
+                      <span className="text-[10px] text-[#BBB] dark:text-gray-500 shrink-0 ml-2">{c.time}</span>
                     </div>
-                    <span className="text-[12px] text-[#999] block truncate mt-0.5">{c.lastMsg}</span>
+                    <span className="text-[12px] text-[#999] dark:text-gray-400 block truncate mt-0.5">{c.lastMsg}</span>
                   </div>
                   {c.unread > 0 && (
                     <div className="shrink-0 min-w-[20px] h-5 bg-[#FF4D4F] rounded-full flex items-center justify-center px-1.5">
@@ -163,6 +161,7 @@ export function Messages() {
 
 /* ─── Swipe to delete ─── */
 function SwipeDelete({ children, onDelete }: { children: React.ReactNode; onDelete: () => void }) {
+  const { t } = useTranslation();
   const [offset, setOffset] = useState(0);
   const startX = useRef(0);
   const swiping = useRef(false);
@@ -181,8 +180,8 @@ function SwipeDelete({ children, onDelete }: { children: React.ReactNode; onDele
 
   return (
     <div className="relative overflow-hidden">
-      <button onClick={() => { setOffset(0); onDelete(); }} className="absolute right-0 top-0 bottom-0 w-20 bg-[#FF4D4F] flex items-center justify-center text-white text-[13px] font-medium">删除</button>
-      <div className="relative bg-white" style={{ transform: `translateX(${offset}px)`, transition: swiping.current ? 'none' : 'transform 0.2s' }}
+      <button onClick={() => { setOffset(0); onDelete(); }} className="absolute right-0 top-0 bottom-0 w-20 bg-[#FF4D4F] flex items-center justify-center text-white text-[13px] font-medium">{t('common.delete')}</button>
+      <div className="relative bg-white dark:bg-gray-900" style={{ transform: `translateX(${offset}px)`, transition: swiping.current ? 'none' : 'transform 0.2s' }}
         onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
         {children}
       </div>

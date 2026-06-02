@@ -24,7 +24,7 @@ function Root() {
   }
 
   return (
-    <div className="w-full h-full bg-white overflow-x-hidden overflow-y-auto">
+    <div className="w-full h-full bg-white dark:bg-gray-900 overflow-x-hidden overflow-y-auto">
       <Outlet />
     </div>
   );
