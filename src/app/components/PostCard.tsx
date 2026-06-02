@@ -63,7 +63,7 @@ export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLik
         </div>
       </div>
 
-      <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.id}`); }} className="block relative w-full aspect-square bg-gray-50 overflow-hidden cursor-pointer">
+      <div onClick={(e) => { e.stopPropagation(); window.location.hash = `#/post/${post.id}`; }} className="block relative w-full aspect-square bg-gray-50 overflow-hidden cursor-pointer">
         <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden" onClick={handleDoubleTap}>
           {(post.images||[]).map((img: string, idx: number) => (
             <div key={idx} className="w-full h-full shrink-0 snap-center relative">
@@ -97,7 +97,7 @@ export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLik
           <button onClick={onLike} className={`flex items-center gap-1.5 ${post.is_liked?'text-[#FF8C42]':'text-gray-600'}`}>
             <Heart className={`w-6 h-6 ${post.is_liked?'fill-current':''}`}/><span className="text-sm font-medium">{post.like_count}</span>
           </button>
-          <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.id}`); }} className="flex items-center gap-1.5 text-gray-600 cursor-pointer">
+          <div onClick={(e) => { e.stopPropagation(); window.location.hash = `#/post/${post.id}`; }} className="flex items-center gap-1.5 text-gray-600 cursor-pointer">
             <MessageCircle className="w-6 h-6"/><span className="text-sm font-medium">{post.comment_count}</span>
           </div>
           <button onClick={onShare} className="flex items-center gap-1.5 text-gray-600"><Share2 className="w-6 h-6"/></button>
