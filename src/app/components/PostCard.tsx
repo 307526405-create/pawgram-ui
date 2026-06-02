@@ -1,9 +1,10 @@
 import { Heart, MessageCircle, Share2, MapPin, Play } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
-import { Link } from "react-router";
+import { useNavigate } from "react-router";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLike?: (e: any) => void; onShare?: (e: any) => void; onFollow?: (e: any) => void }) {
+  const navigate = useNavigate();
   const user = post.user || { name: '用户', avatar: '' };
   const followed = user.followed || false;
   const [showHeart, setShowHeart] = useState(false);
@@ -49,7 +50,7 @@ export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLik
                 </button>
               )}
             </div>
-            <p className="text-xs text-gray-400">{timeAgo(post.created_at)} · {(post.view_count||0)+(post.id*7+3)%100}次浏览</p>
+            <p className="text-xs text-gray-400">{timeAgo(post.created_at)}{post.user_id === 1 ? ` · ${(post.view_count||0)+(post.id*7+3)%100}次浏览` : ''}</p>
           </div>
         </div>
         <div className="flex flex-col items-end">
@@ -62,7 +63,7 @@ export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLik
         </div>
       </div>
 
-      <Link to={`/post/${post.id}`} className="block relative w-full aspect-square bg-gray-50 overflow-hidden">
+      <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.id}`); }} className="block relative w-full aspect-square bg-gray-50 overflow-hidden cursor-pointer">
         <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden" onClick={handleDoubleTap}>
           {(post.images||[]).map((img: string, idx: number) => (
             <div key={idx} className="w-full h-full shrink-0 snap-center relative">
@@ -89,16 +90,16 @@ export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLik
             </div>
           ))}
         </div>
-      </Link>
+      </div>
 
       <div className="flex items-center justify-between p-3 pb-2">
         <div className="flex items-center gap-4">
           <button onClick={onLike} className={`flex items-center gap-1.5 ${post.is_liked?'text-[#FF8C42]':'text-gray-600'}`}>
             <Heart className={`w-6 h-6 ${post.is_liked?'fill-current':''}`}/><span className="text-sm font-medium">{post.like_count}</span>
           </button>
-          <Link to={`/post/${post.id}`} className="flex items-center gap-1.5 text-gray-600">
+          <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.id}`); }} className="flex items-center gap-1.5 text-gray-600 cursor-pointer">
             <MessageCircle className="w-6 h-6"/><span className="text-sm font-medium">{post.comment_count}</span>
-          </Link>
+          </div>
           <button onClick={onShare} className="flex items-center gap-1.5 text-gray-600"><Share2 className="w-6 h-6"/></button>
         </div>
       </div>
