@@ -7,6 +7,8 @@ import { BottomNav } from "../components/BottomNav";
 import { postsApi } from "../api/client";
 import { sendLikeNotification, sendCommentNotification, sendFollowNotification } from "../utils/notifications";
 
+const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.url || item?.poster || '';
+
 function formatTime(iso: string, t: any): string {
   if (!iso) return '';
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
@@ -273,7 +275,7 @@ export function PostDetail() {
           <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
             {(post.images||[]).map((img: string, idx: number) => (
               <div key={idx} className="w-full h-full shrink-0 snap-center relative">
-                <ImageWithFallback src={img} className="w-full h-full object-cover"/>
+                <ImageWithFallback src={getMediaUrl(img)} className="w-full h-full object-cover"/>
                 {(post.images||[]).length > 1 && (
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                     {(post.images||[]).map((_:string, di:number) => (

@@ -2,9 +2,12 @@ import { useState, useEffect, useCallback } from 'react';
 
 type Theme = 'system' | 'light' | 'dark';
 
+const STORAGE_KEY = 'pawgram-theme';
+const EVENT_KEY = 'pawgram-theme-change';
+
 function getStoredTheme(): Theme {
   try {
-    const v = localStorage.getItem('pawgram-theme');
+    const v = localStorage.getItem(STORAGE_KEY);
     if (v === 'system' || v === 'light' || v === 'dark') return v;
   } catch {}
   return 'system';
@@ -26,7 +29,7 @@ export function useDarkMode() {
 
   useEffect(() => {
     applyTheme(resolveTheme(theme));
-    try { localStorage.setItem('pawgram-theme', theme); } catch {}
+    try { localStorage.setItem(STORAGE_KEY, theme); } catch {}
   }, [theme]);
 
   useEffect(() => {
@@ -38,7 +41,21 @@ export function useDarkMode() {
     return () => mq.removeEventListener('change', handler);
   }, [theme]);
 
-  const setTheme = useCallback((t: Theme) => setThemeState(t), []);
+  // Sync across hook instances via custom event
+  useEffect(() => {
+    const onThemeChange = (e: CustomEvent<Theme>) => {
+      const newTheme = e.detail;
+      applyTheme(resolveTheme(newTheme));
+      setThemeState(newTheme);
+    };
+    window.addEventListener(EVENT_KEY, onThemeChange as EventListener);
+    return () => window.removeEventListener(EVENT_KEY, onThemeChange as EventListener);
+  }, []);
+
+  const setTheme = useCallback((t: Theme) => {
+    setThemeState(t);
+    window.dispatchEvent(new CustomEvent(EVENT_KEY, { detail: t }));
+  }, []);
 
   return { theme, setTheme, resolved: resolveTheme(theme) };
 }
