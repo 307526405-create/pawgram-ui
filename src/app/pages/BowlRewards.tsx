@@ -17,13 +17,13 @@ export function BowlRewards() {
   ];
 
   return (
-    <div className="h-full bg-[#FAFAFA] relative flex flex-col">
+    <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
       {/* 顶部导航与首页完全一致（浅色底+毛玻璃） */}
-      <div className="bg-[#FAFAFA]/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-10">
-        <button onClick={() => navigate(-1)} className="text-[#333333] active:scale-95 transition-transform p-1 -ml-1">
+      <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-10">
+        <button onClick={() => navigate(-1)} className="text-[#333333] dark:text-gray-100 active:scale-95 transition-transform p-1 -ml-1">
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-[#333333] text-[17px] font-bold tracking-wider">食盆奖励</h1>
+        <h1 className="text-[#333333] dark:text-gray-100 text-[17px] font-bold tracking-wider">食盆奖励</h1>
         <div className="w-6 h-6"></div> {/* 占位保持居中 */}
       </div>
 
@@ -57,31 +57,31 @@ export function BowlRewards() {
             
             {/* 中间大数字 */}
             <div className="absolute flex flex-col items-center">
-              <span className="text-[28px] font-bold text-[#333333] leading-none mt-1">2/3</span>
+              <span className="text-[28px] font-bold text-[#333333] dark:text-gray-100 leading-none mt-1">2/3</span>
             </div>
           </div>
           
-          <p className="text-[#999999] text-[14px]">再打卡1天即可获得</p>
+          <p className="text-[#999999] dark:text-gray-400 text-[14px]">再打卡1天即可获得</p>
         </div>
 
         {/* 白色圆角卡片规则说明 */}
-        <div className="bg-white rounded-[16px] mx-4 p-5 shadow-sm border border-[#EEEEEE] mb-8">
-          <p className="text-[14px] text-[#333333] font-medium text-center">
+        <div className="bg-white dark:bg-gray-900 rounded-[16px] mx-4 p-5 shadow-sm border border-[#EEEEEE] dark:border-gray-700 mb-8">
+          <p className="text-[14px] text-[#333333] dark:text-gray-100 font-medium text-center">
             连续打卡3天可获得食盆奖励
           </p>
         </div>
 
         {/* 已获奖励列表 */}
         <div className="px-4 mb-4">
-          <h3 className="text-[14px] font-bold text-[#333333] mb-4">已获奖励</h3>
+          <h3 className="text-[14px] font-bold text-[#333333] dark:text-gray-100 mb-4">已获奖励</h3>
           <div className="space-y-3">
             {rewards.map((reward) => (
-              <div key={reward.id} className="bg-white rounded-[16px] p-4 flex items-center justify-between shadow-sm border border-[#EEEEEE]">
+              <div key={reward.id} className="bg-white dark:bg-gray-900 rounded-[16px] p-4 flex items-center justify-between shadow-sm border border-[#EEEEEE] dark:border-gray-700">
                 <div className="flex items-center gap-2">
-                  <span className="text-[14px] font-bold text-[#333333]">{reward.title}</span>
-                  <span className="text-[14px] text-[#999999] ml-1">{reward.date}</span>
+                  <span className="text-[14px] font-bold text-[#333333] dark:text-gray-100">{reward.title}</span>
+                  <span className="text-[14px] text-[#999999] dark:text-gray-400 ml-1">{reward.date}</span>
                 </div>
-                <div className="bg-[#FFF3E6] text-[#FF8C42] text-[12px] font-bold px-2.5 py-1 rounded-[6px]">
+                <div className="bg-[#FFF3E6] dark:bg-orange-900/30 text-[#FF8C42] text-[12px] font-bold px-2.5 py-1 rounded-[6px]">
                   已领取
                 </div>
               </div>

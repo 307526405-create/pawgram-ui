@@ -42,7 +42,7 @@ export function FollowList() {
         );
       case 'followed':
         return (
-          <button className="text-[#999999] text-[13px] font-bold px-3.5 py-1.5 rounded-full border border-[#CCCCCC] active:scale-95 transition-transform">
+          <button className="text-[#999999] dark:text-gray-400 text-[13px] font-bold px-3.5 py-1.5 rounded-full border border-[#CCCCCC] dark:border-gray-700 active:scale-95 transition-transform">
             已关注
           </button>
         );
@@ -57,23 +57,23 @@ export function FollowList() {
   };
 
   return (
-    <div className="h-full bg-[#FAFAFA] relative flex flex-col">
+    <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
       {/* 顶部导航栏：高度对齐，标题和返回 */}
-      <div className="bg-[#FAFAFA]/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-40 border-b border-transparent">
+      <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-40 border-b border-transparent">
         <div className="w-16 flex justify-start">
           <button onClick={() => navigate(-1)} className="p-2 -ml-2 active:opacity-70 transition-opacity">
-            <ChevronLeft className="w-6 h-6 text-[#333333]" />
+            <ChevronLeft className="w-6 h-6 text-[#333333] dark:text-gray-100" />
           </button>
         </div>
-        <h1 className="text-[#333333] text-[17px] font-bold tracking-wider">关注列表</h1>
+        <h1 className="text-[#333333] dark:text-gray-100 text-[17px] font-bold tracking-wider">关注列表</h1>
         <div className="w-16 flex justify-end"></div>
       </div>
 
       {/* Tab 切换 */}
-      <div className="flex h-[var(--app-nav-height)] items-center justify-center gap-16 bg-[#FAFAFA] shrink-0 border-b border-[#EEEEEE] z-30 relative">
+      <div className="flex h-[var(--app-nav-height)] items-center justify-center gap-16 bg-[#FAFAFA] dark:bg-gray-950 shrink-0 border-b border-[#EEEEEE] dark:border-gray-700 z-30 relative">
         <button 
           onClick={() => setActiveTab('following')} 
-          className={`relative h-full flex items-center text-[15px] font-bold transition-colors ${activeTab === 'following' ? 'text-[#333333]' : 'text-[#999999]'}`}
+          className={`relative h-full flex items-center text-[15px] font-bold transition-colors ${activeTab === 'following' ? 'text-[#333333] dark:text-gray-100' : 'text-[#999999] dark:text-gray-400'}`}
         >
           关注
           {activeTab === 'following' && (
@@ -82,7 +82,7 @@ export function FollowList() {
         </button>
         <button 
           onClick={() => setActiveTab('followers')} 
-          className={`relative h-full flex items-center text-[15px] font-bold transition-colors ${activeTab === 'followers' ? 'text-[#333333]' : 'text-[#999999]'}`}
+          className={`relative h-full flex items-center text-[15px] font-bold transition-colors ${activeTab === 'followers' ? 'text-[#333333] dark:text-gray-100' : 'text-[#999999] dark:text-gray-400'}`}
         >
           粉丝
           {activeTab === 'followers' && (
@@ -95,7 +95,7 @@ export function FollowList() {
       <div className="flex-1 overflow-y-auto pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         <div className="pt-2">
           {currentList.map((user, index) => (
-            <div key={user.id} className={`flex items-center justify-between px-4 py-3 bg-white ${index !== currentList.length - 1 ? 'border-b border-[#EEEEEE]' : ''}`}>
+            <div key={user.id} className={`flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 ${index !== currentList.length - 1 ? 'border-b border-[#EEEEEE] dark:border-gray-700' : ''}`}>
               <div className="flex items-center gap-3 overflow-hidden">
                 <ImageWithFallback 
                   src={user.avatar} 
@@ -103,8 +103,8 @@ export function FollowList() {
                   className="w-[36px] h-[36px] rounded-full object-cover shrink-0" 
                 />
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[14px] font-bold text-[#333333] truncate">{user.name}</span>
-                  <span className="text-[12px] text-[#999999] truncate mt-0.5">{user.bio}</span>
+                  <span className="text-[14px] font-bold text-[#333333] dark:text-gray-100 truncate">{user.name}</span>
+                  <span className="text-[12px] text-[#999999] dark:text-gray-400 truncate mt-0.5">{user.bio}</span>
                 </div>
               </div>
               <div className="shrink-0 ml-3">

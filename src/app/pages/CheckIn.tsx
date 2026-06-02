@@ -28,7 +28,7 @@ export function CheckIn() {
     }
     // 过去未打卡
     if (day === 5 || day === 10 || day === 18) {
-      return <div className="w-[20px] h-[20px] rounded-full border-[2px] border-[#CCCCCC] mt-1.5 flex-shrink-0"></div>;
+      return <div className="w-[20px] h-[20px] rounded-full border-[2px] border-[#CCCCCC] dark:border-gray-700 mt-1.5 flex-shrink-0"></div>;
     }
     // 已打卡：橙色实心圆20px + 白色对勾
     return (
@@ -40,8 +40,8 @@ export function CheckIn() {
 
   const getDayTextColor = (day: number | null) => {
     if (day === null) return "";
-    if (day > today) return "text-[#CCCCCC]"; // 未来日期浅灰
-    return "text-[#333333]"; // 过去和今天深色
+    if (day > today) return "text-[#CCCCCC] dark:text-gray-400"; // 未来日期浅灰
+    return "text-[#333333] dark:text-gray-100"; // 过去和今天深色
   };
 
   // 打卡记录数据
@@ -64,13 +64,13 @@ export function CheckIn() {
   ];
 
   return (
-    <div className="h-full bg-[#FAFAFA] relative flex flex-col">
+    <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
       {/* 顶部导航与首页完全一致 */}
-      <div className="bg-[#FAFAFA]/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-10">
-        <button onClick={() => navigate(-1)} className="text-[#333333] active:scale-95 transition-transform p-1 -ml-1">
+      <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-10">
+        <button onClick={() => navigate(-1)} className="text-[#333333] dark:text-gray-100 active:scale-95 transition-transform p-1 -ml-1">
           <ChevronLeft className="w-6 h-6" />
         </button>
-        <h1 className="text-[#333333] text-[17px] font-bold tracking-wider">每日打卡</h1>
+        <h1 className="text-[#333333] dark:text-gray-100 text-[17px] font-bold tracking-wider">每日打卡</h1>
         <div className="w-6 h-6"></div> {/* 占位保持标题居中 */}
       </div>
 
@@ -78,21 +78,21 @@ export function CheckIn() {
       <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
         
         {/* 中间浅橙色大卡片 */}
-        <div className="bg-[#FFF3E6] rounded-[16px] mx-4 mt-2 mb-6 py-6 flex flex-col items-center justify-center">
+        <div className="bg-[#FFF3E6] dark:bg-orange-900/30 rounded-[16px] mx-4 mt-2 mb-6 py-6 flex flex-col items-center justify-center">
           <div className="text-[#FF8C42] text-[48px] font-bold leading-none mb-1">7</div>
-          <div className="text-[#999999] text-[14px]">连续打卡天数</div>
+          <div className="text-[#999999] dark:text-gray-400 text-[14px]">连续打卡天数</div>
         </div>
 
         {/* 本月打卡日历 */}
-        <div className="bg-white rounded-[16px] mx-4 p-5 shadow-sm border border-[#EEEEEE] mb-6">
+        <div className="bg-white dark:bg-gray-900 rounded-[16px] mx-4 p-5 shadow-sm border border-[#EEEEEE] dark:border-gray-700 mb-6">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-[15px] font-bold text-[#333333]">2026年5月</span>
+            <span className="text-[15px] font-bold text-[#333333] dark:text-gray-100">2026年5月</span>
           </div>
           
           <div className="grid grid-cols-7 gap-y-4 text-center">
             {/* 星期表头 */}
             {weekDays.map((day, idx) => (
-              <div key={idx} className="text-[#999999] text-[12px] font-medium">
+              <div key={idx} className="text-[#999999] dark:text-gray-400 text-[12px] font-medium">
                 {day}
               </div>
             ))}
@@ -120,17 +120,17 @@ export function CheckIn() {
 
         {/* 打卡记录时间线 */}
         <div className="px-4 mb-4">
-          <h3 className="text-[14px] font-bold text-[#333333] mb-4">打卡记录</h3>
-          <div className="ml-2 pl-5 border-l-2 border-[#EEEEEE] space-y-6 relative">
+          <h3 className="text-[14px] font-bold text-[#333333] dark:text-gray-100 mb-4">打卡记录</h3>
+          <div className="ml-2 pl-5 border-l-2 border-[#EEEEEE] dark:border-gray-700 space-y-6 relative">
             {historyList.map((item, idx) => (
               <div key={idx} className="relative flex items-start justify-between">
                 {/* 时间线圆点 */}
-                <div className="absolute w-[10px] h-[10px] rounded-full bg-[#FF8C42] border-[2px] border-white left-[-26px] top-[4px]"></div>
+                <div className="absolute w-[10px] h-[10px] rounded-full bg-[#FF8C42] border-[2px] border-white dark:border-gray-950 left-[-26px] top-[4px]"></div>
                 
                 <div className="flex-1 mt-0.5">
                   <div className="flex items-baseline gap-2">
-                    <span className="text-[14px] font-bold text-[#333333]">{item.date}</span>
-                    <span className="text-[12px] text-[#999999]">{item.time}</span>
+                    <span className="text-[14px] font-bold text-[#333333] dark:text-gray-100">{item.date}</span>
+                    <span className="text-[12px] text-[#999999] dark:text-gray-400">{item.time}</span>
                   </div>
                 </div>
                 
@@ -138,7 +138,7 @@ export function CheckIn() {
                 <ImageWithFallback 
                   src={item.img} 
                   alt="打卡照片" 
-                  className="w-[60px] h-[60px] rounded-[8px] object-cover shadow-sm border border-[#EEEEEE] shrink-0" 
+                  className="w-[60px] h-[60px] rounded-[8px] object-cover shadow-sm border border-[#EEEEEE] dark:border-gray-700 shrink-0" 
                 />
               </div>
             ))}
