@@ -73,10 +73,9 @@ export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLik
             <div key={idx} className="w-full h-full shrink-0 snap-center relative">
               <ImageWithFallback src={getMediaUrl(img)} className="w-full h-full object-cover"/>
               {isVideo(img) && (
-                <div className="absolute inset-0 flex items-center justify-center bg-black/20">
-                  <div className="w-12 h-12 rounded-full bg-white/80 flex items-center justify-center">
-                    <Play className="w-6 h-6 text-[#333] ml-0.5"/>
-                  </div>
+                <div className="absolute bottom-2 left-2 flex items-center gap-1 bg-black/50 rounded-full px-2 py-0.5">
+                  <Play className="w-3 h-3 text-white ml-0.5" />
+                  <span className="text-[10px] text-white font-medium">视频</span>
                 </div>
               )}
               {post.images.length > 1 && (

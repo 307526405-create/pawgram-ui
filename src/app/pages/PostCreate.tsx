@@ -14,6 +14,7 @@ const myPets = [
 export function PostCreate() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const [postMode, setPostMode] = useState<"image" | "video">("image");
   const [content, setContent] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [petId, setPetId] = useState<number | null>(null);
@@ -40,7 +41,7 @@ export function PostCreate() {
             reader.onload = () => resolve(reader.result as string);
             reader.readAsDataURL(blob);
           });
-          setImages(prev => [...prev, dataUrl]);
+          if (postMode === "video") { setImages([dataUrl]); } else { setImages(prev => [...prev, dataUrl]); }
         }
       }
     } catch {}
@@ -50,7 +51,7 @@ export function PostCreate() {
     setShowPicker(false);
     try {
       const photo = await Camera.getPhoto({ resultType: CameraResultType.Base64, source: CameraSource.Camera, quality: 90 });
-      if (photo.base64String) setImages(prev => [...prev, `data:image/jpeg;base64,${photo.base64String}`]);
+      if (photo.base64String) { const url = `data:image/jpeg;base64,${photo.base64String}`; if (postMode === "video") { setImages([url]); } else { setImages(prev => [...prev, url]); } }
     } catch {}
   };
 
@@ -116,6 +117,17 @@ export function PostCreate() {
           placeholder={t('post.thoughts')}
           className="w-full px-4 py-4 text-[15px] leading-relaxed outline-none resize-none min-h-[120px] placeholder:text-[#CCC] dark:placeholder:text-gray-600 dark:text-gray-100 dark:bg-gray-900" />
 
+        <div className="px-4 pb-2 flex gap-2">
+          <button onClick={() => { setPostMode("image"); setImages([]); }}
+            className={`px-4 py-1.5 rounded-full text-[13px] font-medium ${postMode === "image" ? "bg-[#FF8C42] text-white" : "bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400"}`}>
+            <Image className="w-3.5 h-3.5 inline mr-1" />图片
+          </button>
+          <button onClick={() => { setPostMode("video"); setImages([]); }}
+            className={`px-4 py-1.5 rounded-full text-[13px] font-medium ${postMode === "video" ? "bg-[#FF8C42] text-white" : "bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400"}`}>
+            <Video className="w-3.5 h-3.5 inline mr-1" />视频
+          </button>
+        </div>
+
         <div className="px-4 pb-3">
           <div className="grid grid-cols-3 gap-1.5">
             {images.map((img, i) => (
@@ -125,7 +137,7 @@ export function PostCreate() {
                 <button onClick={() => removeImage(i)} className="absolute top-0.5 right-0.5 w-5 h-5 bg-black/50 rounded-full flex items-center justify-center text-white text-[10px]">✕</button>
               </div>
             ))}
-            {images.length < 9 && (
+            {(postMode === "image" ? images.length < 9 : images.length < 1) && (
               <button onClick={() => setShowPicker(true)} className="aspect-square rounded border border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:bg-[#F9F9F9] dark:active:bg-gray-800">
                 <span className="text-[32px] text-[#CCC] dark:text-gray-600 font-light">+</span>
               </button>
@@ -145,8 +157,8 @@ export function PostCreate() {
         )}
 
         <div className="flex items-center gap-1 px-4 py-3 border-t border-[#F0F0F0] dark:border-gray-700">
-          <button onClick={() => { setShowPets(!showPets); setShowTags(false); setShowLocation(false); }}
-            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] ${petId ? 'bg-[#FFF3E6] dark:bg-orange-900/30 text-[#FF8C42]' : 'bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400'}`}>
+          <button onClick={() => { if (postMode !== "video") { setShowPets(!showPets); setShowTags(false); setShowLocation(false); } }}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] ${postMode === "video" ? "opacity-40" : ""} ${petId ? 'bg-[#FFF3E6] dark:bg-orange-900/30 text-[#FF8C42]' : 'bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400'}`}>
             {selectedPet ? (
               <><img src={selectedPet.avatar} className="w-4 h-4 rounded-full object-cover" />{selectedPet.name}</>
             ) : t('post.myPet')}
@@ -159,8 +171,8 @@ export function PostCreate() {
             className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] ${loc ? 'bg-[#FFF3E6] dark:bg-orange-900/30 text-[#FF8C42]' : 'bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400'}`}>
             <MapPin className="w-3.5 h-3.5" />{loc || t('post.location')}
           </button>
-          <button onClick={() => setContent(prev => prev + '@')}
-            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400">
+          <button onClick={() => { if (postMode !== "video") setContent(prev => prev + '@'); }}
+            className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400 ${postMode === "video" ? "opacity-40" : ""}`}>
             <AtSign className="w-3.5 h-3.5" />
           </button>
         </div>
