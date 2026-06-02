@@ -27,38 +27,9 @@ export function PostCreate() {
   const [showPicker, setShowPicker] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [publishing, setPublishing] = useState(false);
-  const videoInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const pickVideo = () => { setShowPicker(false); videoInputRef.current?.click(); };
-
-  const pickFromAlbum = async () => {
-    setShowPicker(false);
-    try {
-      const limit = mediaType === "video" ? 1 : mediaType === "image" ? 9 - images.length : 9;
-      const result = await Camera.pickImages({ quality: 90, limit });
-      for (const photo of result.photos) {
-        if (photo.webPath) {
-          const response = await fetch(photo.webPath);
-          const blob = await response.blob();
-          const isVideo = blob.type.startsWith('video/');
-          if (mediaType === "image" && isVideo) continue;
-          if (mediaType === "video" && !isVideo) continue;
-          const dataUrl = await new Promise<string>(resolve => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.readAsDataURL(blob);
-          });
-          if (isVideo) {
-            setMediaType("video");
-            setImages([dataUrl]);
-          } else {
-            if (mediaType === "none") setMediaType("image");
-            setImages(prev => prev.length < 9 ? [...prev, dataUrl] : prev);
-          }
-        }
-      }
-    } catch {}
-  };
+  const pickFromAlbum = () => { setShowPicker(false); fileInputRef.current?.click(); };
 
   const takePhoto = async () => {
     setShowPicker(false);
@@ -116,24 +87,31 @@ export function PostCreate() {
           <div className="bg-white dark:bg-gray-900 rounded-t-[16px]" onClick={e => e.stopPropagation()}>
             <button onClick={takePhoto} className="w-full py-4 text-[15px] text-[#333] dark:text-gray-100 border-b border-[#F0F0F0] dark:border-gray-700 active:bg-[#F9F9F9] dark:active:bg-gray-800">{t('post.takePhoto')}</button>
             <button onClick={pickFromAlbum} className="w-full py-4 text-[15px] text-[#333] dark:text-gray-100 border-b border-[#F0F0F0] dark:border-gray-700 active:bg-[#F9F9F9] dark:active:bg-gray-800">{t('post.chooseFromAlbum')}</button>
-            <button onClick={pickVideo} className="w-full py-4 text-[15px] text-[#333] dark:text-gray-100 border-b border-[#F0F0F0] dark:border-gray-700 active:bg-[#F9F9F9] dark:active:bg-gray-800">选择视频</button>
             <button onClick={() => setShowPicker(false)} className="w-full py-4 text-[15px] text-[#999] dark:text-gray-400 active:bg-[#F9F9F9] dark:active:bg-gray-800">{t('common.cancel')}</button>
           </div>
         </div>
       )}
 
-      <input ref={videoInputRef} type="file" accept="video/*" className="hidden"
+      <input ref={fileInputRef} type="file" accept="image/*,video/*" multiple className="hidden"
         onChange={async (e) => {
-          const file = e.target.files?.[0];
-          if (!file) return;
-          if (mediaType === "image") { e.target.value = ""; return; }
-          const dataUrl = await new Promise<string>(resolve => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.readAsDataURL(file);
-          });
-          setMediaType("video");
-          setImages([dataUrl]);
+          const files = e.target.files;
+          if (!files || files.length === 0) return;
+          for (const file of Array.from(files)) {
+            const isVideo = file.type.startsWith('video/');
+            const dataUrl = await new Promise<string>(resolve => {
+              const reader = new FileReader();
+              reader.onload = () => resolve(reader.result as string);
+              reader.readAsDataURL(file);
+            });
+            if (isVideo) {
+              setMediaType("video");
+              setImages([dataUrl]);
+              break;
+            } else {
+              setMediaType("image");
+              setImages(prev => prev.length < 9 ? [...prev, dataUrl] : prev);
+            }
+          }
           e.target.value = "";
         }}
       />
