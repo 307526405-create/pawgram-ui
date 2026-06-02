@@ -118,7 +118,7 @@ export function Profile() {
       <div className="absolute top-0 w-full pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 z-40">
         <div className="flex items-center gap-1">
           <button onClick={() => setShowQR(true)} className="p-2"><QrCode className="w-5 h-5 text-[#666]"/></button>
-          <button onClick={() => navigate('/post')} className="p-2"><Scan className="w-5 h-5 text-[#666]"/></button>
+          <button onClick={() => navigate('/scan')} className="p-2"><Scan className="w-5 h-5 text-[#666]"/></button>
           <button onClick={handleShare} className="p-2"><Share2 className="w-5 h-5 text-[#666]"/></button>
         </div>
         <button onClick={() => navigate('/settings')} className="p-2 -mr-2"><Settings className="w-5 h-5 text-[#333]"/></button>

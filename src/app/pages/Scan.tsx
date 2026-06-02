@@ -1,0 +1,152 @@
+import { ChevronLeft, Zap } from "lucide-react";
+import { useNavigate } from "react-router";
+import { useEffect, useRef, useState } from "react";
+
+export function Scan() {
+  const navigate = useNavigate();
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const [result, setResult] = useState("");
+  const [error, setError] = useState("");
+  const [torch, setTorch] = useState(false);
+  const streamRef = useRef<MediaStream | null>(null);
+  const scanning = useRef(false);
+  const detectorRef = useRef<any>(null);
+
+  useEffect(() => {
+    startCamera();
+    return () => stopCamera();
+  }, []);
+
+  const startCamera = async () => {
+    try {
+      // @ts-ignore
+      if (window.BarcodeDetector) {
+        // @ts-ignore
+        detectorRef.current = new BarcodeDetector({ formats: ['qr_code'] });
+      }
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { facingMode: 'environment', width: { ideal: 1280 }, height: { ideal: 720 } },
+        audio: false,
+      });
+      streamRef.current = stream;
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+        videoRef.current.play();
+      }
+      scanLoop();
+    } catch (e: any) {
+      setError(e.message || "无法打开摄像头");
+    }
+  };
+
+  const stopCamera = () => {
+    scanning.current = false;
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(t => t.stop());
+      streamRef.current = null;
+    }
+  };
+
+  const scanLoop = async () => {
+    scanning.current = true;
+    const video = videoRef.current;
+    const canvas = canvasRef.current;
+    if (!video || !canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    while (scanning.current) {
+      if (video.readyState >= video.HAVE_CURRENT_DATA) {
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        ctx.drawImage(video, 0, 0);
+        try {
+          if (detectorRef.current) {
+            const barcodes = await detectorRef.current.detect(canvas);
+            if (barcodes.length > 0) {
+              handleResult(barcodes[0].rawValue);
+              return;
+            }
+          }
+        } catch {}
+      }
+      await new Promise(r => setTimeout(r, 200));
+    }
+  };
+
+  const handleResult = (text: string) => {
+    stopCamera();
+    setResult(text);
+    // 如果是URL直接打开
+    if (/^https?:\/\//i.test(text)) {
+      setTimeout(() => {
+        window.open(text, '_blank');
+        navigate(-1);
+      }, 500);
+    }
+  };
+
+  const toggleTorch = async () => {
+    if (!streamRef.current) return;
+    const track = streamRef.current.getVideoTracks()[0];
+    if (!track) return;
+    try {
+      // @ts-ignore
+      await track.applyConstraints({ advanced: [{ torch: !torch }] });
+      setTorch(!torch);
+    } catch {}
+  };
+
+  return (
+    <div className="h-full bg-black relative flex flex-col">
+      {/* header */}
+      <div className="absolute top-0 w-full pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 z-20">
+        <button onClick={() => navigate(-1)} className="p-1 -ml-1 text-white"><ChevronLeft className="w-6 h-6" /></button>
+        <h1 className="text-[17px] font-bold text-white">扫一扫</h1>
+        <button onClick={toggleTorch} className="p-2">
+          <Zap className={`w-5 h-5 ${torch ? 'text-yellow-400' : 'text-white'}`} />
+        </button>
+      </div>
+
+      {error ? (
+        <div className="flex-1 flex flex-col items-center justify-center px-8">
+          <p className="text-white/60 text-[15px] text-center mb-4">{error}</p>
+          <button onClick={() => { setError(''); startCamera(); }} className="px-6 py-2 bg-white/20 text-white rounded-lg text-[14px]">重试</button>
+        </div>
+      ) : (
+        <>
+          <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted />
+          <canvas ref={canvasRef} className="hidden" />
+
+          {/* scan frame */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
+            <div className="w-[240px] h-[240px] relative">
+              {/* corners */}
+              <div className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 border-white rounded-tl-lg" />
+              <div className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 border-white rounded-tr-lg" />
+              <div className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 border-white rounded-bl-lg" />
+              <div className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 border-white rounded-br-lg" />
+            </div>
+          </div>
+
+          {/* hint */}
+          <p className="absolute bottom-[120px] left-0 right-0 text-center text-white/50 text-[13px] z-10">将二维码放入框内自动识别</p>
+        </>
+      )}
+
+      {/* result */}
+      {result && (
+        <div className="absolute inset-0 z-30 flex flex-col items-center justify-center bg-black/80 px-8">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-[300px]">
+            <p className="text-[14px] font-bold text-[#333] mb-3">扫描结果</p>
+            <p className="text-[13px] text-[#666] break-all mb-5 bg-[#F5F5F5] rounded-lg p-3">{result}</p>
+            <button onClick={() => { navigator.clipboard.writeText(result); }} className="w-full h-10 bg-[#F5F5F5] rounded-lg text-[14px] text-[#666] mb-2">复制</button>
+            <button onClick={() => { setResult(''); startCamera(); }} className="w-full h-10 bg-[#FF8C42] text-white rounded-lg text-[14px] font-bold">继续扫描</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

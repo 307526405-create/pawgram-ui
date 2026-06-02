@@ -14,6 +14,7 @@ import { Register } from "./pages/Register";
 import { Settings } from "./pages/Settings";
 import { FollowList } from "./pages/FollowList";
 import { ChatDetail } from "./pages/ChatDetail";
+import { Scan } from "./pages/Scan";
 
 function Root() {
   const location = useLocation();
@@ -49,6 +50,7 @@ export const router = createHashRouter([
       { path: "settings", Component: Settings },
       { path: "follows", Component: FollowList },
       { path: "export", Component: ChatDetail },
+      { path: "scan", Component: Scan },
       { path: "chat/:id", Component: ChatDetail },
       { path: "post/edit/:id", Component: PostCreate },
     ],
