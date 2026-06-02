@@ -6,7 +6,8 @@ export function Login() {
   const navigate = useNavigate();
 
   return (
-    <div className="h-full bg-gradient-to-b from-[#FFF3E6] dark:from-orange-900/30 to-white dark:to-gray-900 relative flex flex-col">
+    <div className="h-full relative flex flex-col">
+      <img src="/splash-zh.png" className="absolute inset-0 w-full h-full object-cover" alt="" />
       {/* 顶部导航与首页完全一致（浅色底+毛玻璃） */}
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-10">
         <button onClick={() => navigate(-1)} className="text-[#333333] dark:text-gray-100 active:scale-95 transition-transform p-1 -ml-1">
@@ -23,7 +24,7 @@ export function Login() {
         <div className="flex flex-col items-center mt-10 mb-8 shrink-0">
           <div className="text-[60px] leading-none mb-3">🐾</div>
           <h2 className="text-[24px] font-bold text-[#FF8C42] mb-1.5">爪印 PawGram</h2>
-          <p className="text-[12px] text-[#999999] dark:text-gray-400">每只宠物，都值得留下爪印</p>
+          <p className="text-[12px] text-[#999999] dark:text-gray-400">记录每一个爪印</p>
         </div>
 
         {/* 白色圆角卡片：表单区 */}
