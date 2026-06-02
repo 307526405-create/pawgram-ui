@@ -13,7 +13,7 @@ import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Settings } from "./pages/Settings";
 import { FollowList } from "./pages/FollowList";
-import { Export } from "./pages/Export";
+import { ChatDetail } from "./pages/ChatDetail";
 
 function Root() {
   const location = useLocation();
@@ -48,7 +48,8 @@ export const router = createHashRouter([
       { path: "register", Component: Register },
       { path: "settings", Component: Settings },
       { path: "follows", Component: FollowList },
-      { path: "export", Component: Export },
+      { path: "export", Component: ChatDetail },
+      { path: "chat/:id", Component: ChatDetail },
     ],
   },
 ]);

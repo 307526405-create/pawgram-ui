@@ -1,183 +1,191 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { useNavigate } from "react-router";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { Bell, Info, ShieldAlert } from "lucide-react";
+import { MoreHorizontal, ChevronRight, CheckCheck, Settings, Ban, Search } from "lucide-react";
 
-const interactions = [
-  {
-    id: 1,
-    username: "Alice Wang",
-    avatar: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBzbWlsaW5nJTIwYXZhdGFyfGVufDF8fHx8MTc3OTc5Njg4MHww&ixlib=rb-4.1.0&q=80&w=150",
-    action: "赞了你的帖子",
-    postImg: "https://images.unsplash.com/photo-1504826260979-242151ee45b7?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXRlJTIwZG9nJTIwcHVwcHl8ZW58MXx8fHwxNzc5ODg4NTYyfDA&ixlib=rb-4.1.0&q=80&w=150"
-  },
-  {
-    id: 2,
-    username: "Bob Chen",
-    avatar: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHx1c2VyJTIwYXZhdGFyfGVufDF8fHx8MTc3OTg4OTUyMHww&ixlib=rb-4.1.0&q=80&w=150",
-    action: "评论了你的帖子：太可爱了吧！",
-    postImg: "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxjdXRlJTIwY2F0JTIwa2l0dGVufGVufDF8fHx8MTc3OTg1Njc5Mnww&ixlib=rb-4.1.0&q=80&w=150"
-  },
-  {
-    id: 3,
-    username: "Charlie Lee",
-    avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHx1c2VyJTIwYXZhdGFyfGVufDF8fHx8MTc3OTg4OTUyMHww&ixlib=rb-4.1.0&q=80&w=150",
-    action: "关注了你",
-    postImg: null
-  }
+const newFriends = [
+  { id:1, name:"Alice Wang", avatar:"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=120", bio:"金毛铲屎官" },
+  { id:2, name:"Bob Chen", avatar:"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120", bio:"猫咪控" },
+  { id:3, name:"Diana Wu", avatar:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120", bio:"柯基&泰迪" },
+  { id:4, name:"Eric Liu", avatar:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120", bio:"布偶猫主人" },
 ];
 
-const directMessages = [
-  {
-    id: 1,
-    username: "Alice Wang",
-    avatar: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxwZXJzb24lMjBzbWlsaW5nJTIwYXZhdGFyfGVufDF8fHx8MTc3OTc5Njg4MHww&ixlib=rb-4.1.0&q=80&w=150",
-    lastMessage: "周末去公园遛狗吗？",
-    unread: 2,
-  },
-  {
-    id: 2,
-    username: "Charlie Lee",
-    avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHx1c2VyJTIwYXZhdGFyfGVufDF8fHx8MTc3OTg4OTUyMHww&ixlib=rb-4.1.0&q=80&w=150",
-    lastMessage: "好的，下次见！",
-    unread: 0,
-  }
+const notifGroups = [
+  { key:"likes", label:"收到的赞和收藏", count:3, avatar:"https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w=80", desc:"大黄铲屎官 等3人赞了你的帖子" },
+  { key:"follows", label:"新增关注", count:2, avatar:"https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=80", desc:"橘猫日记 等2人关注了你" },
+  { key:"comments", label:"评论和@", count:5, avatar:"https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=80", desc:"柯基小短腿 评论了你" },
 ];
 
-const systemNotifications = [
-  {
-    id: 1,
-    icon: Bell,
-    text: "你的帖子「今天和狗狗玩得很开心」获得了100个赞！",
-  },
-  {
-    id: 2,
-    icon: Info,
-    text: "欢迎来到 PawGram 宠物社区！",
-  },
-  {
-    id: 3,
-    icon: ShieldAlert,
-    text: "系统维护通知：今晚凌晨将进行短暂的服务器升级。",
-  }
+const conversations = [
+  { id:1, name:"Alice Wang", avatar:"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150", lastMsg:"周末去公园遛狗吗？", time:"5分钟前", unread:2 },
+  { id:2, name:"Charlie Lee", avatar:"https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150", lastMsg:"好的，下次见！", time:"昨天", unread:0 },
+  { id:3, name:"Bob Chen", avatar:"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150", lastMsg:"你家猫咪太可爱了！", time:"2天前", unread:0 },
+  { id:4, name:"Diana Wu", avatar:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150", lastMsg:"求推荐狗粮品牌", time:"3天前", unread:1 },
 ];
 
 export function Messages() {
-  const [activeTab, setActiveTab] = useState("互动");
+  const navigate = useNavigate();
+  const [convs, setConvs] = useState(conversations);
+  const [notifs, setNotifs] = useState(notifGroups);
+  const [showMenu, setShowMenu] = useState(false);
+  const [showSearch, setShowSearch] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const totalUnread = notifs.reduce((s, g) => s + g.count, 0) + convs.reduce((s, c) => s + c.unread, 0);
+  const deleteConv = (id: number) => setConvs(prev => prev.filter(c => c.id !== id));
+  const markAllRead = () => {
+    setNotifs(prev => prev.map(g => ({...g, count: 0})));
+    setConvs(prev => prev.map(c => ({...c, unread: 0})));
+    setShowMenu(false);
+  };
 
   return (
     <div className="h-full bg-[#FAFAFA] relative flex flex-col">
-      {/* 顶部留出54px空白区域给手机状态栏，导航栏标题向下移，去掉橙色背景 */}
-      <div className="bg-[#FAFAFA]/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-center shrink-0 relative z-40 border-b border-transparent">
-        <h1 className="text-[#333333] text-[17px] font-bold tracking-wider">消息</h1>
-      </div>
-
-      {/* Tabs */}
-      <div className="bg-white flex px-4 shadow-sm relative z-30 shrink-0">
-        {["互动", "私信", "系统"].map((tab) => (
-          <button
-            key={tab}
-            onClick={() => setActiveTab(tab)}
-            className={`flex-1 py-3 text-[14px] font-medium transition-colors relative ${
-              activeTab === tab ? "text-[#FF8C42]" : "text-[#999999]"
-            }`}
-          >
-            {tab}
-            {activeTab === tab && (
-              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-8 h-[3px] bg-[#FF8C42] rounded-t-full" />
-            )}
-          </button>
-        ))}
-      </div>
-
-      {/* Tab Content - 内容整体下移，底部预留给 TabBar 的空间 */}
-      <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        {activeTab === "互动" && (
-          <div className="px-4 py-3 space-y-3">
-            {interactions.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white rounded-[12px] p-3 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-transform"
-              >
-                <ImageWithFallback
-                  src={item.avatar}
-                  alt={item.username}
-                  className="w-[36px] h-[36px] rounded-full object-cover shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <span className="text-[14px] font-bold text-[#333333] block truncate">
-                    {item.username}
-                  </span>
-                  <span className="text-[12px] text-[#999999] block truncate mt-0.5">
-                    {item.action}
-                  </span>
-                </div>
-                {item.postImg && (
-                  <ImageWithFallback
-                    src={item.postImg}
-                    alt="Post thumbnail"
-                    className="w-[45px] h-[45px] rounded-[12px] object-cover shrink-0 ml-2"
-                  />
+      {/* Header */}
+      <div className="bg-[#FAFAFA]/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0">
+        {showSearch ? (
+          <div className="flex-1 flex items-center gap-2">
+            <div className="flex-1 bg-[#F0F0F0] rounded-full flex items-center px-3 h-8">
+              <Search className="w-4 h-4 text-[#999] mr-1.5"/>
+              <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                placeholder="搜索聊天记录" className="flex-1 bg-transparent text-[14px] outline-none"/>
+            </div>
+            <button onClick={() => { setShowSearch(false); setSearchQuery(""); }} className="text-[14px] text-[#FF8C42] shrink-0">取消</button>
+          </div>
+        ) : (
+          <>
+            <h1 className="text-[17px] font-bold text-[#333]">
+              消息
+              {totalUnread > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-[#FF4D4F] text-white text-[10px] font-bold px-1 ml-2 align-middle">{totalUnread}</span>}
+            </h1>
+            <div className="flex items-center gap-1">
+              <button onClick={() => setShowSearch(true)} className="p-1.5"><Search className="w-5 h-5 text-[#333]"/></button>
+              <div className="relative">
+                <button onClick={() => setShowMenu(!showMenu)} className="p-1"><MoreHorizontal className="w-5 h-5 text-[#333]"/></button>
+                {showMenu && (
+                  <>
+                    <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)}/>
+                    <div className="absolute right-0 top-10 bg-white rounded-xl shadow-lg border border-[#F0F0F0] py-1 z-50 min-w-[150px]">
+                      <button onClick={markAllRead} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] active:bg-[#F9F9F9]">
+                        <CheckCheck className="w-4 h-4"/>全部已读
+                      </button>
+                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] active:bg-[#F9F9F9]">
+                        <Settings className="w-4 h-4"/>消息设置
+                      </button>
+                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] active:bg-[#F9F9F9]">
+                        <Ban className="w-4 h-4"/>屏蔽设置
+                      </button>
+                    </div>
+                  </>
                 )}
+              </div>
+            </div>
+          </>
+        )}
+      </div>
+
+      <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden">
+        {/* New Friends */}
+        <div className="bg-white mb-2">
+          <div className="flex gap-3 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+            {newFriends.map(f => (
+              <div key={f.id} className="shrink-0 flex flex-col items-center gap-1.5 w-[64px]">
+                <ImageWithFallback src={f.avatar} className="w-[52px] h-[52px] rounded-full object-cover"/>
+                <span className="text-[11px] text-[#333] text-center leading-tight line-clamp-2">{f.name}</span>
               </div>
             ))}
           </div>
-        )}
+        </div>
 
-        {activeTab === "私信" && (
-          <div className="px-4 py-3 space-y-3">
-            {directMessages.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white rounded-[12px] p-3 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-transform"
-              >
-                <ImageWithFallback
-                  src={item.avatar}
-                  alt={item.username}
-                  className="w-[36px] h-[36px] rounded-full object-cover shrink-0"
-                />
-                <div className="flex-1 min-w-0">
-                  <span className="text-[14px] text-[#333333] font-bold block truncate">
-                    {item.username}
-                  </span>
-                  <span className="text-[12px] text-[#999999] block truncate mt-0.5">
-                    {item.lastMessage}
-                  </span>
+        {/* Notifications */}
+        <div className="bg-white mb-2">
+          {notifs.map(g => (
+            <div key={g.key} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] last:border-b-0 active:bg-[#F9F9F9]">
+              <ImageWithFallback src={g.avatar} className="w-11 h-11 rounded-full object-cover shrink-0"/>
+              <div className="flex-1 min-w-0">
+                <div className="text-[14px] font-bold text-[#333]">{g.label}</div>
+                <div className="text-[12px] text-[#999] truncate mt-0.5">{g.desc}</div>
+              </div>
+              {g.count > 0 && (
+                <div className="min-w-[20px] h-5 bg-[#FF4D4F] rounded-full flex items-center justify-center px-1.5">
+                  <span className="text-[10px] text-white font-bold">{g.count > 99 ? '99+' : g.count}</span>
                 </div>
-                {item.unread > 0 && (
-                  <div className="shrink-0 w-4 h-4 bg-[#FF8C42] rounded-full flex items-center justify-center ml-2">
-                    <span className="text-[10px] text-white font-medium">
-                      {item.unread}
-                    </span>
+              )}
+              <ChevronRight className="w-4 h-4 text-[#CCC] shrink-0"/>
+            </div>
+          ))}
+        </div>
+
+        {/* Conversations */}
+        <div className="bg-white">
+          <div className="px-4 py-3 border-b border-[#F5F5F5]">
+            <span className="text-[13px] font-bold text-[#333]">私信</span>
+          </div>
+          {convs.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="w-14 h-14 rounded-full bg-[#F5F5F5] flex items-center justify-center mb-2"><span className="text-xl">💬</span></div>
+              <p className="text-[13px] text-[#999]">暂无私信</p>
+            </div>
+          ) : (
+            convs.map(c => (
+              <SwipeDelete key={c.id} onDelete={() => deleteConv(c.id)}>
+                <div onClick={() => navigate(`/chat/${c.id}`)} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] last:border-b-0 active:bg-[#F9F9F9]">
+                  <div className="relative shrink-0">
+                    <ImageWithFallback src={c.avatar} className="w-12 h-12 rounded-full object-cover"/>
+                    {c.unread > 0 && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#FF4D4F] border-2 border-white"/>}
                   </div>
-                )}
-              </div>
-            ))}
-          </div>
-        )}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[14px] font-bold text-[#333]">{c.name}</span>
+                      <span className="text-[10px] text-[#BBB] shrink-0 ml-2">{c.time}</span>
+                    </div>
+                    <span className="text-[12px] text-[#999] block truncate mt-0.5">{c.lastMsg}</span>
+                  </div>
+                  {c.unread > 0 && (
+                    <div className="shrink-0 min-w-[20px] h-5 bg-[#FF4D4F] rounded-full flex items-center justify-center px-1.5">
+                      <span className="text-[10px] text-white font-bold">{c.unread > 99 ? '99+' : c.unread}</span>
+                    </div>
+                  )}
+                </div>
+              </SwipeDelete>
+            ))
+          )}
+        </div>
 
-        {activeTab === "系统" && (
-          <div className="px-4 py-3 space-y-3">
-            {systemNotifications.map((item) => (
-              <div
-                key={item.id}
-                className="bg-white rounded-[12px] p-3 flex items-center gap-3 shadow-sm active:scale-[0.98] transition-transform"
-              >
-                <div className="w-[36px] h-[36px] rounded-full bg-[#FAFAFA] flex items-center justify-center shrink-0">
-                  <item.icon className="w-5 h-5 text-[#999999]" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <span className="text-[12px] text-[#666666] block leading-relaxed">
-                    {item.text}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <div className="h-6"/>
       </div>
 
       <BottomNav />
+    </div>
+  );
+}
+
+/* ─── Swipe to delete ─── */
+function SwipeDelete({ children, onDelete }: { children: React.ReactNode; onDelete: () => void }) {
+  const [offset, setOffset] = useState(0);
+  const startX = useRef(0);
+  const swiping = useRef(false);
+
+  const onTouchStart = (e: React.TouchEvent) => { startX.current = e.touches[0].clientX; swiping.current = true; };
+  const onTouchMove = (e: React.TouchEvent) => {
+    if (!swiping.current) return;
+    const dx = e.touches[0].clientX - startX.current;
+    if (dx < 0) setOffset(Math.max(dx, -80));
+    else setOffset(Math.min(offset + dx * 0.3, 0));
+  };
+  const onTouchEnd = () => {
+    swiping.current = false;
+    setOffset(offset < -40 ? -80 : 0);
+  };
+
+  return (
+    <div className="relative overflow-hidden">
+      <button onClick={() => { setOffset(0); onDelete(); }} className="absolute right-0 top-0 bottom-0 w-20 bg-[#FF4D4F] flex items-center justify-center text-white text-[13px] font-medium">删除</button>
+      <div className="relative bg-white" style={{ transform: `translateX(${offset}px)`, transition: swiping.current ? 'none' : 'transform 0.2s' }}
+        onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
+        {children}
+      </div>
     </div>
   );
 }
