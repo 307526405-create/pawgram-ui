@@ -1,14 +1,20 @@
-import { ChevronLeft, Zap } from "lucide-react";
+import { Camera, ChevronLeft, Zap } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useEffect, useRef, useState } from "react";
+import jsQR from "jsqr";
 
 export function Scan() {
   const navigate = useNavigate();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const fileRef = useRef<HTMLInputElement>(null);
   const [result, setResult] = useState("");
   const [error, setError] = useState("");
   const [torch, setTorch] = useState(false);
+  const [barcodeSupported] = useState(() => {
+    // @ts-ignore
+    return !!window.BarcodeDetector;
+  });
   const streamRef = useRef<MediaStream | null>(null);
   const scanning = useRef(false);
   const detectorRef = useRef<any>(null);
@@ -54,7 +60,7 @@ export function Scan() {
     const canvas = canvasRef.current;
     if (!video || !canvas) return;
 
-    const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
     if (!ctx) return;
 
     while (scanning.current) {
@@ -74,6 +80,31 @@ export function Scan() {
       }
       await new Promise(r => setTimeout(r, 200));
     }
+  };
+
+  const handlePhoto = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const img = new Image();
+    img.onload = () => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      canvas.width = img.width;
+      canvas.height = img.height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) return;
+      ctx.drawImage(img, 0, 0);
+      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+      const code = jsQR(imageData.data, canvas.width, canvas.height);
+      if (code) {
+        handleResult(code.data);
+      } else {
+        setError("未识别到二维码，请重试");
+      }
+      URL.revokeObjectURL(img.src);
+    };
+    img.src = URL.createObjectURL(file);
+    e.target.value = '';
   };
 
   const handleResult = (text: string) => {
@@ -119,6 +150,7 @@ export function Scan() {
         <>
           <video ref={videoRef} className="absolute inset-0 w-full h-full object-cover" playsInline muted />
           <canvas ref={canvasRef} className="hidden" />
+          <input ref={fileRef} type="file" capture="environment" accept="image/*" className="hidden" onChange={handlePhoto} />
 
           {/* scan frame */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none z-10">
@@ -132,7 +164,21 @@ export function Scan() {
           </div>
 
           {/* hint */}
-          <p className="absolute bottom-[120px] left-0 right-0 text-center text-white/50 text-[13px] z-10">将二维码放入框内自动识别</p>
+          <p className="absolute bottom-[120px] left-0 right-0 text-center text-white/50 text-[13px] z-10">
+            {barcodeSupported ? '将二维码放入框内自动识别' : ''}
+          </p>
+
+          {!barcodeSupported && (
+            <div className="absolute bottom-[100px] left-0 right-0 flex justify-center z-20">
+              <button
+                onClick={() => fileRef.current?.click()}
+                className="flex items-center gap-2 px-5 py-3 bg-white/20 backdrop-blur text-white rounded-xl text-[14px] font-medium active:bg-white/30"
+              >
+                <Camera className="w-5 h-5" />
+                拍照识别
+              </button>
+            </div>
+          )}
         </>
       )}
 
