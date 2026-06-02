@@ -15,10 +15,12 @@ export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLik
   const timeAgo = (dateStr: string) => {
     if (!dateStr) return '';
     const diff = Date.now() - new Date(dateStr).getTime();
+    const mins = Math.floor(diff / 60000);
     const hours = Math.floor(diff / 3600000);
-    if (hours < 1) return t('time.justNow');
-    if (hours < 24) return t('time.hoursAgo', { count: hours });
-    return t('time.daysAgo', { count: Math.floor(hours / 24) });
+    if (mins < 1) return t('time.justNow');
+    if (mins < 60) return t('time.minAgo', { n: mins });
+    if (hours < 24) return t('time.hoursAgo', { n: hours });
+    return t('time.daysAgo', { n: Math.floor(hours / 24) });
   };
 
   const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.url || item?.poster || '';
