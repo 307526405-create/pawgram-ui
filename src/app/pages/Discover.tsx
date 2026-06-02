@@ -303,6 +303,22 @@ export function Discover() {
         {feed.length>0&&(<div className="mt-8 mb-6"><div className="flex items-center justify-between px-4 mb-3"><h2 className="text-[14px] font-bold text-[#333]">附近热门</h2><div className="flex gap-1">{[{k:'hot',l:'热门'},{k:'nearby',l:'附近'},{k:'newest',l:'最新'}].map(s=>(<button key={s.k} onClick={()=>setFeedSort(s.k as any)} className={`px-2.5 py-1 rounded-full text-[11px] font-medium ${feedSort===s.k?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] text-[#999]'}`}>{s.l}</button>))}</div></div>{(()=>{const left:any[]=[],right:any[]=[];sortedFeed.forEach((n:any,i:number)=>(i%2===0?left:right).push(n));return(<div className="flex gap-2 px-4">{[left,right].map((col,ci)=>(<div key={ci} className="flex-1 flex flex-col gap-2">{col.map((n:any)=>(<div key={n.id} onClick={()=>{const p=places.find((pl:any)=>pl.id===n.placeId);if(p)setSelectedPlace(p);}} className="bg-white rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] cursor-pointer active:opacity-80">{n.images&&n.images[0]&&(<img src={n.images[0]} className="w-full object-cover" style={{aspectRatio:'1/1.1'}}/>)}<div className="p-2.5"><p className="text-[12px] text-[#333] leading-snug line-clamp-2 mb-2">{n.content}</p><div className="flex items-center justify-between"><div className="flex items-center gap-1.5 min-w-0"><img src={n.avatar} className="w-4 h-4 rounded-full object-cover shrink-0"/><span className="text-[10px] text-[#999] truncate">{n.user}</span></div><span className="text-[10px] text-[#FF8C42] shrink-0">❤ {n.likes}</span></div>{n.placeName&&(<div className="mt-1.5 flex items-center gap-1 text-[10px] text-[#BBB]"><MapPin className="w-2.5 h-2.5"/><span className="truncate">{n.placeName}</span></div>)}</div></div>))}</div>))}</div>);})()}</div>)}
         {feedLoading&&<div className="text-center py-4 text-[12px] text-[#999]">加载中...</div>}
         {!feedLoading&&feed.length<feedTotal&&<div className="text-center py-3 text-[12px] text-[#BBB]">上拉加载更多</div>}
+        
+        {/* 附近的宠物达人 */}
+        <div className="mt-8 mb-6">
+          <h2 className="px-4 text-[14px] font-bold text-[#333] mb-3">附近的人</h2>
+          <div className="flex gap-3 px-4 overflow-x-auto pb-2">
+            {[{name:"大黄铲屎官",av:"https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w=200",dist:"0.5km",pet:"金毛"},{name:"橘猫日记",av:"https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=200",dist:"1.2km",pet:"橘猫"},{name:"柯基小短腿",av:"https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=200",dist:"1.8km",pet:"柯基"},{name:"布偶猫主人",av:"https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=200",dist:"2.1km",pet:"布偶猫"}].map(u=>(
+            <div key={u.name} className="shrink-0 w-[100px] bg-white rounded-xl p-3 flex flex-col items-center border border-[#F0F0F0] shadow-sm">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#FF8C42] to-[#FFB380] p-[2px] mb-2">
+                <img src={u.av} className="w-full h-full rounded-full object-cover border-2 border-white"/>
+              </div>
+              <span className="text-[12px] font-bold text-[#333] truncate w-full text-center">{u.name}</span>
+              <span className="text-[10px] text-[#999]">{u.pet} · {u.dist}</span>
+            </div>
+            ))}
+          </div>
+        </div>
       </div>
       <BottomNav/>
     </div>

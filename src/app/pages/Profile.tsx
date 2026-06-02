@@ -1,136 +1,177 @@
+import { Settings, QrCode, Share2, Scan } from "lucide-react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { users, posts, breeds } from "../data/mockData";
-import { Settings as SettingsIcon } from "lucide-react";
+import { postsApi } from "../api/client";
+import { isLoggedIn, login as doLogin } from "../api/auth";
+
+const myUser = {
+  id:1, name:"王丽丽", avatar:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
+  bio:"金毛&布偶猫铲屎官 | 爱生活爱宠物", following:45, followers:1204, likes:1790,
+};
+
+const myPets = [
+  { id:1, name:"贝利", avatar:"https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=120", type:"金毛" },
+  { id:2, name:"咪咪", avatar:"https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=120", type:"布偶猫" },
+];
 
 export function Profile() {
   const navigate = useNavigate();
-  // 当前登录用户，固定选取mockData中的1号用户（王丽丽）
-  const currentUser = users[1];
-  
-  // 计算获赞总数
-  const totalLikes = posts.filter(p => p.userId === currentUser.id).reduce((sum, p) => sum + p.likes, 0);
-  
-  // 筛选属于当前用户的帖子
-  const userPosts = posts.filter(p => p.userId === currentUser.id);
+  const [tab, setTab] = useState<'posts'|'liked'|'favs'|'drafts'>('posts');
+  const [posts, setPosts] = useState<any[]>([]);
+  const [loggedIn, setLoggedIn] = useState(isLoggedIn());
+  const [showQR, setShowQR] = useState(false);
+  const [showAvatar, setShowAvatar] = useState(false);
+  const [editingBio, setEditingBio] = useState(false);
+  const [bio, setBio] = useState(myUser.bio);
 
-  // 模拟属于该用户的宠物数据
-  const myPets = [
-    { id: 1, name: "贝利", avatar: breeds[0].icon },
-    { id: 2, name: "主子", avatar: breeds[2].icon },
-  ];
+  useEffect(() => {
+    const h = () => setLoggedIn(isLoggedIn());
+    window.addEventListener('pawgram:auth-change', h);
+    return () => window.removeEventListener('pawgram:auth-change', h);
+  }, []);
+
+  useEffect(() => { if (loggedIn) postsApi.list(1).then(d => setPosts(d.list)).catch(() => {}); }, [loggedIn]);
+
+  const handleShare = () => {
+    const text = `爪印 PawGram — ${myUser.name}\n${myUser.bio}\n关注/粉丝 ${myUser.following}/${myUser.followers}\n来爪印看我和宠物的故事`;
+    if (navigator.share) navigator.share({ title: myUser.name, text }).catch(() => {});
+    else navigator.clipboard?.writeText(text);
+  };
+
+  if (!loggedIn) return (
+    <div className="h-full bg-white flex flex-col px-6">
+      <div className="flex-1 flex flex-col items-center justify-center">
+        <img src="/app-icon.png" className="w-20 h-20 rounded-2xl mb-5 shadow-lg" alt="爪印"/>
+        <h1 className="text-[24px] font-bold text-[#333] mb-1">爪印 PawGram</h1>
+        <p className="text-[13px] text-[#666]">记录每只爪印的故事</p>
+      </div>
+      <div className="pb-3">
+        <div className="bg-[#F5F5F5] rounded-xl h-12 flex items-center px-4 mb-3">
+          <span className="text-[14px] text-[#999] mr-2">+86</span><div className="w-px h-5 bg-[#DDD] mr-3"/>
+          <input placeholder="请输入手机号" className="flex-1 bg-transparent text-[15px] outline-none"/>
+        </div>
+        <button onClick={doLogin} className="w-full h-12 bg-[#FF8C42] text-white rounded-xl text-[16px] font-bold active:bg-[#E67A35]">登录</button>
+      </div>
+      <div className="flex items-center gap-3 pb-4"><div className="flex-1 h-px bg-[#EEE]"/><span className="text-[12px] text-[#CCC]">其他登录方式</span><div className="flex-1 h-px bg-[#EEE]"/></div>
+      <div className="flex justify-center gap-8 pb-10">
+        <button onClick={doLogin} className="w-12 h-12 rounded-full bg-[#09BB07] flex items-center justify-center active:opacity-70 shadow-sm">
+          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.045c.133 0 .241-.108.241-.245 0-.06-.024-.12-.04-.178l-.325-1.233a.49.49 0 0 1 .178-.554C23.028 18.48 24 16.82 24 14.98c0-3.21-2.931-5.952-7.062-6.122z"/></svg>
+        </button>
+        <button onClick={doLogin} className="w-12 h-12 rounded-full bg-black flex items-center justify-center active:opacity-70 shadow-sm">
+          <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+        </button>
+        <button onClick={doLogin} className="w-12 h-12 rounded-full bg-white border border-[#E5E5E5] flex items-center justify-center active:opacity-70 shadow-sm">
+          <span className="text-[15px] font-bold text-[#4285F4]">G</span>
+        </button>
+      </div>
+      <p className="text-center text-[11px] text-[#BBB] pb-8">登录即同意<span className="text-[#FF8C42]">《用户协议》</span>和<span className="text-[#FF8C42]">《隐私政策》</span></p>
+      <BottomNav />
+    </div>
+  );
+
+  const myPosts = posts.filter(p => p.user?.id === myUser.id);
+  const likedPosts = posts.filter((_, i) => i % 3 === 0);
+  const favPosts = posts.filter((_, i) => i % 4 === 0);
 
   return (
     <div className="h-full bg-[#FAFAFA] relative flex flex-col">
-      
-      {/* 顶部导航：仅保留右侧设置按钮，通过 absolute 定位悬浮 */}
-      <div className="absolute top-0 w-full pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-end px-4 z-40 pointer-events-none">
-        <button onClick={() => navigate('/settings')} className="p-2 -mr-2 active:opacity-70 transition-opacity text-[#333333] pointer-events-auto">
-          <SettingsIcon className="w-[22px] h-[22px]" />
-        </button>
+      {/* QR Code Modal */}
+      {showQR && (
+        <div className="fixed inset-0 z-[90] bg-black/60 flex items-center justify-center p-8" onClick={() => setShowQR(false)}>
+          <div className="bg-white rounded-2xl p-6 text-center max-w-[280px]" onClick={e => e.stopPropagation()}>
+            <div className="w-40 h-40 bg-[#F5F5F5] rounded-xl mx-auto mb-3 flex items-center justify-center border-2 border-dashed border-[#DDD]">
+              <QrCode className="w-24 h-24 text-[#333]"/>
+            </div>
+            <p className="text-[14px] font-bold text-[#333] mb-1">扫码关注我</p>
+            <p className="text-[12px] text-[#999] mb-4">打开爪印扫一扫，关注{myUser.name}</p>
+            <button onClick={() => setShowQR(false)} className="w-full h-10 bg-[#F5F5F5] rounded-lg text-[14px] text-[#666]">关闭</button>
+          </div>
+        </div>
+      )}
+
+      {/* Avatar fullscreen */}
+      {showAvatar && (
+        <div className="fixed inset-0 z-[95] bg-black flex items-center justify-center" onClick={() => setShowAvatar(false)}>
+          <img src={myUser.avatar} className="max-w-full max-h-full object-contain p-4"/>
+        </div>
+      )}
+
+      <div className="absolute top-0 w-full pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 z-40">
+        <div className="flex items-center gap-1">
+          <button onClick={() => setShowQR(true)} className="p-2"><QrCode className="w-5 h-5 text-[#666]"/></button>
+          <button onClick={() => navigate('/post')} className="p-2"><Scan className="w-5 h-5 text-[#666]"/></button>
+          <button onClick={handleShare} className="p-2"><Share2 className="w-5 h-5 text-[#666]"/></button>
+        </div>
+        <button onClick={() => navigate('/settings')} className="p-2 -mr-2"><Settings className="w-5 h-5 text-[#333]"/></button>
       </div>
 
-      {/* 中间滚动区域，顶部补齐98px，底部预留84px空间（50pxTabBar + 34px安全区） */}
-      <div className="flex-1 overflow-y-auto pt-[var(--app-header-height)] pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-        
-        {/* 用户信息区 */}
-        <div className="px-5 pt-2 pb-6">
-          <div className="flex items-center gap-4 mb-6">
-            <ImageWithFallback 
-              src={currentUser.avatar} 
-              alt="用户头像" 
-              className="w-[60px] h-[60px] rounded-full object-cover shrink-0 bg-[#EEEEEE] shadow-sm"
-            />
+      <div className="flex-1 overflow-y-auto pt-[var(--app-header-height)] pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden">
+        <div className="px-5 pt-2 pb-4">
+          <div className="flex items-start gap-4 mb-4">
+            <ImageWithFallback src={myUser.avatar} className="w-16 h-16 rounded-full object-cover shrink-0 shadow-sm" onClick={() => setShowAvatar(true)}/>
             <div className="flex-1 min-w-0">
-              <h2 className="text-[18px] font-bold text-[#333333] truncate">{currentUser.name}</h2>
-              <p className="text-[12px] text-[#999999] mt-1 truncate">{currentUser.bio}</p>
+              <h2 className="text-[17px] font-bold text-[#333] mb-0.5">{myUser.name}</h2>
+              {editingBio ? (
+                <input autoFocus value={bio} onChange={e => setBio(e.target.value)} onBlur={() => setEditingBio(false)} className="text-[13px] text-[#666] bg-[#F5F5F5] rounded-lg px-2 py-1 outline-none w-full"/>
+              ) : (
+                <p className="text-[13px] text-[#666] leading-relaxed" onClick={() => setEditingBio(true)}>{bio || '添加简介...'}</p>
+              )}
             </div>
           </div>
-          
-          <div className="flex items-center gap-12 px-2">
-            <div 
-              className="flex flex-col items-center cursor-pointer active:opacity-70 transition-opacity"
-              onClick={() => navigate('/follows', { state: { tab: 'following' } })}
-            >
-              <span className="text-[18px] font-bold text-[#333333] leading-none">{currentUser.following}</span>
-              <span className="text-[10px] text-[#999999] mt-1.5 leading-none">关注</span>
+
+          {/* Stats */}
+          <div className="flex justify-around mb-4">
+            <div className="flex flex-col items-center" onClick={() => navigate('/follows')}>
+              <span className="text-[18px] font-bold text-[#333]">{myUser.following}</span><span className="text-[11px] text-[#999]">关注</span>
             </div>
-            <div 
-              className="flex flex-col items-center cursor-pointer active:opacity-70 transition-opacity"
-              onClick={() => navigate('/follows', { state: { tab: 'followers' } })}
-            >
-              <span className="text-[18px] font-bold text-[#333333] leading-none">{currentUser.followers}</span>
-              <span className="text-[10px] text-[#999999] mt-1.5 leading-none">粉丝</span>
+            <div className="flex flex-col items-center" onClick={() => navigate('/follows')}>
+              <span className="text-[18px] font-bold text-[#333]">{myUser.followers}</span><span className="text-[11px] text-[#999]">粉丝</span>
             </div>
             <div className="flex flex-col items-center">
-              <span className="text-[18px] font-bold text-[#333333] leading-none">{totalLikes}</span>
-              <span className="text-[10px] text-[#999999] mt-1.5 leading-none">获赞</span>
+              <span className="text-[18px] font-bold text-[#333]">{myUser.likes}</span><span className="text-[11px] text-[#999]">获赞</span>
             </div>
           </div>
         </div>
 
-        {/* 打卡进度条卡片 */}
-        <div 
-          className="mx-4 mb-6 bg-white rounded-[16px] p-4 shadow-sm border border-[#EEEEEE] flex flex-col justify-center cursor-pointer active:scale-[0.98] transition-transform"
-          onClick={() => navigate('/bowl')}
-        >
-          <div className="flex justify-between items-center mb-3">
-            <span className="text-[12px] font-bold text-[#333333]">2/3 次打卡得食盆</span>
-            <span className="text-[16px] leading-none">🥣</span>
-          </div>
-          <div className="h-[6px] bg-[#EEEEEE] rounded-full overflow-hidden w-full">
-            <div className="h-full bg-[#FF8C42] w-[66%] rounded-full transition-all duration-500 ease-out" />
-          </div>
-        </div>
-
-        {/* 我的宠物（横向滚动） */}
-        <div className="mb-6">
-          <div className="px-4 mb-3 flex items-center justify-between">
-            <h3 className="text-[16px] font-bold text-[#333333]">我的宠物</h3>
-          </div>
-          <div className="flex gap-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
-            {myPets.map(pet => (
-               <div key={pet.id} className="flex flex-col items-center gap-2 cursor-pointer active:opacity-70 transition-opacity" onClick={() => navigate('/pet')}>
-                 <ImageWithFallback 
-                   src={pet.avatar} 
-                   alt={pet.name}
-                   className="w-[56px] h-[56px] rounded-full object-cover border border-[#EEEEEE] shadow-sm" 
-                 />
-                 <span className="text-[12px] text-[#333333] font-medium">{pet.name}</span>
-               </div>
+        <div className="mb-4">
+          <div className="px-4 mb-3"><h3 className="text-[14px] font-bold text-[#333]">我的宠物</h3></div>
+          <div className="flex gap-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+            {myPets.map(p => (
+              <div key={p.id} onClick={() => navigate('/pet')} className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer">
+                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#FF8C42] to-[#FFB380] p-[2px]">
+                  <ImageWithFallback src={p.avatar} className="w-full h-full rounded-full object-cover border-2 border-white"/>
+                </div><span className="text-[11px] text-[#666]">{p.name}</span>
+              </div>
             ))}
-            {/* 添加宠物按钮 */}
-            <div className="flex flex-col items-center gap-2 cursor-pointer active:opacity-70 transition-opacity shrink-0">
-               <div className="w-[56px] h-[56px] rounded-full bg-white border border-[#EEEEEE] flex items-center justify-center text-[#FF8C42] text-[24px] shadow-sm">
-                 +
-               </div>
-               <span className="text-[12px] text-[#999999] font-medium">添加</span>
+            <div className="flex flex-col items-center gap-1.5 shrink-0 cursor-pointer">
+              <div className="w-14 h-14 rounded-full border border-dashed border-[#DDD] flex items-center justify-center"><span className="text-xl text-[#CCC]">+</span></div>
+              <span className="text-[11px] text-[#CCC]">添加</span>
             </div>
           </div>
         </div>
 
-        {/* 帖子网格区 */}
-        <div className="bg-white rounded-t-[24px] pt-4 min-h-[400px] border-t border-[#EEEEEE] shadow-sm flex flex-col">
-          <div className="px-4 mb-3 flex gap-6 shrink-0">
-             <span className="text-[15px] font-bold text-[#333333] relative">
-               动态
-               <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"></div>
-             </span>
-             <span className="text-[15px] font-medium text-[#999999]">收藏</span>
+        <div className="bg-white rounded-t-2xl pt-4 min-h-[300px]">
+          <div className="flex justify-around px-4 mb-3">
+            {[{key:'posts',label:'作品'},{key:'liked',label:'喜欢'},{key:'favs',label:'收藏'},{key:'drafts',label:'草稿'}].map(t => (
+              <button key={t.key} onClick={() => setTab(t.key as any)} className={`text-[14px] font-bold relative pb-2 ${tab===t.key?'text-[#333]':'text-[#999]'}`}>
+                {t.label}{tab===t.key && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-[#FF8C42] rounded-full"/>}
+              </button>
+            ))}
           </div>
-          
           <div className="grid grid-cols-3 gap-[2px]">
-            {userPosts.map(post => (
-              <div key={post.id} className="aspect-square bg-[#EEEEEE] cursor-pointer active:opacity-80 transition-opacity" onClick={() => navigate(`/post/${post.id}`)}>
-                <ImageWithFallback src={post.images[0]} alt="帖子" className="w-full h-full object-cover" />
+            {(tab==='posts'?myPosts:tab==='liked'?likedPosts:tab==='favs'?favPosts:[]).map(p => (
+              <div key={p.id} className="aspect-square bg-[#F0F0F0] relative" onClick={() => navigate(`/post/${p.id}`)}>
+                <ImageWithFallback src={p.images?.[0]} className="w-full h-full object-cover"/>
+                <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent p-2">
+                  <div className="flex items-center gap-3 text-white text-[10px]"><span>❤ {p.like_count}</span><span>💬 {p.comment_count}</span></div>
+                </div>
               </div>
             ))}
           </div>
         </div>
-
       </div>
-
       <BottomNav />
     </div>
   );

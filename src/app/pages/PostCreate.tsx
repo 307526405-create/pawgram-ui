@@ -1,4 +1,4 @@
-import { ChevronLeft, MapPin, Hash } from "lucide-react";
+import { ChevronLeft, MapPin, Hash, AtSign } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
@@ -159,6 +159,10 @@ export function PostCreate() {
           <button onClick={() => { setShowLocation(!showLocation); setShowPets(false); setShowTags(false); }}
             className={`flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] ${loc ? 'bg-[#FFF3E6] text-[#FF8C42]' : 'bg-[#F5F5F5] text-[#999]'}`}>
             <MapPin className="w-3.5 h-3.5" />{loc || '位置'}
+          </button>
+          <button onClick={() => setContent(prev => prev + '@')}
+            className="flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] bg-[#F5F5F5] text-[#999]">
+            <AtSign className="w-3.5 h-3.5" />
           </button>
         </div>
 

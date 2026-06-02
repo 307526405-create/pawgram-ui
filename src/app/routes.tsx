@@ -50,6 +50,7 @@ export const router = createHashRouter([
       { path: "follows", Component: FollowList },
       { path: "export", Component: ChatDetail },
       { path: "chat/:id", Component: ChatDetail },
+      { path: "post/edit/:id", Component: PostCreate },
     ],
   },
 ]);
