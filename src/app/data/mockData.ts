@@ -108,8 +108,8 @@ export const breeds = [
     id: "kitten",
     name: "幼猫",
     enName: "Kitten",
-    icon: "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?auto=format&fit=crop&q=80&w=150",
-    cover: "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?auto=format&fit=crop&q=80&w=800",
+    icon: "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&q=80&w=150",
+    cover: "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&q=80&w=800",
     description: "任何品种的小奶猫，可爱到让人无法拒绝。"
   }
 ];
@@ -141,7 +141,7 @@ export const posts = [
     breed: "猫咪",
     location: "温馨的家",
     images: [
-      "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?auto=format&fit=crop&q=80&w=800"
+      "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&q=80&w=800"
     ],
     description: "欢迎家里最小的新成员！还在想名字... 大家有什么建议吗？🐱❤️",
     likes: 891,
