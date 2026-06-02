@@ -1,0 +1,8 @@
+node_modules/
+dist/
+ios/DerivedData/
+ios/App/App.xcworkspace/xcuserdata/
+.gradle/
+android/
+*.log
+.DS_Store
