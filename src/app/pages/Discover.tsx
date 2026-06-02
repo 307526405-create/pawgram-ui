@@ -8,7 +8,7 @@ import { mapPreviewImage } from "../data/mockData";
 import { placesApi, discoverApi } from "../api/client";
 
 /* ─── Note Expanded Modal ─── */
-function NoteExpanded({ note, onClose }: any) {
+function NoteExpanded({ note, onClose, likedNotes, onToggleLike }: any) {
   const { t } = useTranslation();
   return (
     <div className="fixed inset-0 z-[85] bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
@@ -25,7 +25,7 @@ function NoteExpanded({ note, onClose }: any) {
             </div>
           </div>
           <p className="text-[14px] text-[#555] dark:text-gray-300 leading-relaxed">{note.content}</p>
-          <div className="mt-3 text-[12px] text-[#999] dark:text-gray-400"><Heart className="w-3 h-3 inline mr-0.5 text-[#FF4D4F]" />{note.likes} {t('common.like')}</div>
+          <div className="mt-3 text-[12px] text-[#999] dark:text-gray-400"><Heart className={`w-3 h-3 inline mr-0.5 cursor-pointer ${likedNotes && likedNotes.has(note.id) ? 'text-[#FF4D4F] fill-[#FF4D4F]' : 'text-[#999]'}`} onClick={() => onToggleLike && onToggleLike(note.id)} />{note.likes + (likedNotes && likedNotes.has(note.id) ? 1 : 0)} {t('common.like')}</div>
         </div>
         <button onClick={onClose} className="w-full py-3 text-[14px] text-[#999] dark:text-gray-400 border-t border-[#EEE] dark:border-gray-700">{t('common.close')}</button>
       </div>
@@ -40,6 +40,8 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
   const [routes, setRoutes] = useState<any[]>([]);
   const [routesLoading, setRoutesLoading] = useState(true);
   const [expandedNote, setExpandedNote] = useState<any>(null);
+  const [likedNotes, setLikedNotes] = useState<Set<number>>(new Set());
+  const toggleNoteLike = (noteId: number) => { setLikedNotes(prev => { const next = new Set(prev); if (next.has(noteId)) next.delete(noteId); else next.add(noteId); return next; }); };
 
   useEffect(() => {
     fetch(`http://192.168.3.52:3000/api/places/${place.id}/notes`)
@@ -139,7 +141,7 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
                                 <img src={n.avatar} className="w-5 h-5 rounded-full object-cover" />
                                 <span className="text-[11px] text-[#999] dark:text-gray-400">{n.user}</span>
                               </div>
-                              <span className="text-[10px] text-[#BBB] dark:text-gray-500"><Heart className="w-3 h-3 inline mr-0.5 text-[#FF4D4F]" />{n.likes}</span>
+                              <span className="text-[10px] text-[#BBB] dark:text-gray-500"><Heart className={`w-3 h-3 inline mr-0.5 cursor-pointer ${likedNotes.has(n.id) ? 'text-[#FF4D4F] fill-[#FF4D4F]' : 'text-[#999]'}`} onClick={(e) => { e.stopPropagation(); toggleNoteLike(n.id); }} />{n.likes + (likedNotes.has(n.id) ? 1 : 0)}</span>
                             </div>
                           </div>
                           <div className="absolute top-1 right-1 bg-black/40 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -157,7 +159,7 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
 
         <button onClick={onClose} className="w-full h-10 mt-4 text-[#999] dark:text-gray-400 text-[13px] border-t border-[#EEE] dark:border-gray-700 pt-3">{t('common.close')}</button>
       </div>
-      {expandedNote && <NoteExpanded note={expandedNote} onClose={() => setExpandedNote(null)} />}
+      {expandedNote && <NoteExpanded note={expandedNote} onClose={() => setExpandedNote(null)} likedNotes={likedNotes} onToggleLike={toggleNoteLike} />}
     </div>
   );
 }
@@ -231,6 +233,8 @@ export function Discover() {
     try { return new Set(JSON.parse(localStorage.getItem('pawgram_favorites') || '[]')); } catch { return new Set(); }
   });
   const [nearbyUsers, setNearbyUsers] = useState<any[]>([]);
+  const [likedNotes, setLikedNotes] = useState<Set<number>>(new Set());
+  const toggleNoteLike = (noteId: number) => { setLikedNotes(prev => { const next = new Set(prev); if (next.has(noteId)) next.delete(noteId); else next.add(noteId); return next; }); };
   const mapRef = useRef<any>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const [pullState, setPullState] = useState<'idle' | 'pulling' | 'ready' | 'loading'>('idle');
@@ -323,7 +327,7 @@ export function Discover() {
             </div>
           </div>
         )}
-        {feed.length>0&&(<div className="mt-8 mb-6"><div className="flex items-center justify-between px-4 mb-3"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.nearbyHot')}</h2><div className="flex gap-1">{[{k:'hot',l:t('discover.hot')},{k:'nearby',l:t('discover.nearby')},{k:'newest',l:t('discover.newest')}].map(s=>(<button key={s.k} onClick={()=>setFeedSort(s.k as any)} className={`px-2.5 py-1 rounded-full text-[11px] font-medium ${feedSort===s.k?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400'}`}>{s.l}</button>))}</div></div>{(()=>{const left:any[]=[],right:any[]=[];sortedFeed.forEach((n:any,i:number)=>(i%2===0?left:right).push(n));return(<div className="flex gap-2 px-4">{[left,right].map((col,ci)=>(<div key={ci} className="flex-1 flex flex-col gap-2">{col.map((n:any)=>(<div key={n.id} onClick={()=>{const p=places.find((pl:any)=>pl.id===n.placeId);if(p)setSelectedPlace(p);}} className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80">{n.images&&n.images[0]&&(<img src={n.images[0]} className="w-full object-cover" style={{aspectRatio:'1/1.1'}}/>)}<div className="p-2.5"><p className="text-[12px] text-[#333] dark:text-gray-100 leading-snug line-clamp-2 mb-2">{n.content}</p><div className="flex items-center justify-between"><div className="flex items-center gap-1.5 min-w-0"><img src={n.avatar} className="w-4 h-4 rounded-full object-cover shrink-0"/><span className="text-[10px] text-[#999] dark:text-gray-400 truncate">{n.user}</span></div><span className="text-[10px] text-[#FF8C42] shrink-0"><Heart className="w-3 h-3 inline mr-0.5 text-[#FF4D4F]" />{n.likes}</span></div>{n.placeName&&(<div className="mt-1.5 flex items-center gap-1 text-[10px] text-[#BBB] dark:text-gray-500"><MapPin className="w-2.5 h-2.5"/><span className="truncate">{n.placeName}</span></div>)}</div></div>))}</div>))}</div>);})()}</div>)}
+        {feed.length>0&&(<div className="mt-8 mb-6"><div className="flex items-center justify-between px-4 mb-3"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.nearbyHot')}</h2><div className="flex gap-1">{[{k:'hot',l:t('discover.hot')},{k:'nearby',l:t('discover.nearby')},{k:'newest',l:t('discover.newest')}].map(s=>(<button key={s.k} onClick={()=>setFeedSort(s.k as any)} className={`px-2.5 py-1 rounded-full text-[11px] font-medium ${feedSort===s.k?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400'}`}>{s.l}</button>))}</div></div>{(()=>{const left:any[]=[],right:any[]=[];sortedFeed.forEach((n:any,i:number)=>(i%2===0?left:right).push(n));return(<div className="flex gap-2 px-4">{[left,right].map((col,ci)=>(<div key={ci} className="flex-1 flex flex-col gap-2">{col.map((n:any)=>(<div key={n.id} onClick={()=>navigate(`/post/${n.id}`)} className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80">{n.images&&n.images[0]&&(<img src={n.images[0]} className="w-full object-cover" style={{aspectRatio:'1/1.1'}}/>)}<div className="p-2.5"><p className="text-[12px] text-[#333] dark:text-gray-100 leading-snug line-clamp-2 mb-2">{n.content}</p><div className="flex items-center justify-between"><div className="flex items-center gap-1.5 min-w-0"><img src={n.avatar} className="w-4 h-4 rounded-full object-cover shrink-0"/><span className="text-[10px] text-[#999] dark:text-gray-400 truncate">{n.user}</span></div><span className="text-[10px] text-[#FF8C42] shrink-0"><Heart className={`w-3 h-3 inline mr-0.5 cursor-pointer ${likedNotes.has(n.id) ? 'text-[#FF4D4F] fill-[#FF4D4F]' : 'text-[#999]'}`} onClick={(e) => { e.stopPropagation(); toggleNoteLike(n.id); }} />{n.likes + (likedNotes.has(n.id) ? 1 : 0)}</span></div>{n.placeName&&(<div className="mt-1.5 flex items-center gap-1 text-[10px] text-[#BBB] dark:text-gray-500"><MapPin className="w-2.5 h-2.5"/><span className="truncate">{n.placeName}</span></div>)}</div></div>))}</div>))}</div>);})()}</div>)}
         {feedLoading&&<div className="text-center py-4 text-[12px] text-[#999] dark:text-gray-400">{t('common.loading')}</div>}
         {!feedLoading&&feed.length<feedTotal&&<div className="text-center py-3 text-[12px] text-[#BBB] dark:text-gray-500">{t('common.loadMore')}</div>}
       </div>
