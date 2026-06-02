@@ -1,16 +1,58 @@
 import { ChevronLeft, Heart, Share2, Send, MoreHorizontal, Trash2, Lock, Eye, Edit3 } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { BottomNav } from "../components/BottomNav";
 import { postsApi } from "../api/client";
 
-const mockComments = [
-  { id:1, user:{name:"小可",avatar:"https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100"}, text:"金毛也太可爱了吧！", time:"10分钟前", likes:5, isLiked:false, replies:[
-    { id:101, user:{name:"作者"}, text:"是呀，每天带它出来都很开心～", time:"5分钟前" }
-  ]},
-  { id:2, user:{name:"豆豆妈",avatar:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100"}, text:"这个公园在哪里呀？环境看起来真不错", time:"半小时前", likes:2, isLiked:true, replies:[] },
-];
+function formatTime(iso: string): string {
+  if (!iso) return '';
+  const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (diff < 60) return '刚刚';
+  if (diff < 3600) return `${Math.floor(diff / 60)}分钟前`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)}小时前`;
+  if (diff < 604800) return `${Math.floor(diff / 86400)}天前`;
+  return new Date(iso).toLocaleDateString('zh-CN');
+}
+
+interface Comment {
+  id: number;
+  user: { id?: number; name: string; avatar?: string };
+  content: string;
+  created_at: string;
+  parent_id?: number | null;
+  replies: Comment[];
+}
+
+interface FlatComment {
+  id: number;
+  user: { id?: number; name: string; avatar?: string };
+  text: string;
+  time: string;
+  likes: number;
+  isLiked: boolean;
+  parentId: number | null;
+  depth: number;
+  replies: FlatComment[];
+}
+
+function flattenComments(comments: Comment[], depth: number = 0): FlatComment[] {
+  const result: FlatComment[] = [];
+  for (const c of comments) {
+    result.push({
+      id: c.id,
+      user: c.user,
+      text: c.content,
+      time: formatTime(c.created_at),
+      likes: 0,
+      isLiked: false,
+      parentId: c.parent_id || null,
+      depth,
+      replies: c.replies ? flattenComments(c.replies, depth + 1) : [],
+    });
+  }
+  return result;
+}
 
 export function PostDetail() {
   const navigate = useNavigate();
@@ -20,17 +62,29 @@ export function PostDetail() {
   const [isLiked, setIsLiked] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
-  const [comments, setComments] = useState(mockComments);
+  const [comments, setComments] = useState<FlatComment[]>([]);
   const [commentText, setCommentText] = useState("");
+  const [replyTarget, setReplyTarget] = useState<number | null>(null);
+  const [replyText, setReplyText] = useState("");
   const [showHeart, setShowHeart] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const lastTap = useRef(0);
-  const [playingMediaIndex, setPlayingMediaIndex] = useState<number | null>(null);
+
+  const fetchComments = useCallback(async () => {
+    if (!id) return;
+    try {
+      const data = await postsApi.comments(Number(id));
+      setComments(flattenComments(data || []));
+    } catch {
+      // fallback to empty
+    }
+  }, [id]);
 
   useEffect(() => {
     if (!id) return;
     postsApi.detail(Number(id)).then(p => { setPost(p); setIsPrivate(p.is_private||false); setLoading(false); }).catch(() => setLoading(false));
-  }, [id]);
+    fetchComments();
+  }, [id, fetchComments]);
 
   const handleLike = () => setIsLiked(!isLiked);
   const handleShare = () => {
@@ -44,14 +98,42 @@ export function PostDetail() {
     if (now - lastTap.current < 300) { setShowHeart(true); setTimeout(() => setShowHeart(false), 800); handleLike(); }
     lastTap.current = now;
   };
-  const handleSendComment = () => {
-    if (!commentText.trim()) return;
-    setComments([{ id: Date.now(), user:{name:"我",avatar:""}, text: commentText, time:"刚刚", likes:0, isLiked:false, replies:[] }, ...comments]);
-    setCommentText("");
+
+  const handleSendComment = async () => {
+    if (!commentText.trim() || !id) return;
+    try {
+      await postsApi.addComment(Number(id), commentText.trim());
+      setCommentText("");
+      fetchComments();
+    } catch {
+      // ignore
+    }
   };
+
+  const handleSendReply = async (parentId: number) => {
+    if (!replyText.trim() || !id) return;
+    try {
+      await postsApi.addComment(Number(id), replyText.trim(), parentId);
+      setReplyText("");
+      setReplyTarget(null);
+      fetchComments();
+    } catch {
+      // ignore
+    }
+  };
+
   const toggleCommentLike = (cid: number) => {
-    setComments(prev => prev.map(c => c.id===cid ? {...c, isLiked:!c.isLiked, likes: c.isLiked ? c.likes-1 : c.likes+1} : c));
+    setComments(prev => {
+      if (prev.some(c => c.id === cid)) {
+        return prev.map(c => c.id === cid ? {...c, isLiked:!c.isLiked, likes: c.isLiked ? c.likes-1 : c.likes+1} : c);
+      }
+      return prev.map(c => ({
+        ...c,
+        replies: c.replies.map(r => r.id === cid ? {...r, isLiked:!r.isLiked, likes: r.isLiked ? r.likes-1 : r.likes+1} : r),
+      }));
+    });
   };
+
   const handleDelete = async () => {
     if (!post) return;
     await fetch(`http://192.168.3.52:3000/api/posts/${post.id}`, { method: 'DELETE' });
@@ -62,9 +144,62 @@ export function PostDetail() {
     setIsPrivate(!isPrivate);
     setShowMenu(false);
   };
-  const getMediaItems = (p: any) => (p?.images || []).map((item: any) => typeof item === 'string' ? { type: 'image', url: item } : item);
 
   const isOwner = post?.user?.id === 1;
+
+  const renderCommentItem = (c: FlatComment) => {
+    const isReply = c.depth > 0;
+    const indentClass = isReply ? 'ml-4 pl-3 border-l-2 border-[#E8E8E8]' : '';
+
+    return (
+      <div key={c.id}>
+        <div className={`flex gap-2.5 ${indentClass}`}>
+          <ImageWithFallback src={c.user.avatar} className="w-7 h-7 rounded-full object-cover shrink-0 bg-gray-200 mt-0.5"/>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-start justify-between">
+              <div className="flex-1">
+                <span className="text-[12px] font-bold text-[#666]">{c.user.name}</span>
+                <p className="text-[14px] text-[#333] mt-0.5 leading-snug">{c.text}</p>
+                <div className="flex items-center gap-3 mt-1">
+                  <span className="text-[10px] text-[#999]">{c.time}</span>
+                  <button
+                    onClick={() => { setReplyTarget(c.id); setReplyText(""); }}
+                    className="text-[10px] font-medium text-[#FF8C42]"
+                  >
+                    回复
+                  </button>
+                </div>
+              </div>
+              <button onClick={() => toggleCommentLike(c.id)}
+                className={`flex flex-col items-center gap-0.5 shrink-0 ${c.isLiked ? 'text-[#FF4D4F]' : 'text-[#CCC]'}`}>
+                <Heart className={`w-3.5 h-3.5 ${c.isLiked ? 'fill-current' : ''}`}/>
+                <span className="text-[10px]">{c.likes||''}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        {/* Inline reply input */}
+        {replyTarget === c.id && (
+          <div className={`flex items-center gap-2 mt-2 ${indentClass}`}>
+            <input
+              value={replyText}
+              onChange={e => setReplyText(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleSendReply(c.id)}
+              placeholder={`回复 ${c.user.name}...`}
+              autoFocus
+              className="flex-1 bg-[#F5F5F5] rounded-lg px-3 h-8 outline-none text-[13px] placeholder:text-[#999]"
+            />
+            <button onClick={() => handleSendReply(c.id)}
+              className="w-8 h-8 bg-[#FF8C42] text-white rounded-lg flex items-center justify-center active:bg-[#E67A35] shrink-0">
+              <Send className="w-3.5 h-3.5"/>
+            </button>
+          </div>
+        )}
+        {/* Render nested replies inline */}
+        {c.replies.map(r => renderCommentItem(r))}
+      </div>
+    );
+  };
 
   if (loading) return (
     <div className="h-full bg-[#FAFAFA] flex items-center justify-center">
@@ -123,48 +258,21 @@ export function PostDetail() {
           </button>
         </div>
 
-        {/* Media Carousel */}
-        <div className="w-full aspect-square bg-gray-50 overflow-hidden relative" onClick={handleDoubleTap}>
+        {/* Image Carousel */}
+        <div className="w-full aspect-square bg-gray-50 overflow-hidden" onClick={handleDoubleTap}>
           <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden">
-            {(() => { const mediaItems = getMediaItems(post); return mediaItems.map((item: any, idx: number) => (
+            {(post.images||[]).map((img: string, idx: number) => (
               <div key={idx} className="w-full h-full shrink-0 snap-center relative">
-                {item.type === 'video' ? (
-                  playingMediaIndex === idx ? (
-                    <video
-                      src={item.url}
-                      poster={item.poster}
-                      controls
-                      playsInline
-                      className="w-full h-full object-cover"
-                      autoPlay
-                    />
-                  ) : (
-                    <>
-                      <ImageWithFallback src={item.poster} className="w-full h-full object-cover"/>
-                      <button
-                        onClick={(e) => { e.stopPropagation(); setPlayingMediaIndex(idx); }}
-                        className="absolute inset-0 flex items-center justify-center"
-                      >
-                        <div className="w-16 h-16 bg-black/50 rounded-full flex items-center justify-center active:bg-black/60">
-                          <svg width="22" height="26" viewBox="0 0 22 26" fill="white" className="ml-1">
-                            <path d="M22 13L0 26V0z"/>
-                          </svg>
-                        </div>
-                      </button>
-                    </>
-                  )
-                ) : (
-                  <ImageWithFallback src={item.url} className="w-full h-full object-cover"/>
-                )}
-                {mediaItems.length > 1 && (
+                <ImageWithFallback src={img} className="w-full h-full object-cover"/>
+                {(post.images||[]).length > 1 && (
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                    {mediaItems.map((_: any, di: number) => (
+                    {(post.images||[]).map((_:string, di:number) => (
                       <div key={di} className={`w-1.5 h-1.5 rounded-full ${di===idx?'bg-white':'bg-white/40'}`}/>
                     ))}
                   </div>
                 )}
               </div>
-            )); })()}
+            ))}
           </div>
           {showHeart && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{marginTop:'-60%'}}>
@@ -203,38 +311,7 @@ export function PostDetail() {
         <div className="bg-white mt-2 px-4 py-4 min-h-[200px]">
           <h3 className="text-[14px] font-bold text-[#333] mb-4">评论 {comments.length}</h3>
           <div className="space-y-4">
-            {comments.map(c => (
-              <div key={c.id} className="flex gap-2.5">
-                <ImageWithFallback src={c.user.avatar} className="w-7 h-7 rounded-full object-cover shrink-0 bg-gray-200 mt-0.5"/>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start justify-between">
-                    <div className="flex-1">
-                      <span className="text-[12px] font-bold text-[#666]">{c.user.name}</span>
-                      <p className="text-[14px] text-[#333] mt-0.5 leading-snug">{c.text}</p>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-[10px] text-[#999]">{c.time}</span>
-                        <button className="text-[10px] font-medium text-[#FF8C42]">回复</button>
-                      </div>
-                    </div>
-                    <button onClick={() => toggleCommentLike(c.id)}
-                      className={`flex flex-col items-center gap-0.5 shrink-0 ${c.isLiked ? 'text-[#FF4D4F]' : 'text-[#CCC]'}`}>
-                      <Heart className={`w-3.5 h-3.5 ${c.isLiked ? 'fill-current' : ''}`}/>
-                      <span className="text-[10px]">{c.likes||''}</span>
-                    </button>
-                  </div>
-                  {c.replies?.length > 0 && (
-                    <div className="mt-2 bg-[#FAFAFA] rounded-md p-2 space-y-1.5">
-                      {c.replies.map((r: any) => (
-                        <div key={r.id} className="text-[12px] leading-snug">
-                          <span className="font-bold text-[#666]">{r.user.name}：</span>
-                          <span className="text-[#333]">{r.text}</span>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            ))}
+            {comments.map(c => renderCommentItem(c))}
           </div>
         </div>
       </div>
