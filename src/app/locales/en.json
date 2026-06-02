@@ -57,8 +57,8 @@
     "hotSearch": "Trending Searches",
     "recommendedFollows": "Recommended",
     "hotTopics": "Trending Topics",
-    "postsCount": "{count} posts",
-    "followersCount": "{count} followers"
+    "postsCount": "{{count}} posts",
+    "followersCount": "{{count}} followers"
   },
   "bottomNav": {
     "home": "Home",
@@ -83,7 +83,7 @@
     "title": "Discover",
     "petMap": "Pet Map",
     "searchPlaceholder": "Search pets, users or topics",
-    "nearbyPlaces": "{count} pet-friendly places nearby",
+    "nearbyPlaces": "{{count}} pet-friendly places nearby",
     "myWishlist": "My Wishlist",
     "nearbyHot": "Nearby Trending",
     "hot": "Trending",
@@ -124,14 +124,14 @@
     "enterTopic": "Enter topic tag...",
     "add": "Add",
     "enterLocation": "Enter location name...",
-    "topicsCount": "{count} topics",
+    "topicsCount": "{{count}} topics",
     "publish": "Post",
     "publishing": "Posting..."
   },
   "postDetail": {
     "title": "Post Details",
     "reply": "Reply",
-    "commentsCount": "Comments {count}",
+    "commentsCount": "Comments {{count}}",
     "setPublic": "Set Public",
     "setPrivate": "Set Private",
     "private": "Private",
@@ -200,7 +200,7 @@
     "wechatBinding": "WeChat Binding",
     "bound": "Linked",
     "blockList": "Block List",
-    "blockListCount": "{count} people",
+    "blockListCount": "{{count}} people",
     "whoCanSee": "Who can see my posts",
     "everyone": "Everyone",
     "hideLocation": "Hide My Location",

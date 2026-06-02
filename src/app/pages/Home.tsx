@@ -12,7 +12,7 @@ const stories = [
   { id:1, name:"金毛阿福", avatar:"https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=120", pet:"金毛", images:["https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600"] },
   { id:2, name:"柯基小短腿", avatar:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120", pet:"柯基", images:["https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=600"] },
   { id:3, name:"布偶汤圆", avatar:"https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120", pet:"布偶猫", images:["https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=600"] },
-  { id:4, name:"萨摩耶球球", avatar:"https://images.unsplash.com/photo-1507003211169-0a1dd7228fd2?w=120", pet:"萨摩耶", images:["https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=600"] },
+  { id:4, name:"萨摩耶球球", avatar:"https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=120", pet:"萨摩耶", images:["https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=600"] },
   { id:5, name:"泰迪豆豆", avatar:"https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120", pet:"泰迪", images:["https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600"] },
   { id:6, name:"橘猫滚滚", avatar:"https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=120", pet:"橘猫", images:["https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=600"] },
 ];

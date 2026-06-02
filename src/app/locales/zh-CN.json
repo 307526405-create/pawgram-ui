@@ -57,8 +57,8 @@
     "hotSearch": "热门搜索",
     "recommendedFollows": "推荐关注",
     "hotTopics": "热门话题",
-    "postsCount": "{count} 篇帖子",
-    "followersCount": "粉丝 {count}"
+    "postsCount": "{{count}} 篇帖子",
+    "followersCount": "粉丝 {{count}}"
   },
   "bottomNav": {
     "home": "首页",
@@ -83,7 +83,7 @@
     "title": "发现",
     "petMap": "遛宠地图",
     "searchPlaceholder": "搜索宠物、用户或话题",
-    "nearbyPlaces": "发现附近 {count} 个宠物友好地点",
+    "nearbyPlaces": "发现附近 {{count}} 个宠物友好地点",
     "myWishlist": "我的想去",
     "nearbyHot": "附近热门",
     "hot": "热门",
@@ -124,14 +124,14 @@
     "enterTopic": "输入话题标签...",
     "add": "添加",
     "enterLocation": "输入地点名称...",
-    "topicsCount": "{count}个话题",
+    "topicsCount": "{{count}}个话题",
     "publish": "发布",
     "publishing": "发布中..."
   },
   "postDetail": {
     "title": "帖子详情",
     "reply": "回复",
-    "commentsCount": "评论 {count}",
+    "commentsCount": "评论 {{count}}",
     "setPublic": "设为公开",
     "setPrivate": "设为私密",
     "private": "私密",
@@ -200,7 +200,7 @@
     "wechatBinding": "微信绑定",
     "bound": "已绑定",
     "blockList": "黑名单",
-    "blockListCount": "{count}人",
+    "blockListCount": "{{count}}人",
     "whoCanSee": "谁可以看我的帖子",
     "everyone": "所有人",
     "hideLocation": "隐藏我的位置",
