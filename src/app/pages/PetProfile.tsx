@@ -50,7 +50,7 @@ function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialDat
             <span className="text-3xl text-[#CCC] dark:text-gray-600">+</span>
           </div>
         )}
-        <p className="text-[12px] text-[#999] dark:text-gray-400">{hasAvatar ? petName || name : t('pet.addAvatar')}</p>
+<p className="text-[12px] text-[#999] dark:text-gray-400">{hasAvatar ? name || t("pet.petName") : t("pet.addAvatar")}</p>
       </div>
 
       <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 shadow-sm border border-[#F0F0F0] dark:border-gray-700 space-y-4">
