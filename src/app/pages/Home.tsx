@@ -282,7 +282,6 @@ export function Home() {
               if (followedPosts.length > 0) return followedPosts.map(post => (
                 <PostCard key={post.id} post={post}
                   onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id, post.user?.name); }}
-                  onShare={(e: any) => { e?.stopPropagation(); handleShare(post); }}
                   onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id, post.user?.name); }}
                   onBookmark={(e: any) => { e?.stopPropagation(); toggleBookmark(post.id); }}
                 />
@@ -319,7 +318,6 @@ export function Home() {
             return postsWithLike.map(post => (
               <PostCard key={post.id} post={post}
                 onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id, post.user?.name); }}
-                onShare={(e: any) => { e?.stopPropagation(); handleShare(post); }}
                 onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id, post.user?.name); }}
               />
             ));
