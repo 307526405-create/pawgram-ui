@@ -1,10 +1,10 @@
-import { Heart, MessageCircle, Share2, MapPin, Play } from "lucide-react";
+import { Heart, MessageCircle, Share2, MapPin, Play, Bookmark } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
-export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLike?: (e: any) => void; onShare?: (e: any) => void; onFollow?: (e: any) => void }) {
+export function PostCard({ post, onLike, onShare, onFollow, onBookmark }: { post: any; onLike?: (e: any) => void; onShare?: (e: any) => void; onFollow?: (e: any) => void; onBookmark?: (e: any) => void }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const user = post.user || { name: t('common.user'), avatar: '' };
@@ -103,6 +103,7 @@ export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLik
             <MessageCircle className="w-6 h-6"/><span className="text-sm font-medium">{post.comment_count}</span>
           </div>
           <button onClick={onShare} className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400"><Share2 className="w-6 h-6"/></button>
+          <button onClick={onBookmark} className={`flex items-center gap-1.5 ml-auto ${post.is_bookmarked ? 'text-[#FF8C42]' : 'text-gray-600 dark:text-gray-400'}`}><Bookmark className={`w-6 h-6 ${post.is_bookmarked ? 'fill-current' : ''}`}/></button>
         </div>
       </div>
 

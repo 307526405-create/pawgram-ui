@@ -78,6 +78,7 @@ export function Home() {
   const [loading, setLoading] = useState(false);
   const [loadMoreLoading, setLoadMoreLoading] = useState(false);
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<Set<number>>(new Set());
   const [followedUsers, setFollowedUsers] = useState<Set<number>>(new Set());
   const [viewedStories, setViewedStories] = useState<Set<number>>(new Set());
   const [notifViewed, setNotifViewed] = useState(false);
@@ -132,6 +133,10 @@ export function Home() {
     const unread = notifications.filter(n => n.unread);
     if (unread.length > 0) sendNewNotification(unread[0].text);
   };
+  const toggleBookmark = (postId: number) => {
+    setBookmarkedPosts(prev => { const next = new Set(prev); if (next.has(postId)) next.delete(postId); else next.add(postId); return next; });
+  };
+
   const toggleLike = (postId: number, userName?: string) => {
     setLikedPosts(prev => {
       const next = new Set(prev);
@@ -165,7 +170,7 @@ export function Home() {
     if(posts.length > 0 && el.scrollHeight-el.scrollTop-el.clientHeight<300&&hasMore&&!loadMoreLoading) fetchPosts();
   };
 
-  const postsWithLike = posts.map(p => ({...p, is_liked: likedPosts.has(p.id), like_count: (p.like_count||0) + (likedPosts.has(p.id)?1:0), user: {...p.user, followed: followedUsers.has(p.user_id||p.user?.id)}, breedDisplay: p.breed ? (t('pet.breeds.' + p.breed, p.breed)) : '' })).filter((p: any) => !p.images?.some((img: any) => typeof img === 'object' && img.type === 'video'));
+  const postsWithLike = posts.map(p => ({...p, is_liked: likedPosts.has(p.id), like_count: (p.like_count||0) + (likedPosts.has(p.id)?1:0), user: {...p.user, followed: followedUsers.has(p.user_id||p.user?.id)}, breedDisplay: p.breed ? (t('pet.breeds.' + p.breed, p.breed)) : '', is_bookmarked: bookmarkedPosts.has(p.id) })).filter((p: any) => !p.images?.some((img: any) => typeof img === 'object' && img.type === 'video'));
 
   const pullLabels: Record<string, string> = {
     pulling: t('common.pullRefresh'),
@@ -279,6 +284,7 @@ export function Home() {
                   onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id, post.user?.name); }}
                   onShare={(e: any) => { e?.stopPropagation(); handleShare(post); }}
                   onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id, post.user?.name); }}
+                  onBookmark={(e: any) => { e?.stopPropagation(); toggleBookmark(post.id); }}
                 />
               ));
               return (
