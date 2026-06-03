@@ -1,4 +1,5 @@
 import { createHashRouter, Outlet, useLocation } from "react-router";
+import { motion, AnimatePresence } from "motion/react";
 import { Home } from "./pages/Home";
 import { PostDetail } from "./pages/PostDetail";
 import { Profile } from "./pages/Profile";
@@ -16,6 +17,7 @@ import { FollowList } from "./pages/FollowList";
 import { ChatDetail } from "./pages/ChatDetail";
 import { Scan } from "./pages/Scan";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
+import { UserProfile } from "./pages/UserProfile";
 
 function Root() {
   const location = useLocation();
@@ -25,7 +27,18 @@ function Root() {
   return (
     <div className="w-full h-full bg-gray-900 overflow-hidden">
       <div className="w-full h-full bg-white dark:bg-gray-900 relative">
-        <Outlet />
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={location.pathname}
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 350, damping: 35 }}
+            className="w-full h-full"
+          >
+            <Outlet />
+          </motion.div>
+        </AnimatePresence>
       </div>
     </div>
   );
@@ -55,6 +68,7 @@ export const router = createHashRouter([
       { path: "chat/:id", Component: ChatDetail },
       { path: "post/edit/:id", Component: PostCreate },
       { path: "privacy", Component: PrivacyPolicy },
+      { path: "user/:id", Component: UserProfile },
     ],
   },
 ]);

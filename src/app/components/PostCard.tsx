@@ -44,7 +44,7 @@ export function PostCard({ post, onLike, onFollow }: { post: any; onLike?: (e: a
     <div className="bg-white dark:bg-gray-900 rounded-xl mb-4 shadow-sm border border-gray-50 dark:border-gray-800 overflow-hidden">
       <div className="flex items-center justify-between p-3">
         <div className="flex items-center gap-2">
-          <ImageWithFallback src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-gray-100 dark:border-gray-700 cursor-pointer active:opacity-70" />
+          <ImageWithFallback src={user.avatar} alt={user.name} onClick={(e) => { e.stopPropagation(); navigate(`/user/${post.user_id}`); }} className="w-10 h-10 rounded-full object-cover border border-gray-100 dark:border-gray-700 cursor-pointer active:opacity-70" />
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{user.name}</h3>

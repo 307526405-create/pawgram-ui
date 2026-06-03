@@ -4,8 +4,6 @@ import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
 import { BottomNav } from "../components/BottomNav";
-import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { mapPreviewImage } from "../data/mockData";
 import { postsApi, placesApi, discoverApi } from "../api/client";
 import { useScrollRestore } from "../hooks/useScrollRestore";
 
@@ -339,8 +337,38 @@ export function Discover() {
           {mapTypes.map(tp=>{const tn=tp==='全部'?t('discover.all'):tp==='公园'?t('discover.typePark'):tp==='咖啡馆'?t('discover.typeCafe'):tp==='医院'?t('discover.typeHospital'):tp==='餐厅'?t('discover.typeRestaurant'):tp==='小区'?t('discover.typeResidential'):tp==='户外'?t('discover.typeOutdoor'):tp==='美容'?t('discover.typeGrooming'):tp==='商店'?t('discover.typeShop'):tp;return(<button key={tp} onClick={()=>{setFavoritesOnly(false);setMapFilter(tp===mapFilter?'全部':tp);}} className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-medium ${!favoritesOnly&&mapFilter===tp?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>{tn}</button>);})}
         </div>
         <div className="flex-1 relative bg-[#E8E8E8] dark:bg-gray-800 overflow-hidden">
-          <ImageWithFallback src={mapPreviewImage} className="absolute inset-0 w-full h-full object-cover opacity-50" />
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 px-4">
+          <div className="absolute inset-0 bg-cover bg-center" style={{
+            backgroundImage: `url(https://snapshot.apple-mapkit.com/map?center=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}&size=600x400&scale=2&z=13&t=standard&poi=0)`,
+          }} />
+          {sortedPlaces.map(p => {
+            const centerLat = userLoc?.lat || 23.1291;
+            const centerLng = userLoc?.lng || 113.2644;
+            const dLat = p.lat - centerLat;
+            const dLng = p.lng - centerLng;
+            const zoom = 13;
+            const metersPerPixel = 156543.03392 * Math.cos(centerLat * Math.PI / 180) / Math.pow(2, zoom);
+            const px = (dLng * 111320 * Math.cos(centerLat * Math.PI / 180)) / metersPerPixel;
+            const py = -(dLat * 111320) / metersPerPixel;
+            const color = getTypeColor(p.type);
+            return (
+              <div
+                key={p.id}
+                onClick={() => setSelectedPlace(p)}
+                className="absolute cursor-pointer active:scale-125 transition-transform"
+                style={{
+                  left: `calc(50% + ${px}px)`,
+                  top: `calc(50% + ${py}px)`,
+                  transform: 'translate(-50%, -50%)',
+                }}
+              >
+                <div className="relative">
+                  <MapPin className="w-6 h-6 drop-shadow-lg" style={{ color, fill: color }} />
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-white border-2" style={{ borderColor: color }} />
+                </div>
+              </div>
+            );
+          })}
+          <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
             <button onClick={() => window.open(`http://maps.apple.com/?q=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}`, '_blank')} className="bg-white dark:bg-gray-900 rounded-2xl px-6 py-3 shadow-lg flex items-center gap-2 active:opacity-80">
               <MapPin className="w-5 h-5 text-[#FF8C42]" />
               <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.openInMaps')}</span>
@@ -352,9 +380,9 @@ export function Discover() {
       {selectedPlace&&<PlaceDetail place={selectedPlace} userLoc={userLoc} isFavorite={favorites.has(selectedPlace.id)} wantCount={wantCount(selectedPlace.id)} onToggleFavorite={()=>toggleFavorite(selectedPlace.id)} onClose={()=>setSelectedPlace(null)}/>}
       {markForm&&<MarkPlaceForm lat={markForm.lat} lng={markForm.lng} onClose={()=>setMarkForm(null)}/>}
       <div className="flex-1 overflow-y-auto pb-24" ref={scrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onScroll={handleScroll}>
-        {pullState!=='idle'&&(<div className="flex items-center justify-center text-[12px] text-[#999] dark:text-gray-400" style={{height:pullDist}}>{pullState==='pulling'&&t('common.pullRefresh')}{pullState==='ready'&&t('common.releaseRefresh')}{pullState==='loading'&&t('common.refreshing')}</div>)}
+        {pullState!=='idle'&&(<div className="flex items-center justify-center gap-2 text-[12px] text-[#999] dark:text-gray-400" style={{height:pullDist}}>{pullState==='loading'&&<span className="w-3.5 h-3.5 border-2 border-[#FF8C42] border-t-transparent rounded-full animate-spin"/>}{pullState==='pulling'&&t('common.pullRefresh')}{pullState==='ready'&&t('common.releaseRefresh')}{pullState==='loading'&&t('common.refreshing')}</div>)}
         <div className="px-4 mt-5" onClick={()=>navigate('/search')}><div className="bg-white dark:bg-gray-900 border border-[#E5E5E5] dark:border-gray-600 rounded-lg px-3 py-2.5 flex items-center cursor-pointer"><Search className="w-4 h-4 text-[#999] dark:text-gray-400 mr-2 shrink-0"/><span className="flex-1 text-[14px] text-[#999] dark:text-gray-400">{t('discover.searchPlaceholder')}</span></div></div>
-        <div className="mt-8"><div className="flex items-center justify-between px-4 mb-4"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button className="text-[#FF8C42] text-[12px] font-medium" onClick={()=>setShowMap(true)}>{t('common.viewAll')}</button></div><div className="px-4"><div onClick={()=>setShowMap(true)} className="bg-white dark:bg-gray-900 rounded-xl border border-[#EEE] dark:border-gray-700 overflow-hidden shadow-sm cursor-pointer active:opacity-80"><div className="relative h-[120px] w-full"><ImageWithFallback src={mapPreviewImage} alt="地图" className="w-full h-full object-cover"/><div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"/><div className="absolute bottom-3 left-3 flex items-center text-white"><MapPin className="w-4 h-4 mr-1"/><span className="text-[12px] font-medium">{t('discover.nearbyPlaces', { count: places.length })}</span></div></div></div></div></div>
+        <div className="mt-8"><div className="flex items-center justify-between px-4 mb-4"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button className="text-[#FF8C42] text-[12px] font-medium" onClick={()=>setShowMap(true)}>{t('common.viewAll')}</button></div><div className="px-4"><div onClick={()=>setShowMap(true)} className="bg-white dark:bg-gray-900 rounded-xl border border-[#EEE] dark:border-gray-700 overflow-hidden shadow-sm cursor-pointer active:opacity-80"><div className="relative h-[120px] w-full"><div className="w-full h-full bg-cover bg-center" style={{backgroundImage: `url(https://snapshot.apple-mapkit.com/map?center=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}&size=600x200&scale=2&z=13&t=standard&poi=0)`}} /><div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"/><div className="absolute bottom-3 left-3 flex items-center text-white"><MapPin className="w-4 h-4 mr-1"/><span className="text-[12px] font-medium">{t('discover.nearbyPlaces', { count: places.length })}</span></div></div></div></div></div>
         {favPlaces.length>0&&(<div className="mt-8"><h2 className="px-4 text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">{t('discover.myWishlist')} ({favPlaces.length})</h2><div className="flex gap-3 px-4 overflow-x-auto pb-2">{favPlaces.map(p=>(<div key={p.id} onClick={()=>setSelectedPlace(p)} className="shrink-0 w-[130px] bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80"><div className="h-[70px] flex items-center justify-center" style={{backgroundColor:getTypeColor(p.type)+'20'}}><MapPin className="w-6 h-6" style={{color:getTypeColor(p.type)}}/></div><div className="p-2.5"><div className="text-[13px] font-semibold text-[#333] dark:text-gray-100 truncate">{getPlaceName(p)}</div><div className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{p.type} · ★{p.rating}</div></div></div>))}</div></div>)}
         {nearbyUsers.length > 0 && (
           <div className="mt-6 px-4">
@@ -362,7 +390,7 @@ export function Discover() {
               {nearbyUsers.map((u: any) => (
                 <div key={u.id} className="shrink-0 w-[100px] bg-white dark:bg-gray-900 rounded-xl p-3 flex flex-col items-center border border-[#F0F0F0] dark:border-gray-700 shadow-sm">
                   <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#FF8C42] to-[#FFB380] p-[2px] mb-2">
-                    <img src={u.avatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200'} className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-900 cursor-pointer active:opacity-70"/>
+                    <img src={u.avatar || 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200'} onClick={() => navigate(`/user/${u.id}`)} className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-900 cursor-pointer active:opacity-70"/>
                   </div>
                   <span className="text-[12px] font-bold text-[#333] dark:text-gray-100 truncate w-full text-center">{u.nickname}</span>
                   <span className="text-[10px] text-[#999] dark:text-gray-400">{u.distance_km != null ? `${u.distance_km}km` : ''}</span>
@@ -371,7 +399,7 @@ export function Discover() {
             </div>
           </div>
         )}
-        {feed.length>0&&(<div className="mt-8 mb-6"><div className="flex items-center justify-between px-4 mb-3"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.nearbyHot')}</h2><div className="flex gap-1">{[{k:'hot',l:t('discover.hot')},{k:'nearby',l:t('discover.nearby')},{k:'newest',l:t('discover.newest')}].map(s=>(<button key={s.k} onClick={()=>setFeedSort(s.k as any)} className={`px-2.5 py-1 rounded-full text-[11px] font-medium ${feedSort===s.k?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400'}`}>{s.l}</button>))}</div></div>{(()=>{const left:any[]=[],right:any[]=[];sortedFeed.forEach((n:any,i:number)=>(i%2===0?left:right).push(n));return(<div className="flex gap-2 px-4">{[left,right].map((col,ci)=>(<div key={ci} className="flex-1 flex flex-col gap-2">{col.map((n:any)=>(<div key={n.id} onClick={()=>navigate(`/post/${n.postId}`)} className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80">{n.images&&n.images[0]&&(<img src={getMediaUrl(n.images[0])} className="w-full object-cover" style={{aspectRatio:'1/1.1'}}/>)}<div className="p-2.5"><p className="text-[12px] text-[#333] dark:text-gray-100 leading-snug line-clamp-2 mb-2">{n.content}</p><div className="flex items-center justify-between"><div className="flex items-center gap-1.5 min-w-0"><img src={n.avatar} className="w-4 h-4 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/><span className="text-[10px] text-[#999] dark:text-gray-400 truncate">{n.user}</span></div><span className="text-[10px] text-[#FF8C42] shrink-0"><Heart className={`w-3 h-3 inline mr-0.5 cursor-pointer ${likedNotes.has(n.id) ? 'text-[#FF4D4F] fill-[#FF4D4F]' : 'text-[#999]'}`} onClick={(e) => { e.stopPropagation(); toggleNoteLike(n.id); }} />{n.likes + (likedNotes.has(n.id) ? 1 : 0)}</span></div>{n.placeName&&(<div className="mt-1.5 flex items-center gap-1 text-[10px] text-[#BBB] dark:text-gray-500"><MapPin className="w-2.5 h-2.5"/><span className="truncate">{n.placeName}</span></div>)}</div></div>))}</div>))}</div>);})()}</div>)}
+        {feed.length>0&&(<div className="mt-8 mb-6"><div className="flex items-center justify-between px-4 mb-3"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.nearbyHot')}</h2><div className="flex gap-1">{[{k:'hot',l:t('discover.hot')},{k:'nearby',l:t('discover.nearby')},{k:'newest',l:t('discover.newest')}].map(s=>(<button key={s.k} onClick={()=>setFeedSort(s.k as any)} className={`px-2.5 py-1 rounded-full text-[11px] font-medium ${feedSort===s.k?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400'}`}>{s.l}</button>))}</div></div>{(()=>{const left:any[]=[],right:any[]=[];sortedFeed.forEach((n:any,i:number)=>(i%2===0?left:right).push(n));return(<div className="flex gap-2 px-4">{[left,right].map((col,ci)=>(<div key={ci} className="flex-1 flex flex-col gap-2">{col.map((n:any)=>(<div key={n.id} onClick={()=>navigate(`/post/${n.postId}`)} className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80">{n.images&&n.images[0]&&(<img src={getMediaUrl(n.images[0])} className="w-full object-cover" style={{aspectRatio:'1/1.1'}}/>)}<div className="p-2.5"><p className="text-[12px] text-[#333] dark:text-gray-100 leading-snug line-clamp-2 mb-2">{n.content}</p><div className="flex items-center justify-between"><div className="flex items-center gap-1.5 min-w-0"><img src={n.avatar} onClick={(e) => { e.stopPropagation(); navigate(`/user/${n.userId || n.user?.id}`); }} className="w-4 h-4 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/><span className="text-[10px] text-[#999] dark:text-gray-400 truncate">{n.user}</span></div><span className="text-[10px] text-[#FF8C42] shrink-0"><Heart className={`w-3 h-3 inline mr-0.5 cursor-pointer ${likedNotes.has(n.id) ? 'text-[#FF4D4F] fill-[#FF4D4F]' : 'text-[#999]'}`} onClick={(e) => { e.stopPropagation(); toggleNoteLike(n.id); }} />{n.likes + (likedNotes.has(n.id) ? 1 : 0)}</span></div>{n.placeName&&(<div className="mt-1.5 flex items-center gap-1 text-[10px] text-[#BBB] dark:text-gray-500"><MapPin className="w-2.5 h-2.5"/><span className="truncate">{n.placeName}</span></div>)}</div></div>))}</div>))}</div>);})()}</div>)}
         {feedLoading&&<div className="text-center py-4 text-[12px] text-[#999] dark:text-gray-400">{t('common.loading')}</div>}
         {!feedLoading&&feedHasMore&&<div className="text-center py-3 text-[12px] text-[#BBB] dark:text-gray-500">{t('common.loadMore')}</div>}
       </div>

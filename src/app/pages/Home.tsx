@@ -228,7 +228,8 @@ export function Home() {
       <div className="flex-1 overflow-y-auto pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]" ref={scrollRef}
         onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onScroll={handleScroll}>
 
-        {pullState!=='idle'&&(<div className="flex items-center justify-center text-[12px] text-[#999] dark:text-gray-400" style={{height:pullDist}}>
+        {pullState!=='idle'&&(<div className="flex items-center justify-center gap-2 text-[12px] text-[#999] dark:text-gray-400" style={{height:pullDist}}>
+          {pullState==='loading'&&<span className="w-3.5 h-3.5 border-2 border-[#FF8C42] border-t-transparent rounded-full animate-spin"/>}
           {pullLabels[pullState]}
         </div>)}
 
@@ -294,7 +295,7 @@ export function Home() {
                   <div className="space-y-3">
                     {recommendUsers.map(u => (
                       <div key={u.id} className="bg-white dark:bg-gray-900 rounded-2xl p-3 flex items-center gap-3 border border-[#EEE] dark:border-gray-700">
-                        <ImageWithFallback src={u.avatar} className="w-12 h-12 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70" />
+                        <ImageWithFallback src={u.avatar} onClick={() => navigate(`/user/${u.id}`)} className="w-12 h-12 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70" />
                         <div className="flex-1 min-w-0">
                           <div className="text-[14px] font-bold text-[#333] dark:text-gray-100">{u.name}</div>
                           <div className="text-[11px] text-[#999] dark:text-gray-400">{u.bio} · {t('home.followers')} {u.followers}</div>

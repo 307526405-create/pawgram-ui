@@ -168,7 +168,7 @@ export function PostDetail() {
     return (
       <div key={c.id}>
         <div className={`flex gap-2.5 ${indentClass}`}>
-          <ImageWithFallback src={c.user.avatar} className="w-7 h-7 rounded-full object-cover shrink-0 bg-gray-200 dark:bg-gray-700 mt-0.5 cursor-pointer active:opacity-70"/>
+          <ImageWithFallback src={c.user.avatar} onClick={() => c.user.id && navigate(`/user/${c.user.id}`)} className="w-7 h-7 rounded-full object-cover shrink-0 bg-gray-200 dark:bg-gray-700 mt-0.5 cursor-pointer active:opacity-70"/>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -260,7 +260,7 @@ export function PostDetail() {
       <div className="flex-1 overflow-y-auto pb-[80px] [&::-webkit-scrollbar]:hidden">
         <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900">
           <div className="flex items-center gap-3">
-            <ImageWithFallback src={post.user?.avatar} className="w-9 h-9 rounded-full object-cover cursor-pointer active:opacity-70"/>
+            <ImageWithFallback src={post.user?.avatar} onClick={() => navigate(`/user/${post.user?.id}`)} className="w-9 h-9 rounded-full object-cover cursor-pointer active:opacity-70"/>
             <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{post.user?.name || t('common.user')}</span>
           </div>
           <button onClick={() => {
