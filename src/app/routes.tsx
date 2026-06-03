@@ -1,4 +1,5 @@
-import { createHashRouter, Outlet, useLocation } from "react-router";
+import { useEffect, useRef } from "react";
+import { createHashRouter, Outlet, useLocation, useNavigate } from "react-router";
 import { Home } from "./pages/Home";
 import { PostDetail } from "./pages/PostDetail";
 import { Profile } from "./pages/Profile";
@@ -19,6 +20,39 @@ import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 
 function Root() {
   const location = useLocation();
+  const navigate = useNavigate();
+  const swipeRef = useRef({ startX: 0, startY: 0, swiping: false });
+
+  useEffect(() => {
+    const s = swipeRef.current;
+    const onTouchStart = (e: TouchEvent) => {
+      if (e.touches.length !== 1) return;
+      s.startX = e.touches[0].clientX;
+      s.startY = e.touches[0].clientY;
+      s.swiping = s.startX < 30;
+    };
+    const onTouchMove = (e: TouchEvent) => {
+      if (!s.swiping) return;
+      const dy = Math.abs(e.touches[0].clientY - s.startY);
+      const dx = e.touches[0].clientX - s.startX;
+      if (dy > Math.abs(dx)) { s.swiping = false; return; }
+      if (dx < 0) s.swiping = false;
+    };
+    const onTouchEnd = (e: TouchEvent) => {
+      if (!s.swiping) return;
+      const dx = e.changedTouches[0].clientX - s.startX;
+      if (dx > 50) navigate(-1);
+      s.swiping = false;
+    };
+    document.addEventListener('touchstart', onTouchStart, { passive: true });
+    document.addEventListener('touchmove', onTouchMove, { passive: true });
+    document.addEventListener('touchend', onTouchEnd);
+    return () => {
+      document.removeEventListener('touchstart', onTouchStart);
+      document.removeEventListener('touchmove', onTouchMove);
+      document.removeEventListener('touchend', onTouchEnd);
+    };
+  }, [navigate]);
 
   if (location.pathname === "/export") {
     return <Outlet />;

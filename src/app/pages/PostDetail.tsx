@@ -332,6 +332,7 @@ export function PostDetail() {
         </div>
       </div>
 
+      {!replyTarget && (
       <div className="absolute bottom-[84px] left-0 right-0 bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 p-3 z-40 flex items-center gap-3">
         <input value={commentText} onChange={e => setCommentText(e.target.value)} onKeyDown={e => e.key==='Enter'&&handleSendComment()}
           placeholder={t('common.saySomething')} className="flex-1 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 h-9 outline-none text-[14px] placeholder:text-[#999]"/>
@@ -339,6 +340,7 @@ export function PostDetail() {
           <Send className="w-4 h-4"/>
         </button>
       </div>
+      )}
 
       <BottomNav />
     </div>

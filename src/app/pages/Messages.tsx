@@ -1,9 +1,9 @@
-import { useState, useRef, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { MoreHorizontal, ChevronRight, CheckCheck, Settings, Ban, Search } from "lucide-react";
+import { MoreHorizontal, ChevronRight, CheckCheck, Settings, Ban, Search, X } from "lucide-react";
 
 const newFriendBase = [
   { id:1, name:"Alice Wang", avatar:"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=120" },
@@ -62,6 +62,7 @@ export function Messages() {
   const [showMenu, setShowMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 
   const convs = useMemo(() =>
     conversations
@@ -171,7 +172,7 @@ export function Messages() {
             </div>
           ) : (
             convs.map(c => (
-              <SwipeDelete key={c.id} onDelete={() => deleteConv(c.id)}>
+              <div key={c.id} className="relative group">
                 <div onClick={() => navigate(`/chat/${c.id}`)} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 active:bg-[#F9F9F9] dark:active:bg-gray-800">
                   <div className="relative shrink-0">
                     <ImageWithFallback src={c.avatar} className="w-12 h-12 rounded-full object-cover"/>
@@ -190,7 +191,13 @@ export function Messages() {
                     </div>
                   )}
                 </div>
-              </SwipeDelete>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(c.id); }}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#F0F0F0] dark:bg-gray-700 flex items-center justify-center opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity"
+                >
+                  <X className="w-3.5 h-3.5 text-[#999] dark:text-gray-400" />
+                </button>
+              </div>
             ))
           )}
         </div>
@@ -199,36 +206,24 @@ export function Messages() {
       </div>
 
       <BottomNav />
-    </div>
-  );
-}
 
-/* ─── Swipe to delete ─── */
-function SwipeDelete({ children, onDelete }: { children: React.ReactNode; onDelete: () => void }) {
-  const { t } = useTranslation();
-  const [offset, setOffset] = useState(0);
-  const startX = useRef(0);
-  const swiping = useRef(false);
-
-  const onTouchStart = (e: React.TouchEvent) => { startX.current = e.touches[0].clientX; swiping.current = true; };
-  const onTouchMove = (e: React.TouchEvent) => {
-    if (!swiping.current) return;
-    const dx = e.touches[0].clientX - startX.current;
-    if (dx < 0) setOffset(Math.max(dx, -80));
-    else setOffset(Math.min(offset + dx * 0.3, 0));
-  };
-  const onTouchEnd = () => {
-    swiping.current = false;
-    setOffset(offset < -40 ? -80 : 0);
-  };
-
-  return (
-    <div className="relative overflow-hidden">
-      <button onClick={() => { setOffset(0); onDelete(); }} className="absolute right-0 top-0 bottom-0 w-20 bg-[#FF4D4F] flex items-center justify-center text-white text-[13px] font-medium">{t('common.delete')}</button>
-      <div className="relative bg-white dark:bg-gray-900" style={{ transform: `translateX(${offset}px)`, transition: swiping.current ? 'none' : 'transform 0.2s' }}
-        onTouchStart={onTouchStart} onTouchMove={onTouchMove} onTouchEnd={onTouchEnd}>
-        {children}
-      </div>
+      {confirmDeleteId !== null && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div className="absolute inset-0 bg-black/40" onClick={() => setConfirmDeleteId(null)} />
+          <div className="relative bg-white dark:bg-gray-900 rounded-2xl px-6 py-6 mx-8 w-full max-w-[280px] shadow-xl">
+            <p className="text-[15px] text-[#333] dark:text-gray-100 text-center font-medium mb-1">{t('messages.deleteConfirmTitle')}</p>
+            <p className="text-[13px] text-[#999] dark:text-gray-400 text-center mb-5">{t('messages.deleteConfirmDesc')}</p>
+            <div className="flex gap-3">
+              <button onClick={() => setConfirmDeleteId(null)} className="flex-1 h-10 rounded-full bg-[#F0F0F0] dark:bg-gray-800 text-[14px] font-medium text-[#333] dark:text-gray-100 active:bg-[#E5E5E5]">
+                {t('common.cancel')}
+              </button>
+              <button onClick={() => { deleteConv(confirmDeleteId); setConfirmDeleteId(null); }} className="flex-1 h-10 rounded-full bg-[#FF4D4F] text-[14px] font-medium text-white active:bg-[#E04345]">
+                {t('common.delete')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
