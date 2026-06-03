@@ -21,6 +21,7 @@ const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.poste
 
 export function Profile() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [tab, setTab] = useState<'posts'|'liked'|'favs'|'drafts'>('posts');
   const [posts, setPosts] = useState<any[]>([]);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());
