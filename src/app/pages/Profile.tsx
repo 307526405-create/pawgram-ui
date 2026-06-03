@@ -1,4 +1,4 @@
-import { Settings, QrCode, Share2, Scan } from "lucide-react";
+import { Settings, QrCode, Share2, Scan, Heart, MessageCircle } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -182,7 +182,7 @@ export function Profile() {
               <div key={p.id} className="aspect-square bg-[#F0F0F0] dark:bg-gray-800 relative" onClick={() => navigate(`/post/${p.id}`)}>
                 <ImageWithFallback src={getMediaUrl(p.images?.[0])} className="w-full h-full object-cover"/>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent p-2">
-                  <div className="flex items-center gap-3 text-white text-[10px]"><span>❤ {p.like_count}</span><span>💬 {p.comment_count}</span></div>
+                  <div className="flex items-center gap-3 text-white text-[10px]"><span><Heart className="w-3 h-3 inline mr-0.5" />{p.like_count}</span><span><MessageCircle className="w-3 h-3 inline mr-0.5" />{p.comment_count}</span></div>
                 </div>
               </div>
             ))}
