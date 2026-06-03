@@ -1,11 +1,20 @@
+# 爪印 PawGram - 前端
 
-  # PAWGRAM
+**版本**: v1.0
+**上线日期**: 2026-06-03
 
-  This is a code bundle for PAWGRAM. The original project is available at https://www.figma.com/design/W2X3pVPPO8AxL29jgb1oze/PAWGRAM.
+## 技术栈
+- React + Vite + Tailwind CSS
+- Capacitor iOS
+- react-i18next (中英文)
 
-  ## Running the code
+## 功能模块
+- 首页：帖子流、Stories、通知
+- 发现页：地图、附近热门、宠友
+- 发布页：图文/视频发布
+- 消息页：通知、私信
+- 我的：个人主页、宠物档案、设置
 
-  Run `npm i` to install the dependencies.
-
-  Run `npm run dev` to start the development server.
-  
+## 版本标签
+- `v1.0-20260603` — 正式上线版
+- 回滚：`git checkout v1.0-20260603`
