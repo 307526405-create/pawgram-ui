@@ -19,7 +19,7 @@ export const postsApi = {
   list: (page = 1) => apiGet(`/posts?page=${page}&pageSize=10`),
   detail: (id: number) => apiGet(`/posts/${id}`),
   create: (data: any) => apiPost('/posts', data),
-  comments: (id: number) => apiGet(`/posts/${id}/comments`),
+  comments: (id: number) => apiGet(`/posts/${id}/comments?lang=${localStorage.getItem("i18nextLng")?.startsWith("en") ? "en" : "zh"}`),
   addComment: (postId: number, content: string, parentId?: number) =>
     apiPost(`/posts/${postId}/comments`, { content, parent_id: parentId || null }),
 };
