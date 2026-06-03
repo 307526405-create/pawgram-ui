@@ -1,6 +1,5 @@
-import { useEffect, useRef } from "react";
-import { createHashRouter, Outlet, useLocation, useNavigate } from "react-router";
 import { useRef } from "react";
+import { createHashRouter, Outlet, useLocation, useNavigate } from "react-router";
 import { Home } from "./pages/Home";
 import { PostDetail } from "./pages/PostDetail";
 import { Profile } from "./pages/Profile";
@@ -22,44 +21,64 @@ import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 function Root() {
   const location = useLocation();
   const navigate = useNavigate();
-  const navRef = useRef({ x:0, y:0, on:false, off:0 });
+  const pageRef = useRef<HTMLDivElement>(null);
+  const gesture = useRef({ startX: 0, startY: 0, swiping: false, dx: 0 });
 
   if (location.pathname === "/export") return <Outlet />;
 
   const isHome = location.pathname === "/";
 
+  const finish = (el: HTMLDivElement, forward: boolean) => {
+    el.style.transition = 'transform 0.3s ease-out';
+    if (forward) {
+      el.style.transform = `translateX(${window.innerWidth}px)`;
+      setTimeout(() => {
+        el.style.transition = 'none';
+        el.style.transform = '';
+        navigate(-1);
+      }, 300);
+    } else {
+      el.style.transform = 'translateX(0)';
+      setTimeout(() => { el.style.transition = 'none'; }, 300);
+    }
+  };
+
   return (
-    <div className="w-full h-full bg-white dark:bg-gray-900 overflow-hidden relative"
+    <div className="w-full h-full bg-gray-900 overflow-hidden"
       onTouchStart={e => {
         if (isHome) return;
         const t = e.touches[0];
-        navRef.current = { x: t.clientX, y: t.clientY, on: t.clientX < 28, off: 0 };
+        gesture.current = { startX: t.clientX, startY: t.clientY, swiping: t.clientX < 28, dx: 0 };
       }}
       onTouchMove={e => {
-        const n = navRef.current;
-        if (!n.on) return;
+        const g = gesture.current;
+        if (!g.swiping) return;
         const t = e.touches[0];
-        const dx = t.clientX - n.x;
-        const dy = Math.abs(t.clientY - n.y);
-        if (dy > dx * 1.5) { n.on = false; return; }
-        if (dx > 0) { n.off = dx; e.currentTarget.style.transform = `translateX(${dx}px)`; }
-      }}
-      onTouchEnd={e => {
-        const n = navRef.current;
-        if (!n.on) return;
-        n.on = false;
-        const el = e.currentTarget as HTMLElement;
-        if (n.off > 80) {
-          el.style.transform = 'translateX(100%)';
-          el.style.transition = 'transform 0.3s ease-out';
-          setTimeout(() => navigate(-1), 300);
-        } else {
-          el.style.transform = '';
-          el.style.transition = 'transform 0.2s ease-out';
+        const dx = t.clientX - g.startX;
+        const dy = Math.abs(t.clientY - g.startY);
+        if (dy > dx * 1.5) { g.swiping = false; return; }
+        if (dx > 0) {
+          g.dx = dx;
+          const el = pageRef.current;
+          if (el) {
+            el.style.transition = 'none';
+            el.style.transform = `translateX(${dx}px)`;
+          }
         }
       }}
+      onTouchEnd={() => {
+        const g = gesture.current;
+        if (!g.swiping) return;
+        g.swiping = false;
+        const el = pageRef.current;
+        if (!el) return;
+        const progress = g.dx / window.innerWidth;
+        finish(el, progress > 0.3);
+      }}
     >
-      <Outlet />
+      <div ref={pageRef} className="w-full h-full bg-white dark:bg-gray-900 relative">
+        <Outlet />
+      </div>
     </div>
   );
 }
