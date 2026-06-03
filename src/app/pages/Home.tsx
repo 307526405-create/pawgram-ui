@@ -165,7 +165,7 @@ export function Home() {
     if(posts.length > 0 && el.scrollHeight-el.scrollTop-el.clientHeight<300&&hasMore&&!loadMoreLoading) fetchPosts();
   };
 
-  const postsWithLike = posts.map(p => ({...p, is_liked: likedPosts.has(p.id), like_count: (p.like_count||0) + (likedPosts.has(p.id)?1:0), user: {...p.user, followed: followedUsers.has(p.user_id||p.user?.id)}, breedDisplay: p.breed ? (t('pet.breeds.' + p.breed, p.breed)) : '' }));
+  const postsWithLike = posts.map(p => ({...p, is_liked: likedPosts.has(p.id), like_count: (p.like_count||0) + (likedPosts.has(p.id)?1:0), user: {...p.user, followed: followedUsers.has(p.user_id||p.user?.id)}, breedDisplay: p.breed ? (t('pet.breeds.' + p.breed, p.breed)) : '' })).filter((p: any) => !p.images?.some((img: any) => typeof img === 'object' && img.type === 'video'));
 
   const pullLabels: Record<string, string> = {
     pulling: t('common.pullRefresh'),
