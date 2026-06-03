@@ -2,6 +2,7 @@ import { Search, MapPin, Navigation, Star, Phone, ChevronRight, X, Share2, Heart
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import i18n from "../i18n";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { mapPreviewImage } from "../data/mockData";
@@ -75,15 +76,15 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
     <div className="fixed inset-0 z-[70] bg-black/40 flex items-end" onClick={onClose}>
       <div className="w-full bg-white dark:bg-gray-900 rounded-t-[20px] px-5 pt-5 pb-8 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-1">
-          <h2 className="text-[18px] font-bold text-[#333] dark:text-gray-100 flex-1">{place.name}</h2>
+          <h2 className="text-[18px] font-bold text-[#333] dark:text-gray-100 flex-1">{getPlaceName(place)}</h2>
           <div className="flex items-center gap-1">
             <button onClick={onToggleFavorite} className={`p-1 ${isFavorite ? 'text-[#FF4444]' : 'text-[#999] dark:text-gray-400'} active:opacity-70`}>
               <Heart className={`w-4 h-4 ${isFavorite ? 'fill-[#FF4444]' : ''}`} />
             </button>
             <button onClick={() => {
               const url = `http://maps.apple.com/?q=${place.lat},${place.lng}`;
-              const text = `${place.name}\n⭐${place.rating} · ${place.type}\n${place.desc}`;
-              if (navigator.share) navigator.share({ title: place.name, text, url });
+              const text = `${getPlaceName(place)}\n⭐${place.rating} · ${place.type}\n${place.desc}`;
+              if (navigator.share) navigator.share({ title: getPlaceName(place), text, url });
               else navigator.clipboard?.writeText(text);
             }} className="p-1 text-[#999] dark:text-gray-400 active:text-[#FF8C42]"><Share2 className="w-4 h-4" /></button>
           </div>
@@ -171,7 +172,6 @@ function MarkPlaceForm({ lat, lng, onClose }: any) {
   const [type, setType] = useState('');
   const [desc, setDesc] = useState('');
   const [phone, setPhone] = useState('');
-  const typeOptions = ['公园', '咖啡馆', '医院', '餐厅', '小区', '户外', '美容', '商店', '其他'];
   const [submitted, setSubmitted] = useState(false);
 
   const handleSubmit = async () => {
@@ -197,7 +197,7 @@ function MarkPlaceForm({ lat, lng, onClose }: any) {
         <div className="flex items-center justify-between mb-4"><h2 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('discover.markPlace')}</h2><button onClick={onClose}><X className="w-5 h-5 text-[#999] dark:text-gray-400" /></button></div>
         <p className="text-[12px] text-[#999] dark:text-gray-400 mb-4">📍 {lat.toFixed(5)}, {lng.toFixed(5)}</p>
         <input value={name} onChange={e => setName(e.target.value)} placeholder={t('discover.placeNameRequired')} className="w-full h-11 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 text-[14px] mb-3 outline-none" />
-        <div className="flex flex-wrap gap-2 mb-3">{typeOptions.map(tp => (<button key={tp} onClick={() => setType(type === tp ? '' : tp)} className={`px-3 py-1.5 rounded-full text-[12px] font-medium ${type === tp ? 'bg-[#FF8C42] text-white' : 'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>{tp}</button>))}</div>
+        <div className="flex flex-wrap gap-2 mb-3">{typeOptions.map(tp => (<button key={tp.value} onClick={() => setType(type === tp.value ? '' : tp.value)} className={`px-3 py-1.5 rounded-full text-[12px] font-medium ${type === tp.value ? 'bg-[#FF8C42] text-white' : 'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>{t(tp.key)}</button>))}</div>
         <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder={t('discover.describePlace')} rows={3} className="w-full bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-[14px] mb-3 outline-none resize-none" />
         <input value={phone} onChange={e => setPhone(e.target.value)} placeholder={t('discover.phoneOptional')} className="w-full h-11 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 text-[14px] mb-4 outline-none" />
         <button onClick={handleSubmit} disabled={!name.trim()} className={`w-full h-12 rounded-xl text-[15px] font-bold ${name.trim() ? 'bg-[#FF8C42] text-white active:bg-[#E67A35]' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#999] dark:text-gray-500'}`}>{t('discover.submitReview')}</button>
@@ -215,6 +215,29 @@ function getDistanceKm(p: any, userLoc?: { lat: number; lng: number } | null) {
 
 /* ───────── Main Discover Page ───────── */
 const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.poster || item?.url || '';
+
+const typeOptions = [
+  { value: '公园', key: 'discover.typePark' },
+  { value: '咖啡馆', key: 'discover.typeCafe' },
+  { value: '医院', key: 'discover.typeHospital' },
+  { value: '餐厅', key: 'discover.typeRestaurant' },
+  { value: '小区', key: 'discover.typeResidential' },
+  { value: '户外', key: 'discover.typeOutdoor' },
+  { value: '美容', key: 'discover.typeGrooming' },
+  { value: '商店', key: 'discover.typeShop' },
+  { value: '其他', key: 'common.other' },
+];
+
+const typeColors = ['#4CAF50', '#795548', '#F44336', '#FF8C42', '#2196F3', '#E91E63', '#9C27B0', '#607D8B', '#FF8C42'];
+
+function getTypeColor(type: string): string {
+  const idx = typeOptions.findIndex(o => o.value === type);
+  return typeColors[idx] || '#FF8C42';
+}
+
+function getPlaceName(place: any): string {
+  return i18n.language === 'en' && place.name_en ? place.name_en : place.name;
+}
 
 export function Discover() {
   const navigate = useNavigate();
@@ -307,7 +330,7 @@ export function Discover() {
       (el as any)._leaflet_map=map;mapRef.current=map;setTimeout(()=>map.invalidateSize(),200);}
   },[showMap,places,userLoc]);
 
-  function addMarkers(L:any,map:any,list:any[]){const c:Record<string,string>={'公园':'#4CAF50','咖啡馆':'#795548','医院':'#F44336','餐厅':'#FF8C42','户外':'#2196F3','美容':'#E91E63','小区':'#9C27B0','商店':'#607D8B'};list.forEach(p=>{L.circleMarker([p.lat,p.lng],{radius:8,color:'#fff',weight:2.5,fillColor:c[p.type]||'#FF8C42',fillOpacity:.9}).addTo(map).on('click',()=>setSelectedPlace(p));});}
+  function addMarkers(L:any,map:any,list:any[]){list.forEach(p=>{L.circleMarker([p.lat,p.lng],{radius:8,color:'#fff',weight:2.5,fillColor:getTypeColor(p.type),fillOpacity:.9}).addTo(map).on('click',()=>setSelectedPlace(p));});}
 
   useEffect(()=>{const map=mapRef.current;if(!map)return;const L=(window as any).L;map.eachLayer((l:any)=>{if(l instanceof L.Marker||l instanceof L.CircleMarker||l instanceof L.Circle)map.removeLayer(l);});if(userLoc)L.circleMarker([userLoc.lat,userLoc.lng],{radius:6,color:'#4A90D9',fillColor:'#4A90D9',fillOpacity:1,weight:3}).addTo(map).bindPopup(t('discover.myLocation'));addMarkers(L,map,filteredPlaces);},[filteredPlaces]);
 
@@ -326,7 +349,7 @@ export function Discover() {
           {mapTypes.map(tp=>(<button key={tp} onClick={()=>{setFavoritesOnly(false);setMapFilter(tp===mapFilter?'全部':tp);}} className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-medium ${!favoritesOnly&&mapFilter===tp?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>{tp === '全部' ? t('discover.all') : tp}</button>))}
         </div>
         <div id="pawgram-leaflet-map" className="flex-1 w-full"/>
-        <div className="flex gap-2 p-3 overflow-x-auto bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 shrink-0">{sortedPlaces.map(p=>(<div key={p.id} onClick={()=>setSelectedPlace(p)} className="shrink-0 bg-white dark:bg-gray-900 rounded-xl px-3 py-2 cursor-pointer shadow-sm border border-[#F0F0F0] dark:border-gray-700" style={{borderLeftWidth:'3px',borderLeftColor:(()=>{const c:Record<string,string>={'公园':'#4CAF50','咖啡馆':'#795548','医院':'#F44336','餐厅':'#FF8C42','户外':'#2196F3','美容':'#E91E63','小区':'#9C27B0','商店':'#607D8B'};return c[p.type]||'#FF8C42';})()}}><div className="flex items-center gap-1.5"><span className="text-[13px] font-semibold text-[#333] dark:text-gray-100">{p.name}</span>{favorites.has(p.id)&&<Heart className="w-3 h-3 text-[#FF4444] fill-[#FF4444] shrink-0"/>}</div><div className="text-[11px] text-[#FF8C42] mt-0.5">★{p.rating} · {getDistanceKm(p, userLoc)===Infinity?p.distance:`${getDistanceKm(p, userLoc).toFixed(1)}km`}</div></div>))}</div>
+        <div className="flex gap-2 p-3 overflow-x-auto bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 shrink-0">{sortedPlaces.map(p=>(<div key={p.id} onClick={()=>setSelectedPlace(p)} className="shrink-0 bg-white dark:bg-gray-900 rounded-xl px-3 py-2 cursor-pointer shadow-sm border border-[#F0F0F0] dark:border-gray-700" style={{borderLeftWidth:'3px',borderLeftColor:getTypeColor(p.type)}}><div className="flex items-center gap-1.5"><span className="text-[13px] font-semibold text-[#333] dark:text-gray-100">{getPlaceName(p)}</span>{favorites.has(p.id)&&<Heart className="w-3 h-3 text-[#FF4444] fill-[#FF4444] shrink-0"/>}</div><div className="text-[11px] text-[#FF8C42] mt-0.5">★{p.rating} · {getDistanceKm(p, userLoc)===Infinity?p.distance:`${getDistanceKm(p, userLoc).toFixed(1)}km`}</div></div>))}</div>
       </div>)}
       {selectedPlace&&<PlaceDetail place={selectedPlace} userLoc={userLoc} isFavorite={favorites.has(selectedPlace.id)} wantCount={wantCount(selectedPlace.id)} onToggleFavorite={()=>toggleFavorite(selectedPlace.id)} onClose={()=>setSelectedPlace(null)}/>}
       {markForm&&<MarkPlaceForm lat={markForm.lat} lng={markForm.lng} onClose={()=>setMarkForm(null)}/>}
@@ -334,7 +357,7 @@ export function Discover() {
         {pullState!=='idle'&&(<div className="flex items-center justify-center text-[12px] text-[#999] dark:text-gray-400" style={{height:pullDist}}>{pullState==='pulling'&&t('common.pullRefresh')}{pullState==='ready'&&t('common.releaseRefresh')}{pullState==='loading'&&t('common.refreshing')}</div>)}
         <div className="px-4 mt-5" onClick={()=>navigate('/search')}><div className="bg-white dark:bg-gray-900 border border-[#E5E5E5] dark:border-gray-600 rounded-lg px-3 py-2.5 flex items-center cursor-pointer"><Search className="w-4 h-4 text-[#999] dark:text-gray-400 mr-2 shrink-0"/><span className="flex-1 text-[14px] text-[#999] dark:text-gray-400">{t('discover.searchPlaceholder')}</span></div></div>
         <div className="mt-8"><div className="flex items-center justify-between px-4 mb-4"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button className="text-[#FF8C42] text-[12px] font-medium" onClick={()=>setShowMap(true)}>{t('common.viewAll')}</button></div><div className="px-4"><div onClick={()=>setShowMap(true)} className="bg-white dark:bg-gray-900 rounded-xl border border-[#EEE] dark:border-gray-700 overflow-hidden shadow-sm cursor-pointer active:opacity-80"><div className="relative h-[120px] w-full"><ImageWithFallback src={mapPreviewImage} alt="地图" className="w-full h-full object-cover"/><div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"/><div className="absolute bottom-3 left-3 flex items-center text-white"><MapPin className="w-4 h-4 mr-1"/><span className="text-[12px] font-medium">{t('discover.nearbyPlaces', { count: places.length })}</span></div></div></div></div></div>
-        {favPlaces.length>0&&(<div className="mt-8"><h2 className="px-4 text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">{t('discover.myWishlist')} ({favPlaces.length})</h2><div className="flex gap-3 px-4 overflow-x-auto pb-2">{favPlaces.map(p=>(<div key={p.id} onClick={()=>setSelectedPlace(p)} className="shrink-0 w-[130px] bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80"><div className="h-[70px] flex items-center justify-center" style={{backgroundColor:(()=>{const c:Record<string,string>={'公园':'#4CAF50','咖啡馆':'#795548','医院':'#F44336','餐厅':'#FF8C42','户外':'#2196F3','美容':'#E91E63','小区':'#9C27B0','商店':'#607D8B'};return (c[p.type]||'#FF8C42')+'20';})()}}><MapPin className="w-6 h-6" style={{color:(()=>{const c:Record<string,string>={'公园':'#4CAF50','咖啡馆':'#795548','医院':'#F44336','餐厅':'#FF8C42','户外':'#2196F3','美容':'#E91E63','小区':'#9C27B0','商店':'#607D8B'};return c[p.type]||'#FF8C42';})()}}/></div><div className="p-2.5"><div className="text-[13px] font-semibold text-[#333] dark:text-gray-100 truncate">{p.name}</div><div className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{p.type} · ★{p.rating}</div></div></div>))}</div></div>)}
+        {favPlaces.length>0&&(<div className="mt-8"><h2 className="px-4 text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">{t('discover.myWishlist')} ({favPlaces.length})</h2><div className="flex gap-3 px-4 overflow-x-auto pb-2">{favPlaces.map(p=>(<div key={p.id} onClick={()=>setSelectedPlace(p)} className="shrink-0 w-[130px] bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80"><div className="h-[70px] flex items-center justify-center" style={{backgroundColor:getTypeColor(p.type)+'20'}}><MapPin className="w-6 h-6" style={{color:getTypeColor(p.type)}}/></div><div className="p-2.5"><div className="text-[13px] font-semibold text-[#333] dark:text-gray-100 truncate">{getPlaceName(p)}</div><div className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{p.type} · ★{p.rating}</div></div></div>))}</div></div>)}
         {nearbyUsers.length > 0 && (
           <div className="mt-6 px-4">
             <div className="flex gap-3 overflow-x-auto pb-2">
