@@ -7,6 +7,7 @@ import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { mapPreviewImage } from "../data/mockData";
 import { postsApi, placesApi, discoverApi } from "../api/client";
+import { useScrollRestore } from "../hooks/useScrollRestore";
 
 /* ─── Note Expanded Modal ─── */
 function NoteExpanded({ note, onClose, likedNotes, onToggleLike }: any) {
@@ -261,7 +262,7 @@ export function Discover() {
   const [likedNotes, setLikedNotes] = useState<Set<number>>(new Set());
   const toggleNoteLike = (noteId: number) => { setLikedNotes(prev => { const next = new Set(prev); if (next.has(noteId)) next.delete(noteId); else next.add(noteId); return next; }); };
   const mapRef = useRef<any>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { containerRef: scrollRef, onScroll: saveScrollPos } = useScrollRestore(!feedLoading);
   const [pullState, setPullState] = useState<'idle' | 'pulling' | 'ready' | 'loading'>('idle');
   const [pullDist, setPullDist] = useState(0);
   const touchStartY = useRef(0);
@@ -319,7 +320,7 @@ export function Discover() {
   const handleTouchStart = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop===0) touchStartY.current=e.touches[0].clientY; };
   const handleTouchMove = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop!==0||touchStartY.current===0) return; const d=e.touches[0].clientY-touchStartY.current; if(d>0){setPullDist(Math.min(d*.5,80));setPullState(d>60?'ready':'pulling');} };
   const handleTouchEnd = async () => { if(pullState==='ready'){setPullState('loading');setPullDist(40);setFeedPage(1);await fetchFeed(1);setPullState('idle');setPullDist(0);}else{setPullState('idle');setPullDist(0);} touchStartY.current=0; };
-  const handleScroll = () => { const el=scrollRef.current; if(!el)return; if(el.scrollHeight-el.scrollTop-el.clientHeight<200)loadMore(); };
+  const handleScroll = () => { saveScrollPos(); const el=scrollRef.current; if(!el)return; if(el.scrollHeight-el.scrollTop-el.clientHeight<200)loadMore(); };
   useEffect(() => { navigator.geolocation?.getCurrentPosition(p=>setUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),()=>setUserLoc({lat:23.1291,lng:113.2644})); },[]);
   useEffect(() => { if (userLoc) { discoverApi.nearby(userLoc.lat, userLoc.lng, 8).then(d => setNearbyUsers(d.users || [])).catch(() => {}); } }, [userLoc]);
   useEffect(() => { const h=()=>{setShowMap(false);setSelectedPlace(null);setMarkForm(null);}; window.addEventListener('pawgram:discover-tab-click',h); return ()=>window.removeEventListener('pawgram:discover-tab-click',h); },[]);

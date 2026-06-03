@@ -7,6 +7,7 @@ import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { postsApi } from "../api/client";
 import { sendLikeNotification, sendFollowNotification, sendNewNotification } from "../utils/notifications";
+import { useScrollRestore } from "../hooks/useScrollRestore";
 
 const storyAvatars = [
   "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=120",
@@ -86,7 +87,7 @@ export function Home() {
   const [storyProgress, setStoryProgress] = useState(0);
   const storyTimer = useRef<any>(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const { containerRef: scrollRef, onScroll: saveScrollPos } = useScrollRestore(!loading);
   const [pullState, setPullState] = useState<'idle'|'pulling'|'ready'|'loading'>('idle');
   const [pullDist, setPullDist] = useState(0);
   const touchStartY = useRef(0);
@@ -166,6 +167,7 @@ export function Home() {
     else{setPullState('idle');setPullDist(0);} touchStartY.current=0;
   };
   const handleScroll = () => {
+    saveScrollPos();
     const el=scrollRef.current; if(!el)return;
     if(posts.length > 0 && el.scrollHeight-el.scrollTop-el.clientHeight<300&&hasMore&&!loadMoreLoading) fetchPosts();
   };

@@ -6,6 +6,7 @@ import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { postsApi } from "../api/client";
 import { isLoggedIn, login as doLogin } from "../api/auth";
+import { useScrollRestore } from "../hooks/useScrollRestore";
 
 const myUserBase = {
   id:1, avatar:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
@@ -47,6 +48,7 @@ export function Profile() {
   const [showAvatar, setShowAvatar] = useState(false);
   const [editingBio, setEditingBio] = useState(false);
   const [bio, setBio] = useState(myUser.bio);
+  const { containerRef: scrollRef, onScroll } = useScrollRestore();
   const [showAddPet, setShowAddPet] = useState(false);
 
   useEffect(() => {
@@ -143,7 +145,7 @@ export function Profile() {
         <button onClick={() => navigate('/settings')} className="p-2 -mr-2"><Settings className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
       </div>
 
-      <div className="flex-1 overflow-y-auto pt-[var(--app-header-height)] pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 overflow-y-auto pt-[var(--app-header-height)] pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden" ref={scrollRef} onScroll={onScroll}>
         <div className="px-5 pt-2 pb-4">
           <div className="flex items-start gap-4 mb-4">
             <ImageWithFallback src={myUser.avatar} className="w-16 h-16 rounded-full object-cover shrink-0 shadow-sm" onClick={() => setShowAvatar(true)}/>

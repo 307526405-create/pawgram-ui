@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { MoreHorizontal, ChevronRight, CheckCheck, Settings, Ban, Search, X } from "lucide-react";
+import { useScrollRestore } from "../hooks/useScrollRestore";
 
 const newFriendBase = [
   { id:1, name:"Alice Wang", avatar:"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=120" },
@@ -57,6 +58,7 @@ export function Messages() {
     })),
   [mockData]);
 
+  const { containerRef: scrollRef, onScroll } = useScrollRestore();
   const [deletedConvIds, setDeletedConvIds] = useState<Set<number>>(new Set());
   const [allRead, setAllRead] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -125,7 +127,7 @@ export function Messages() {
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden" ref={scrollRef} onScroll={onScroll}>
         <div className="bg-white dark:bg-gray-900 mb-2">
           <div className="flex gap-3 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
             {newFriends.map(f => (
