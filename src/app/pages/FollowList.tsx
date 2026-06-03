@@ -101,10 +101,9 @@ export function FollowList() {
             <div key={user.id} className={`flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 ${index !== currentList.length - 1 ? 'border-b border-[#EEEEEE] dark:border-gray-700' : ''}`}>
               <div className="flex items-center gap-3 overflow-hidden">
                 <ImageWithFallback
-                  onClick={() => navigate('/profile')}
                   src={user.avatar}
                   alt={user.name}
-                  className="w-[36px] h-[36px] rounded-full object-cover shrink-0 cursor-pointer"
+                  className="w-[36px] h-[36px] rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"
                 />
                 <div className="flex flex-col min-w-0">
                   <span className="text-[14px] font-bold text-[#333333] dark:text-gray-100 truncate">{user.name}</span>

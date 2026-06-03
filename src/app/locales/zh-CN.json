@@ -105,7 +105,7 @@
     "calculatingRoute": "计算路线中...",
     "view": "查看",
     "favorites": "收藏",
-    "longPressHint": "长按地图标记新地点",
+    "openInMaps": "在 Apple Maps 中打开",
     "backToMap": "← 返回",
     "all": "全部",
     "myLocation": "我的位置",

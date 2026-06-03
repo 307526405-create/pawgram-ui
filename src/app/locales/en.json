@@ -105,7 +105,7 @@
     "calculatingRoute": "Calculating route...",
     "view": "View",
     "favorites": "Favorites",
-    "longPressHint": "Long press on the map to add a spot",
+    "openInMaps": "Open in Apple Maps",
     "backToMap": "← Back",
     "all": "All",
     "myLocation": "My Location",

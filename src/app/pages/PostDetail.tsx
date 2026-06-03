@@ -168,7 +168,7 @@ export function PostDetail() {
     return (
       <div key={c.id}>
         <div className={`flex gap-2.5 ${indentClass}`}>
-          <ImageWithFallback onClick={() => navigate('/profile')} src={c.user.avatar} className="w-7 h-7 rounded-full object-cover shrink-0 bg-gray-200 dark:bg-gray-700 mt-0.5 cursor-pointer"/>
+          <ImageWithFallback src={c.user.avatar} className="w-7 h-7 rounded-full object-cover shrink-0 bg-gray-200 dark:bg-gray-700 mt-0.5 cursor-pointer active:opacity-70"/>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -257,10 +257,10 @@ export function PostDetail() {
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto pb-[150px] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 overflow-y-auto pb-[80px] [&::-webkit-scrollbar]:hidden">
         <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900">
           <div className="flex items-center gap-3">
-            <ImageWithFallback onClick={() => navigate('/profile')} src={post.user?.avatar} className="w-9 h-9 rounded-full object-cover cursor-pointer"/>
+            <ImageWithFallback src={post.user?.avatar} className="w-9 h-9 rounded-full object-cover cursor-pointer active:opacity-70"/>
             <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{post.user?.name || t('common.user')}</span>
           </div>
           <button onClick={() => {
@@ -334,7 +334,7 @@ export function PostDetail() {
       </div>
 
       {!replyTarget && (
-      <div className="absolute bottom-[84px] left-0 right-0 bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 p-3 z-40 flex items-center gap-3">
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 p-3 z-40 flex items-center gap-3" style={{paddingBottom: 'calc(12px + env(safe-area-inset-bottom))'}}>
         <input value={commentText} onChange={e => setCommentText(e.target.value)} onKeyDown={e => e.key==='Enter'&&handleSendComment()}
           placeholder={t('common.saySomething')} className="flex-1 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 h-9 outline-none text-[14px] placeholder:text-[#999]"/>
         <button onClick={handleSendComment} className="w-9 h-9 bg-[#FF8C42] text-white rounded-lg flex items-center justify-center active:bg-[#E67A35]">

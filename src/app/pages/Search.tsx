@@ -174,7 +174,7 @@ export function Search() {
                 <div>
                   {filteredUsers.length > 0 ? (
                     filteredUsers.map(user => (
-                      <div key={user.id} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-[16px] mb-3 border border-[#EEEEEE] dark:border-gray-700 shadow-sm active:opacity-70 transition-opacity cursor-pointer" onClick={() => navigate('/profile')}>
+                      <div key={user.id} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-[16px] mb-3 border border-[#EEEEEE] dark:border-gray-700 shadow-sm active:opacity-70 transition-opacity cursor-pointer">
                         <ImageWithFallback src={user.avatar} alt={user.name} className="w-[48px] h-[48px] rounded-full object-cover shrink-0" />
                         <div className="flex-1 min-w-0">
                           <h4 className="text-[15px] font-bold text-[#333] dark:text-gray-100 truncate">{user.name}</h4>

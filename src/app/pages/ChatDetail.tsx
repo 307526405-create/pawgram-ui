@@ -86,7 +86,7 @@ export function ChatDetail() {
           <>
             <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100"/></button>
             <div className="flex-1 flex items-center gap-2 ml-2">
-              <ImageWithFallback onClick={() => navigate('/profile')} src={user.avatar} className="w-8 h-8 rounded-full object-cover cursor-pointer"/>
+              <ImageWithFallback src={user.avatar} className="w-8 h-8 rounded-full object-cover cursor-pointer active:opacity-70"/>
               <span className="text-[16px] font-bold text-[#333] dark:text-gray-100">{user.name}</span>
             </div>
             <div className="flex items-center gap-1">
@@ -122,7 +122,7 @@ export function ChatDetail() {
             <div key={m.id}>
               {showTime && <div className="text-center py-2"><span className="text-[11px] text-[#BBB] dark:text-gray-500">{m.time}</span></div>}
               <div className={`flex mb-3 items-end gap-2 ${m.from ? 'justify-start' : 'justify-end'}`}>
-                {m.from && <ImageWithFallback onClick={() => navigate('/profile')} src={user.avatar} className="w-8 h-8 rounded-full object-cover shrink-0 cursor-pointer"/>}
+                {m.from && <ImageWithFallback src={user.avatar} className="w-8 h-8 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/>}
                 <div className={`max-w-[70%] px-3 py-2 rounded-2xl text-[14px] leading-relaxed ${m.from ? 'bg-[#F5F5F5] dark:bg-gray-800 text-[#333] dark:text-gray-100 rounded-bl-sm' : 'bg-[#FF8C42] text-white rounded-br-sm'}`}>
                   {m.text}
                 </div>

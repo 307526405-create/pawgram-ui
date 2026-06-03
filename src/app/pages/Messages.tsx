@@ -152,7 +152,7 @@ export function Messages() {
           <div className="flex gap-3 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
             {newFriends.map(f => (
               <div key={f.id} className="shrink-0 flex flex-col items-center gap-1.5 w-[64px]">
-                <ImageWithFallback onClick={() => navigate('/profile')} src={f.avatar} className="w-[52px] h-[52px] rounded-full object-cover cursor-pointer"/>
+                <ImageWithFallback src={f.avatar} className="w-[52px] h-[52px] rounded-full object-cover cursor-pointer active:opacity-70"/>
                 <span className="text-[11px] text-[#333] dark:text-gray-100 text-center leading-tight line-clamp-2">{f.name}</span>
               </div>
             ))}
@@ -162,7 +162,7 @@ export function Messages() {
         <div className="bg-white dark:bg-gray-900 mb-2">
           {notifs.map(g => (
             <div key={g.key} onClick={() => setActiveNotifGroup(g.key)} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 active:bg-[#F9F9F9] dark:active:bg-gray-800 cursor-pointer">
-              <ImageWithFallback onClick={(e) => { e.stopPropagation(); navigate('/profile'); }} src={g.avatar} className="w-11 h-11 rounded-full object-cover shrink-0 cursor-pointer"/>
+              <ImageWithFallback src={g.avatar} className="w-11 h-11 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/>
               <div className="flex-1 min-w-0">
                 <div className="text-[14px] font-bold text-[#333] dark:text-gray-100">{g.label}</div>
                 <div className="text-[12px] text-[#999] dark:text-gray-400 truncate mt-0.5">{g.desc}</div>
@@ -197,7 +197,7 @@ export function Messages() {
               <div key={c.id} className="relative group">
                 <div onClick={() => navigate(`/chat/${c.id}`)} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 active:bg-[#F9F9F9] dark:active:bg-gray-800 cursor-pointer">
                   <div className="relative shrink-0">
-                    <ImageWithFallback onClick={(e) => { e.stopPropagation(); navigate('/profile'); }} src={c.avatar} className="w-12 h-12 rounded-full object-cover cursor-pointer"/>
+                    <ImageWithFallback src={c.avatar} className="w-12 h-12 rounded-full object-cover cursor-pointer active:opacity-70"/>
                     {c.unread > 0 && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#FF4D4F] border-2 border-white dark:border-gray-900"/>}
                   </div>
                   <div className="flex-1 min-w-0">
