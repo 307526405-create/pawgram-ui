@@ -1,7 +1,6 @@
 import { ChevronLeft, PenSquare } from "lucide-react";
 import { useNavigate, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
-import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { PostCard } from "../components/PostCard";
 import { useState, useRef } from "react";
@@ -264,7 +263,6 @@ export function PetProfile() {
           </>
         )}
       </div>
-      <BottomNav />
     </div>
   );
 }

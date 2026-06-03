@@ -2,7 +2,6 @@ import { ChevronLeft, MessageCircle } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import i18n from "../i18n";
-import { BottomNav } from "../components/BottomNav";
 
 export function Login() {
   const navigate = useNavigate();
@@ -82,7 +81,6 @@ export function Login() {
         </div>
       </div>
 
-      <BottomNav />
     </div>
   );
 }

@@ -1,7 +1,6 @@
 import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import { BottomNav } from "../components/BottomNav";
 import { usePageTransition } from "../hooks/usePageTransition";
 
 export function BowlRewards() {
@@ -87,7 +86,6 @@ export function BowlRewards() {
 
       </div>
 
-      <BottomNav />
     </div>
   );
 }

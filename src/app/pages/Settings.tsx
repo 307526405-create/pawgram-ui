@@ -1,5 +1,4 @@
 import { useNavigate } from "react-router";
-import { BottomNav } from "../components/BottomNav";
 import { ChevronLeft, UserPen, Shield, Lock, Bell, Info, Trash2, ChevronRight, X, MessageSquare, Moon, Sun, Monitor, Globe } from "lucide-react";
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -283,7 +282,6 @@ export function Settings() {
         </div>
       )}
 
-      <BottomNav />
     </div>
   );
 }

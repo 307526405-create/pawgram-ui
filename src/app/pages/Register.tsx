@@ -1,7 +1,6 @@
 import { ChevronLeft, Camera, Check } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
-import { BottomNav } from "../components/BottomNav";
 
 export function Register() {
   const navigate = useNavigate();
@@ -76,7 +75,6 @@ export function Register() {
         <div className="flex-1"></div>
       </div>
 
-      <BottomNav />
     </div>
   );
 }

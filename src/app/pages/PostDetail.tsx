@@ -3,7 +3,6 @@ import { useNavigate, useParams } from "react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { BottomNav } from "../components/BottomNav";
 import { postsApi } from "../api/client";
 import { sendLikeNotification, sendCommentNotification, sendFollowNotification } from "../utils/notifications";
 import { usePageTransition } from "../hooks/usePageTransition";
@@ -344,7 +343,6 @@ export function PostDetail() {
       </div>
       )}
 
-      <BottomNav />
     </div>
   );
 }

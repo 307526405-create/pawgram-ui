@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { ChevronLeft } from "lucide-react";
-import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { users } from "../data/mockData";
 import { usePageTransition } from "../hooks/usePageTransition";
@@ -117,7 +116,6 @@ export function FollowList() {
         </div>
       </div>
 
-      <BottomNav />
     </div>
   );
 }

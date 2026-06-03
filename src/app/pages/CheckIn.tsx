@@ -1,6 +1,5 @@
 import { ChevronLeft, Check } from "lucide-react";
 import { useNavigate } from "react-router";
-import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { usePageTransition } from "../hooks/usePageTransition";
 
@@ -149,8 +148,6 @@ export function CheckIn() {
         
       </div>
 
-      {/* 底部固定 5 个 TabBar */}
-      <BottomNav />
     </div>
   );
 }
