@@ -7,15 +7,16 @@ import { PostCard } from "../components/PostCard";
 import { useState, useRef } from "react";
 import { posts } from "../data/mockData";
 
-function PetCreateForm({ onDone }: { onDone: () => void }) {
+function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialData?: any }) {
   const { t } = useTranslation();
-  const [name, setName] = useState("");
-  const [category, setCategory] = useState("");
-  const [breed, setBreed] = useState("");
+  const init = initialData || {};
+  const [name, setName] = useState(init.name || "");
+  const [category, setCategory] = useState(init.type?.includes("猫") ? "猫" : init.type ? "犬" : "");
+  const [breed, setBreed] = useState(init.type || "");
   const [customBreed, setCustomBreed] = useState("");
-  const [birthday, setBirthday] = useState("");
-  const [weight, setWeight] = useState("");
-  const [bio, setBio] = useState("");
+  const [birthday, setBirthday] = useState(init.birthday || "");
+  const [weight, setWeight] = useState(init.weight || "");
+  const [bio, setBio] = useState(init.bio || "");
   const [showPicker, setShowPicker] = useState(false);
   const catRef = useRef<HTMLDivElement>(null);
   const breedRef = useRef<HTMLDivElement>(null);
@@ -146,14 +147,14 @@ export function PetProfile() {
   return (
     <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 z-10">
-        <button onClick={() => navigate(-1)} className="text-[#333] dark:text-gray-100 p-1 -ml-1"><ChevronLeft className="w-6 h-6" /></button>
+        <button onClick={() => { if (isEditing) setIsEditing(false); else navigate(-1); }} className="text-[#333] dark:text-gray-100 p-1 -ml-1"><ChevronLeft className="w-6 h-6" /></button>
 <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{isNew || isEditing ? t("pet.addPet") : t("pet.title")}</h1>
         {isNew ? <div className="w-8"/> : <button onClick={() => setIsEditing(true)} className="p-1"><PenSquare className="w-5 h-5 text-[#666] dark:text-gray-400"/></button>}
       </div>
 
       <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden">
         {isNew || isEditing ? (
-          <PetCreateForm onDone={() => { setIsEditing(false); navigate(-1); }} />
+          <PetCreateForm onDone={() => setIsEditing(false)} initialData={isEditing ? pet : undefined} />
         ) : (
           <>
             <div className="flex flex-col items-center mt-2 mb-6">
