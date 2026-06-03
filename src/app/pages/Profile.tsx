@@ -17,9 +17,10 @@ const myPets = [
   { id:2, name:"咪咪", avatar:"https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=120", type:"布偶猫" },
 ];
 
+const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.poster || item?.url || '';
+
 export function Profile() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
   const [tab, setTab] = useState<'posts'|'liked'|'favs'|'drafts'>('posts');
   const [posts, setPosts] = useState<any[]>([]);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());
@@ -178,7 +179,7 @@ export function Profile() {
           <div className="grid grid-cols-3 gap-[2px]">
             {(tab==='posts'?myPosts:tab==='liked'?likedPosts:tab==='favs'?favPosts:[]).map(p => (
               <div key={p.id} className="aspect-square bg-[#F0F0F0] dark:bg-gray-800 relative" onClick={() => navigate(`/post/${p.id}`)}>
-                <ImageWithFallback src={p.images?.[0]} className="w-full h-full object-cover"/>
+                <ImageWithFallback src={getMediaUrl(p.images?.[0])} className="w-full h-full object-cover"/>
                 <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/40 to-transparent p-2">
                   <div className="flex items-center gap-3 text-white text-[10px]"><span>❤ {p.like_count}</span><span>💬 {p.comment_count}</span></div>
                 </div>

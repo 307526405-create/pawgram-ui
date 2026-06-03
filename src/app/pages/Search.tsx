@@ -21,6 +21,8 @@ const mockTopics = [
   { id: 5, name: "金毛寻回犬", postCount: 204 },
 ];
 
+const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.poster || item?.url || '';
+
 export function Search() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -193,7 +195,7 @@ export function Search() {
                       return (
                         <div key={post.id} className="flex gap-3 p-3 bg-white dark:bg-gray-900 rounded-[16px] mb-3 border border-[#EEEEEE] dark:border-gray-700 shadow-sm active:opacity-70 transition-opacity" onClick={() => navigate(`/post/${post.id}`)}>
                           {post.images && post.images.length > 0 && (
-                            <ImageWithFallback src={post.images[0]} alt="帖子" className="w-[84px] h-[84px] rounded-[12px] object-cover shrink-0 bg-[#FAFAFA] dark:bg-gray-800" />
+                            <ImageWithFallback src={getMediaUrl(post.images[0])} alt="帖子" className="w-[84px] h-[84px] rounded-[12px] object-cover shrink-0 bg-[#FAFAFA] dark:bg-gray-800" />
                           )}
                           <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                             <p className="text-[14px] text-[#333] dark:text-gray-100 font-medium line-clamp-2 leading-relaxed">
