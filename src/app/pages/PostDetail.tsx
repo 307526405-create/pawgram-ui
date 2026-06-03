@@ -1,4 +1,4 @@
-import { ChevronLeft, Heart, Share2, Send, MoreHorizontal, Trash2, Lock, Eye, Edit3 } from "lucide-react";
+import { ChevronLeft, Heart, Share2, Send, MoreHorizontal, Trash2, Lock, Eye, Edit3, Star } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
@@ -65,6 +65,7 @@ export function PostDetail() {
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
+  const [isFaved, setIsFaved] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
   const [comments, setComments] = useState<FlatComment[]>([]);
@@ -251,6 +252,7 @@ export function PostDetail() {
             </div>
           )}
           <button onClick={handleShare} className="p-1 text-[#666] dark:text-gray-400"><Share2 className="w-5 h-5"/></button>
+          <button onClick={() => setIsFaved(!isFaved)} className={`p-1 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}><Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/></button>
         </div>
       </div>
 
@@ -313,6 +315,10 @@ export function PostDetail() {
               <button onClick={handleLike} className={`flex items-center gap-1.5 ${isLiked ? 'text-[#FF4D4F]' : 'text-[#666] dark:text-gray-400'}`}>
                 <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`}/>
                 <span className="text-[14px] font-medium">{(post.like_count||0)+(isLiked?1:0)}</span>
+              </button>
+              <button onClick={() => setIsFaved(!isFaved)} className={`flex items-center gap-1.5 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}>
+                <Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/>
+                <span className="text-[14px] font-medium">{isFaved ? 1 : 0}</span>
               </button>
             </div>
           </div>
