@@ -301,7 +301,7 @@ export function PostDetail() {
         <div className="bg-white dark:bg-gray-900 px-4 pt-4 pb-2">
           <p className="text-[14px] text-[#333] dark:text-gray-100 leading-relaxed mb-3">{post.content}</p>
           <div className="flex flex-wrap gap-2 mb-4">
-            {post.breed && <span className="bg-[#FFF3E6] dark:bg-orange-900/30 text-[#FF8C42] px-2.5 py-1 rounded-md text-[12px] font-medium">#{post.breed}</span>}
+            {post.breed && <span className="bg-[#FFF3E6] dark:bg-orange-900/30 text-[#FF8C42] px-2.5 py-1 rounded-md text-[12px] font-medium">#{(t as any)('pet.breeds.' + post.breed, post.breed)}</span>}
             {post.location && <span className="bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400 px-2.5 py-1 rounded-md text-[12px]">📍{post.location}</span>}
           </div>
           <div className="text-[11px] text-[#BBB] dark:text-gray-500 mb-3">
