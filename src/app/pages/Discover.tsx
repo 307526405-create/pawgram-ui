@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { mapPreviewImage } from "../data/mockData";
-import { placesApi, discoverApi } from "../api/client";
+import { postsApi, placesApi, discoverApi } from "../api/client";
 
 /* ─── Note Expanded Modal ─── */
 function NoteExpanded({ note, onClose, likedNotes, onToggleLike }: any) {
@@ -223,8 +223,8 @@ export function Discover() {
   const [userLoc, setUserLoc] = useState<{ lat: number; lng: number } | null>(null);
   const [markForm, setMarkForm] = useState<{ lat: number; lng: number } | null>(null);
   const [feed, setFeed] = useState<any[]>([]);
-  const [feedLimit, setFeedLimit] = useState(6);
-  const [feedTotal, setFeedTotal] = useState(0);
+  const [feedPage, setFeedPage] = useState(1);
+  const [feedHasMore, setFeedHasMore] = useState(false);
   const [feedLoading, setFeedLoading] = useState(false);
   const [mapFilter, setMapFilter] = useState('全部');
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -260,19 +260,40 @@ export function Discover() {
 
   const sortedFeed = [...feed].sort((a, b) => feedSort === 'hot' ? b.likes - a.likes : feedSort === 'newest' ? (b.id - a.id) : (a.distance||999)-(b.distance||999));
 
-  const fetchFeed = async (limit?: number) => {
+  const fetchFeed = async (page = 1) => {
     setFeedLoading(true);
-    try { const d = await placesApi.discoverFeed(limit); setFeed(d.list); setFeedTotal(d.total||0); } catch {}
+    try {
+      const d = await postsApi.list(page);
+      const feedItems = d.list.map((p: any) => ({
+        id: p.id,
+        postId: p.id,
+        user: p.user?.name || '',
+        avatar: p.user?.avatar || '',
+        content: p.content,
+        images: p.images || [],
+        likes: p.like_count || 0,
+        comment_count: p.comment_count || 0,
+        breed: p.breed || '',
+        placeName: p.location || '',
+        time: p.created_at,
+      }));
+      if (page === 1) {
+        setFeed(feedItems);
+      } else {
+        setFeed(prev => [...prev, ...feedItems]);
+      }
+      setFeedHasMore(d.pagination?.hasMore || false);
+    } catch {}
     setFeedLoading(false);
   };
 
   useEffect(() => { placesApi.list(userLoc?.lat, userLoc?.lng).then(d => setPlaces(d.list)).catch(() => {}); }, [userLoc]);
-  useEffect(() => { fetchFeed(feedLimit); }, [feedLimit]);
-  const loadMore = () => { if (feed.length < feedTotal && !feedLoading) setFeedLimit(l => l + 6); };
+  useEffect(() => { fetchFeed(1); }, []);
+  const loadMore = () => { if (feedHasMore && !feedLoading) { const next = feedPage + 1; setFeedPage(next); fetchFeed(next); } };
 
   const handleTouchStart = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop===0) touchStartY.current=e.touches[0].clientY; };
   const handleTouchMove = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop!==0||touchStartY.current===0) return; const d=e.touches[0].clientY-touchStartY.current; if(d>0){setPullDist(Math.min(d*.5,80));setPullState(d>60?'ready':'pulling');} };
-  const handleTouchEnd = async () => { if(pullState==='ready'){setPullState('loading');setPullDist(40);setFeedLimit(6);await fetchFeed(6);setPullState('idle');setPullDist(0);}else{setPullState('idle');setPullDist(0);} touchStartY.current=0; };
+  const handleTouchEnd = async () => { if(pullState==='ready'){setPullState('loading');setPullDist(40);setFeedPage(1);await fetchFeed(1);setPullState('idle');setPullDist(0);}else{setPullState('idle');setPullDist(0);} touchStartY.current=0; };
   const handleScroll = () => { const el=scrollRef.current; if(!el)return; if(el.scrollHeight-el.scrollTop-el.clientHeight<200)loadMore(); };
   useEffect(() => { navigator.geolocation?.getCurrentPosition(p=>setUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),()=>setUserLoc({lat:23.1291,lng:113.2644})); },[]);
   useEffect(() => { if (userLoc) { discoverApi.nearby(userLoc.lat, userLoc.lng, 8).then(d => setNearbyUsers(d.users || [])).catch(() => {}); } }, [userLoc]);
@@ -329,7 +350,7 @@ export function Discover() {
         )}
         {feed.length>0&&(<div className="mt-8 mb-6"><div className="flex items-center justify-between px-4 mb-3"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.nearbyHot')}</h2><div className="flex gap-1">{[{k:'hot',l:t('discover.hot')},{k:'nearby',l:t('discover.nearby')},{k:'newest',l:t('discover.newest')}].map(s=>(<button key={s.k} onClick={()=>setFeedSort(s.k as any)} className={`px-2.5 py-1 rounded-full text-[11px] font-medium ${feedSort===s.k?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400'}`}>{s.l}</button>))}</div></div>{(()=>{const left:any[]=[],right:any[]=[];sortedFeed.forEach((n:any,i:number)=>(i%2===0?left:right).push(n));return(<div className="flex gap-2 px-4">{[left,right].map((col,ci)=>(<div key={ci} className="flex-1 flex flex-col gap-2">{col.map((n:any)=>(<div key={n.id} onClick={()=>navigate(`/post/${n.postId}`)} className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80">{n.images&&n.images[0]&&(<img src={n.images[0]} className="w-full object-cover" style={{aspectRatio:'1/1.1'}}/>)}<div className="p-2.5"><p className="text-[12px] text-[#333] dark:text-gray-100 leading-snug line-clamp-2 mb-2">{n.content}</p><div className="flex items-center justify-between"><div className="flex items-center gap-1.5 min-w-0"><img src={n.avatar} className="w-4 h-4 rounded-full object-cover shrink-0"/><span className="text-[10px] text-[#999] dark:text-gray-400 truncate">{n.user}</span></div><span className="text-[10px] text-[#FF8C42] shrink-0"><Heart className={`w-3 h-3 inline mr-0.5 cursor-pointer ${likedNotes.has(n.id) ? 'text-[#FF4D4F] fill-[#FF4D4F]' : 'text-[#999]'}`} onClick={(e) => { e.stopPropagation(); toggleNoteLike(n.id); }} />{n.likes + (likedNotes.has(n.id) ? 1 : 0)}</span></div>{n.placeName&&(<div className="mt-1.5 flex items-center gap-1 text-[10px] text-[#BBB] dark:text-gray-500"><MapPin className="w-2.5 h-2.5"/><span className="truncate">{n.placeName}</span></div>)}</div></div>))}</div>))}</div>);})()}</div>)}
         {feedLoading&&<div className="text-center py-4 text-[12px] text-[#999] dark:text-gray-400">{t('common.loading')}</div>}
-        {!feedLoading&&feed.length<feedTotal&&<div className="text-center py-3 text-[12px] text-[#BBB] dark:text-gray-500">{t('common.loadMore')}</div>}
+        {!feedLoading&&feedHasMore&&<div className="text-center py-3 text-[12px] text-[#BBB] dark:text-gray-500">{t('common.loadMore')}</div>}
       </div>
       <BottomNav/>
     </div>

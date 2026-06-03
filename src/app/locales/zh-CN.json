@@ -239,7 +239,13 @@
     "selectCategoryFirst": "请先选择品类",
     "enterBreedName": "请输入品种名称",
     "birthdayPlaceholder": "生日（如2024-03-15）",
-    "weightPlaceholder": "体重（如28kg）"
+    "weightPlaceholder": "体重（如28kg）",
+    "vaccineRecords": "疫苗记录",
+    "vaccineName": "疫苗名称",
+    "vaccineDate": "接种日期",
+    "dailyNotes": "日常笔记",
+    "noteContent": "记录内容",
+    "noteDate": "日期"
   },
   "chat": {
     "viewProfile": "查看主页",

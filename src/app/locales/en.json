@@ -238,7 +238,13 @@
     "selectCategoryFirst": "Please select a category first",
     "enterBreedName": "Enter breed name",
     "birthdayPlaceholder": "Birthday (e.g. 2024-03-15)",
-    "weightPlaceholder": "Weight (e.g. 28kg)"
+    "weightPlaceholder": "Weight (e.g. 28kg)",
+    "vaccineRecords": "Vaccine Records",
+    "vaccineName": "Vaccine Name",
+    "vaccineDate": "Date",
+    "dailyNotes": "Daily Notes",
+    "noteContent": "Note",
+    "noteDate": "Date"
   },
   "chat": {
     "viewProfile": "View Profile",

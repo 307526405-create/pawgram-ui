@@ -1,4 +1,4 @@
-import { ChevronLeft } from "lucide-react";
+import { ChevronLeft, PenSquare } from "lucide-react";
 import { useNavigate, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
@@ -115,6 +115,7 @@ export function PetProfile() {
   const { t } = useTranslation();
   const isNew = (location.state as any)?.new;
   const petData = (location.state as any)?.pet;
+  const [isEditing, setIsEditing] = useState(false);
 
   const pet = petData || { name:"豆豆", type:"金毛", avatar:"https://images.unsplash.com/photo-1581285217236-a2355291f9c9?w=1080" };
   const petPosts = posts.filter(p => p.breedId === 'golden-retriever');
@@ -125,17 +126,34 @@ export function PetProfile() {
     "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=1080"
   ];
 
+  const [vaccines, setVaccines] = useState<{id: number, name: string, date: string}[]>([
+    { id: 1, name: '狂犬疫苗', date: '2025-03-15' },
+    { id: 2, name: '犬瘟热疫苗', date: '2025-01-20' },
+  ]);
+  const [showVaccineForm, setShowVaccineForm] = useState(false);
+  const [newVaccineName, setNewVaccineName] = useState('');
+  const [newVaccineDate, setNewVaccineDate] = useState('');
+  const vaccineIdRef = useRef(3);
+
+  const [dailyNotes, setDailyNotes] = useState<{id: number, note: string, date: string}[]>([
+    { id: 1, note: '今天豆豆特别活泼，在公园里跑了好几圈', date: '2025-05-20' },
+  ]);
+  const [showNoteForm, setShowNoteForm] = useState(false);
+  const [newNoteContent, setNewNoteContent] = useState('');
+  const [newNoteDate, setNewNoteDate] = useState('');
+  const noteIdRef = useRef(2);
+
   return (
     <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 z-10">
         <button onClick={() => navigate(-1)} className="text-[#333] dark:text-gray-100 p-1 -ml-1"><ChevronLeft className="w-6 h-6" /></button>
-        <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{isNew ? t('pet.addPet') : t('pet.title')}</h1>
-        <div className="w-8"/>
+<h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{isNew || isEditing ? t("pet.addPet") : t("pet.title")}</h1>
+        {isNew ? <div className="w-8"/> : <button onClick={() => setIsEditing(true)} className="p-1"><PenSquare className="w-5 h-5 text-[#666] dark:text-gray-400"/></button>}
       </div>
 
       <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden">
-        {isNew ? (
-          <PetCreateForm onDone={() => navigate(-1)} />
+        {isNew || isEditing ? (
+          <PetCreateForm onDone={() => { setIsEditing(false); navigate(-1); }} />
         ) : (
           <>
             <div className="flex flex-col items-center mt-2 mb-6">
@@ -151,6 +169,73 @@ export function PetProfile() {
                 <div className="flex items-start"><span className="text-[16px] mr-2 mt-0.5">📝</span><span className="text-[14px] text-[#999] dark:text-gray-400 w-10">{t('pet.bio').replace('...','')}</span><span className="text-[14px] font-medium text-[#333] dark:text-gray-100 ml-auto text-right flex-1">爱笑的金毛大暖男</span></div>
               </div>
             </div>
+
+            {/* 疫苗记录 */}
+            <div className="px-4 mb-6">
+              <h3 className="text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">💉 {t('pet.vaccineRecords')}</h3>
+              <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-sm border border-[#F0F0F0] dark:border-gray-700 space-y-3">
+                {vaccines.map(v => (
+                  <div key={v.id} className="flex items-center gap-3">
+                    <span className="text-[14px] font-medium text-[#333] dark:text-gray-100 flex-1">{v.name}</span>
+                    <span className="text-[12px] text-[#999] dark:text-gray-400">{v.date}</span>
+                    <button onClick={() => setVaccines(vaccines.filter(x => x.id !== v.id))} className="text-[#CCC] dark:text-gray-600 hover:text-red-400 p-0.5">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                    </button>
+                  </div>
+                ))}
+                {vaccines.length === 0 && !showVaccineForm && (
+                  <p className="text-[13px] text-[#BBB] dark:text-gray-500 text-center py-2">{t('common.noData')}</p>
+                )}
+                {showVaccineForm ? (
+                  <div className="flex items-center gap-2 pt-1">
+                    <input value={newVaccineName} onChange={e => setNewVaccineName(e.target.value)} placeholder={t('pet.vaccineName')} className="flex-1 h-9 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 text-[13px] outline-none" />
+                    <input type="date" value={newVaccineDate} onChange={e => setNewVaccineDate(e.target.value)} className="w-[128px] h-9 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-2 text-[13px] outline-none" />
+                    <button onClick={() => { setShowVaccineForm(false); setNewVaccineName(''); setNewVaccineDate(''); }} className="text-[13px] text-[#999] dark:text-gray-400 shrink-0">{t('common.cancel')}</button>
+                    <button onClick={() => { if (newVaccineName.trim()) { setVaccines([...vaccines, { id: vaccineIdRef.current++, name: newVaccineName.trim(), date: newVaccineDate || new Date().toISOString().slice(0, 10) }]); setNewVaccineName(''); setNewVaccineDate(''); setShowVaccineForm(false); } }} className="text-[13px] text-[#FF8C42] font-bold shrink-0">{t('common.save')}</button>
+                  </div>
+                ) : (
+                  <button onClick={() => setShowVaccineForm(true)} className="flex items-center justify-center w-full h-9 border border-dashed border-[#DDD] dark:border-gray-600 rounded-lg text-[#999] dark:text-gray-400 text-[13px] hover:border-[#FF8C42] hover:text-[#FF8C42] transition-colors">
+                    + {t('pet.vaccineRecords')}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* 日常笔记 */}
+            <div className="px-4 mb-6">
+              <h3 className="text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">📒 {t('pet.dailyNotes')}</h3>
+              <div className="bg-white dark:bg-gray-900 rounded-2xl p-4 shadow-sm border border-[#F0F0F0] dark:border-gray-700 space-y-3">
+                {dailyNotes.map(n => (
+                  <div key={n.id} className="flex items-start gap-3">
+                    <span className="text-[14px] text-[#333] dark:text-gray-100 flex-1 leading-relaxed">{n.note}</span>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <span className="text-[12px] text-[#999] dark:text-gray-400">{n.date}</span>
+                      <button onClick={() => setDailyNotes(dailyNotes.filter(x => x.id !== n.id))} className="text-[#CCC] dark:text-gray-600 hover:text-red-400 p-0.5">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18"/><path d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {dailyNotes.length === 0 && !showNoteForm && (
+                  <p className="text-[13px] text-[#BBB] dark:text-gray-500 text-center py-2">{t('common.noData')}</p>
+                )}
+                {showNoteForm ? (
+                  <div className="space-y-2 pt-1">
+                    <textarea value={newNoteContent} onChange={e => setNewNoteContent(e.target.value)} placeholder={t('pet.noteContent')} rows={2} className="w-full bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-[13px] outline-none resize-none" />
+                    <div className="flex items-center gap-2">
+                      <input type="date" value={newNoteDate} onChange={e => setNewNoteDate(e.target.value)} className="flex-1 h-9 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-2 text-[13px] outline-none" />
+                      <button onClick={() => { setShowNoteForm(false); setNewNoteContent(''); setNewNoteDate(''); }} className="text-[13px] text-[#999] dark:text-gray-400 shrink-0">{t('common.cancel')}</button>
+                      <button onClick={() => { if (newNoteContent.trim()) { setDailyNotes([...dailyNotes, { id: noteIdRef.current++, note: newNoteContent.trim(), date: newNoteDate || new Date().toISOString().slice(0, 10) }]); setNewNoteContent(''); setNewNoteDate(''); setShowNoteForm(false); } }} className="text-[13px] text-[#FF8C42] font-bold shrink-0">{t('common.save')}</button>
+                    </div>
+                  </div>
+                ) : (
+                  <button onClick={() => setShowNoteForm(true)} className="flex items-center justify-center w-full h-9 border border-dashed border-[#DDD] dark:border-gray-600 rounded-lg text-[#999] dark:text-gray-400 text-[13px] hover:border-[#FF8C42] hover:text-[#FF8C42] transition-colors">
+                    + {t('pet.dailyNotes')}
+                  </button>
+                )}
+              </div>
+            </div>
+
             <div className="px-4 mb-8">
               <h3 className="text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">{t('pet.gallery')}</h3>
               <div className="grid grid-cols-3 gap-3">{albumImages.map((img, idx) => <div key={idx}><ImageWithFallback src={img} className="w-full aspect-square rounded-lg object-cover"/></div>)}</div>
