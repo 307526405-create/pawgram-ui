@@ -42,10 +42,12 @@ export default function App() {
     }
   }, [showSplash, showOnboarding]);
 
+  const appReady = !showSplash && !showOnboarding;
+
   return (
     <>
       <DarkModeInit />
-      <RouterProvider router={router} />
+      {appReady && <RouterProvider router={router} />}
       {showSplash && <SplashScreen onDone={handleSplashDone} />}
       {showOnboarding && <Onboarding onDone={handleOnboardingDone} />}
     </>

@@ -4,9 +4,11 @@ import { ChevronLeft } from "lucide-react";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { users } from "../data/mockData";
+import { usePageTransition } from "../hooks/usePageTransition";
 
 export function FollowList() {
   const navigate = useNavigate();
+  const { animClass, handleBack } = usePageTransition();
   const location = useLocation();
   
   // 通过路由 state 初始化 tab，默认为 'following'
@@ -57,11 +59,11 @@ export function FollowList() {
   };
 
   return (
-    <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
+    <div className={`h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col ${animClass}`}>
       {/* 顶部导航栏：高度对齐，标题和返回 */}
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-40 border-b border-transparent">
         <div className="w-16 flex justify-start">
-          <button onClick={() => navigate(-1)} className="p-2 -ml-2 active:opacity-70 transition-opacity">
+          <button onClick={handleBack} className="p-2 -ml-2 active:opacity-70 transition-opacity">
             <ChevronLeft className="w-6 h-6 text-[#333333] dark:text-gray-100" />
           </button>
         </div>

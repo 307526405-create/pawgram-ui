@@ -5,6 +5,7 @@ import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { logout } from "../api/auth";
 import { useDarkMode } from "../hooks/useDarkMode";
+import { usePageTransition } from "../hooks/usePageTransition";
 
 function FeedbackForm({ onDone }: { onDone: () => void }) {
   const { t } = useTranslation();
@@ -70,6 +71,7 @@ const themeIcons: Record<string, React.ReactNode> = { system: <Monitor className
 
 export function Settings() {
   const navigate = useNavigate();
+  const { animClass, handleBack } = usePageTransition();
   const { t, i18n } = useTranslation();
   const { theme, setTheme } = useDarkMode();
   const [showLogout, setShowLogout] = useState(false);
@@ -162,11 +164,11 @@ export function Settings() {
   };
 
   return (
-    <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
+    <div className={`h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col ${animClass}`}>
       {page && renderPage()}
 
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center px-4 shrink-0">
-        <button onClick={() => navigate(-1)} className="p-1 -ml-1"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100"/></button>
+        <button onClick={handleBack} className="p-1 -ml-1"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100"/></button>
         <h1 className="flex-1 text-center text-[17px] font-bold text-[#333] dark:text-gray-100 mr-8">{t('settings.title')}</h1>
       </div>
 
