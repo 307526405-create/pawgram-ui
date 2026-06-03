@@ -44,7 +44,7 @@ export function PostCard({ post, onLike, onFollow }: { post: any; onLike?: (e: a
     <div className="bg-white dark:bg-gray-900 rounded-xl mb-4 shadow-sm border border-gray-50 dark:border-gray-800 overflow-hidden">
       <div className="flex items-center justify-between p-3">
         <div className="flex items-center gap-2">
-          <ImageWithFallback src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-gray-100 dark:border-gray-700"/>
+          <ImageWithFallback onClick={(e) => { e.stopPropagation(); navigate('/profile'); }} src={user.avatar} alt={user.name} className="w-10 h-10 rounded-full object-cover border border-gray-100 dark:border-gray-700 cursor-pointer" />
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{user.name}</h3>
@@ -67,7 +67,7 @@ export function PostCard({ post, onLike, onFollow }: { post: any; onLike?: (e: a
         </div>
       </div>
 
-      <div onClick={(e) => { e.stopPropagation(); window.location.hash = `#/post/${post.id}`; }} className="block relative w-full aspect-square bg-gray-50 dark:bg-gray-800 overflow-hidden cursor-pointer">
+      <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.id}`); }} className="block relative w-full aspect-square bg-gray-50 dark:bg-gray-800 overflow-hidden cursor-pointer">
         <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden" onClick={handleDoubleTap}>
           {(post.images||[]).map((img: string, idx: number) => (
             <div key={idx} className="w-full h-full shrink-0 snap-center relative">
@@ -99,7 +99,7 @@ export function PostCard({ post, onLike, onFollow }: { post: any; onLike?: (e: a
           <button onClick={onLike} className={`flex items-center gap-1.5 ${post.is_liked?'text-[#FF8C42]':'text-gray-600 dark:text-gray-400'}`}>
             <Heart className={`w-6 h-6 ${post.is_liked?'fill-current':''}`}/><span className="text-sm font-medium">{post.like_count}</span>
           </button>
-          <div onClick={(e) => { e.stopPropagation(); window.location.hash = `#/post/${post.id}`; }} className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 cursor-pointer">
+          <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.id}`); }} className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 cursor-pointer">
             <MessageCircle className="w-6 h-6"/><span className="text-sm font-medium">{post.comment_count}</span>
           </div>
         </div>

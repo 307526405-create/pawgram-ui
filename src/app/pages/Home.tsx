@@ -269,7 +269,7 @@ export function Home() {
               return (
               <div key={s.id} onClick={() => handleOpenStory(s)} className="shrink-0 flex flex-col items-center gap-1 cursor-pointer active:opacity-70">
                 <div className={`w-[62px] h-[62px] rounded-full p-[2px] ${viewed ? 'bg-gray-300 dark:bg-gray-600' : 'bg-gradient-to-br from-[#FF8C42] to-[#FFB380]'}`}>
-                  <ImageWithFallback src={s.avatar} className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-900" />
+                  <ImageWithFallback onClick={(e) => { e.stopPropagation(); navigate('/profile'); }} src={s.avatar} className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-900 cursor-pointer" />
                 </div>
                 <span className="text-[10px] text-[#666] dark:text-gray-400 w-[62px] text-center truncate">{s.name}</span>
               </div>
@@ -294,7 +294,7 @@ export function Home() {
                   <div className="space-y-3">
                     {recommendUsers.map(u => (
                       <div key={u.id} className="bg-white dark:bg-gray-900 rounded-2xl p-3 flex items-center gap-3 border border-[#EEE] dark:border-gray-700">
-                        <ImageWithFallback src={u.avatar} className="w-12 h-12 rounded-full object-cover shrink-0" />
+                        <ImageWithFallback onClick={() => navigate('/profile')} src={u.avatar} className="w-12 h-12 rounded-full object-cover shrink-0 cursor-pointer" />
                         <div className="flex-1 min-w-0">
                           <div className="text-[14px] font-bold text-[#333] dark:text-gray-100">{u.name}</div>
                           <div className="text-[11px] text-[#999] dark:text-gray-400">{u.bio} · {t('home.followers')} {u.followers}</div>

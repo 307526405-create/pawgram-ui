@@ -134,7 +134,7 @@ export function Search() {
                       <div className="text-[14px] font-bold text-[#333] dark:text-gray-100">{u.name}</div>
                       <div className="text-[11px] text-[#999] dark:text-gray-400">{t('common.followersCount', { count: u.followers })} · {u.bio}</div>
                     </div>
-                    <button className="shrink-0 bg-[#FF8C42] text-white px-4 py-1.5 rounded-full text-[12px] font-bold active:bg-[#E67A35]">{t('common.follow')}</button>
+                    <button onClick={() => alert(t('common.featureInDev'))} className="shrink-0 bg-[#FF8C42] text-white px-4 py-1.5 rounded-full text-[12px] font-bold active:bg-[#E67A35]">{t('common.follow')}</button>
                   </div>
                 ))}
               </div>
@@ -174,13 +174,13 @@ export function Search() {
                 <div>
                   {filteredUsers.length > 0 ? (
                     filteredUsers.map(user => (
-                      <div key={user.id} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-[16px] mb-3 border border-[#EEEEEE] dark:border-gray-700 shadow-sm active:opacity-70 transition-opacity">
+                      <div key={user.id} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-[16px] mb-3 border border-[#EEEEEE] dark:border-gray-700 shadow-sm active:opacity-70 transition-opacity cursor-pointer" onClick={() => navigate('/profile')}>
                         <ImageWithFallback src={user.avatar} alt={user.name} className="w-[48px] h-[48px] rounded-full object-cover shrink-0" />
                         <div className="flex-1 min-w-0">
                           <h4 className="text-[15px] font-bold text-[#333] dark:text-gray-100 truncate">{user.name}</h4>
                           <p className="text-[12px] text-[#999] dark:text-gray-400 mt-0.5 truncate">{t('common.followersCount', { count: user.followers })}</p>
                         </div>
-                        <button className="shrink-0 bg-transparent border border-[#FF8C42] text-[#FF8C42] px-4 py-1.5 rounded-full text-[13px] font-bold active:opacity-70 transition-opacity">
+                        <button onClick={(e) => { e.stopPropagation(); alert(t('common.featureInDev')); }} className="shrink-0 bg-transparent border border-[#FF8C42] text-[#FF8C42] px-4 py-1.5 rounded-full text-[13px] font-bold active:opacity-70 transition-opacity">
                           {t('common.follow')}
                         </button>
                       </div>
@@ -195,7 +195,7 @@ export function Search() {
                     filteredPosts.map(post => {
                       const author = users[post.userId as keyof typeof users];
                       return (
-                        <div key={post.id} className="flex gap-3 p-3 bg-white dark:bg-gray-900 rounded-[16px] mb-3 border border-[#EEEEEE] dark:border-gray-700 shadow-sm active:opacity-70 transition-opacity" onClick={() => navigate(`/post/${post.id}`)}>
+                        <div key={post.id} className="flex gap-3 p-3 bg-white dark:bg-gray-900 rounded-[16px] mb-3 border border-[#EEEEEE] dark:border-gray-700 shadow-sm active:opacity-70 transition-opacity cursor-pointer" onClick={() => navigate(`/post/${post.id}`)}>
                           {post.images && post.images.length > 0 && (
                             <ImageWithFallback src={getMediaUrl(post.images[0])} alt="帖子" className="w-[84px] h-[84px] rounded-[12px] object-cover shrink-0 bg-[#FAFAFA] dark:bg-gray-800" />
                           )}

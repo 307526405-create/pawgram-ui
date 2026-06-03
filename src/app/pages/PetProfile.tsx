@@ -96,7 +96,7 @@ function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialDat
                 <div className="py-[110px]"/>
                 {category ? (category === 'dog' ? dogBreeds : catBreeds).map(b => (
                   <div key={b} onClick={() => { setBreed(b === breed ? '' : b); setCustomBreed(''); }}
-                    className={`h-10 flex items-center px-4 text-[17px] snap-center ${b === breed ? 'text-[#333] dark:text-gray-100 font-semibold' : 'text-[#BBB] dark:text-gray-500'}`}>{getBreedDisplay(b)}</div>
+                    className={`h-10 flex items-center px-4 text-[17px] snap-center cursor-pointer ${b === breed ? 'text-[#333] dark:text-gray-100 font-semibold' : 'text-[#BBB] dark:text-gray-500'}`}>{getBreedDisplay(b)}</div>
                 )) : (
                   <div className="h-10 flex items-center px-4 text-[#BBB] dark:text-gray-500 text-[15px]">{t('pet.selectCategoryFirst')}</div>
                 )}

@@ -148,7 +148,7 @@ export function Profile() {
       <div className="flex-1 overflow-y-auto pt-[var(--app-header-height)] pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden" ref={scrollRef} onScroll={onScroll}>
         <div className="px-5 pt-2 pb-4">
           <div className="flex items-start gap-4 mb-4">
-            <ImageWithFallback src={myUser.avatar} className="w-16 h-16 rounded-full object-cover shrink-0 shadow-sm" onClick={() => setShowAvatar(true)}/>
+            <ImageWithFallback src={myUser.avatar} className="w-16 h-16 rounded-full object-cover shrink-0 shadow-sm cursor-pointer" onClick={() => setShowAvatar(true)}/>
             <div className="flex-1 min-w-0">
               <h2 className="text-[17px] font-bold text-[#333] dark:text-gray-100 mb-0.5">{myUser.name}</h2>
               {editingBio ? (

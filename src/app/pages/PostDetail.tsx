@@ -168,7 +168,7 @@ export function PostDetail() {
     return (
       <div key={c.id}>
         <div className={`flex gap-2.5 ${indentClass}`}>
-          <ImageWithFallback src={c.user.avatar} className="w-7 h-7 rounded-full object-cover shrink-0 bg-gray-200 dark:bg-gray-700 mt-0.5"/>
+          <ImageWithFallback onClick={() => navigate('/profile')} src={c.user.avatar} className="w-7 h-7 rounded-full object-cover shrink-0 bg-gray-200 dark:bg-gray-700 mt-0.5 cursor-pointer"/>
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
               <div className="flex-1">
@@ -229,7 +229,7 @@ export function PostDetail() {
     <div className={`h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col ${className}`}>
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 z-10">
         <button onClick={() => handleBack(() => navigate(-1))} className="text-[#333] dark:text-gray-100 p-1 -ml-1"><ChevronLeft className="w-6 h-6"/></button>
-        <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('postDetail.title')}</h1>
+        <div className="w-6" />
         <div className="flex items-center gap-1">
           {isOwner && (
             <div className="relative">
@@ -260,7 +260,7 @@ export function PostDetail() {
       <div className="flex-1 overflow-y-auto pb-[150px] [&::-webkit-scrollbar]:hidden">
         <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900">
           <div className="flex items-center gap-3">
-            <ImageWithFallback src={post.user?.avatar} className="w-9 h-9 rounded-full object-cover"/>
+            <ImageWithFallback onClick={() => navigate('/profile')} src={post.user?.avatar} className="w-9 h-9 rounded-full object-cover cursor-pointer"/>
             <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{post.user?.name || t('common.user')}</span>
           </div>
           <button onClick={() => {

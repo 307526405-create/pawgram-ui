@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router";
+import { useTranslation } from "react-i18next";
 import { ChevronLeft } from "lucide-react";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { users } from "../data/mockData";
@@ -7,6 +8,7 @@ import { usePageTransition } from "../hooks/usePageTransition";
 
 export function FollowList() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const { className, handleBack } = usePageTransition();
   const location = useLocation();
   
@@ -37,20 +39,20 @@ export function FollowList() {
     switch (status) {
       case 'mutual':
         return (
-          <button className="text-[#FF8C42] text-[13px] font-bold px-3 py-1.5 active:opacity-70 transition-opacity">
+          <button onClick={(e) => { e.stopPropagation(); alert(t('common.featureInDev')); }} className="text-[#FF8C42] text-[13px] font-bold px-3 py-1.5 active:opacity-70 transition-opacity">
             互相关注
           </button>
         );
       case 'followed':
         return (
-          <button className="text-[#999999] dark:text-gray-400 text-[13px] font-bold px-3.5 py-1.5 rounded-full border border-[#CCCCCC] dark:border-gray-700 active:scale-95 transition-transform">
+          <button onClick={(e) => { e.stopPropagation(); alert(t('common.featureInDev')); }} className="text-[#999999] dark:text-gray-400 text-[13px] font-bold px-3.5 py-1.5 rounded-full border border-[#CCCCCC] dark:border-gray-700 active:scale-95 transition-transform">
             已关注
           </button>
         );
       case 'none':
       default:
         return (
-          <button className="bg-[#FF8C42] text-white text-[13px] font-bold px-4 py-1.5 rounded-full active:scale-95 transition-transform shadow-sm">
+          <button onClick={(e) => { e.stopPropagation(); alert(t('common.featureInDev')); }} className="bg-[#FF8C42] text-white text-[13px] font-bold px-4 py-1.5 rounded-full active:scale-95 transition-transform shadow-sm">
             关注
           </button>
         );
@@ -98,10 +100,11 @@ export function FollowList() {
           {currentList.map((user, index) => (
             <div key={user.id} className={`flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900 ${index !== currentList.length - 1 ? 'border-b border-[#EEEEEE] dark:border-gray-700' : ''}`}>
               <div className="flex items-center gap-3 overflow-hidden">
-                <ImageWithFallback 
-                  src={user.avatar} 
-                  alt={user.name} 
-                  className="w-[36px] h-[36px] rounded-full object-cover shrink-0" 
+                <ImageWithFallback
+                  onClick={() => navigate('/profile')}
+                  src={user.avatar}
+                  alt={user.name}
+                  className="w-[36px] h-[36px] rounded-full object-cover shrink-0 cursor-pointer"
                 />
                 <div className="flex flex-col min-w-0">
                   <span className="text-[14px] font-bold text-[#333333] dark:text-gray-100 truncate">{user.name}</span>
