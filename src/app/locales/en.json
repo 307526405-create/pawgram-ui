@@ -160,7 +160,9 @@
     "goMeetFriends": "Go meet new friends on Discover",
     "receivedLikes": "Likes & Favorites",
     "newFollowers": "New Followers",
-    "commentsAndAt": "Comments & @ Mentions"
+    "commentsAndAt": "Comments & @ Mentions",
+    "deleteConfirmTitle": "Delete conversation?",
+    "deleteConfirmDesc": "This will remove the conversation from your list."
   },
   "profile": {
     "scanToFollow": "Scan to Follow",

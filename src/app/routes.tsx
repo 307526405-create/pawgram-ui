@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { createHashRouter, Outlet, useLocation, useNavigate } from "react-router";
+import { useRef } from "react";
 import { Home } from "./pages/Home";
 import { PostDetail } from "./pages/PostDetail";
 import { Profile } from "./pages/Profile";
@@ -21,45 +22,43 @@ import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 function Root() {
   const location = useLocation();
   const navigate = useNavigate();
-  const swipeRef = useRef({ startX: 0, startY: 0, swiping: false });
+  const navRef = useRef({ x:0, y:0, on:false, off:0 });
 
-  useEffect(() => {
-    const s = swipeRef.current;
-    const onTouchStart = (e: TouchEvent) => {
-      if (e.touches.length !== 1) return;
-      s.startX = e.touches[0].clientX;
-      s.startY = e.touches[0].clientY;
-      s.swiping = s.startX < 30;
-    };
-    const onTouchMove = (e: TouchEvent) => {
-      if (!s.swiping) return;
-      const dy = Math.abs(e.touches[0].clientY - s.startY);
-      const dx = e.touches[0].clientX - s.startX;
-      if (dy > Math.abs(dx)) { s.swiping = false; return; }
-      if (dx < 0) s.swiping = false;
-    };
-    const onTouchEnd = (e: TouchEvent) => {
-      if (!s.swiping) return;
-      const dx = e.changedTouches[0].clientX - s.startX;
-      if (dx > 50) navigate(-1);
-      s.swiping = false;
-    };
-    document.addEventListener('touchstart', onTouchStart, { passive: true });
-    document.addEventListener('touchmove', onTouchMove, { passive: true });
-    document.addEventListener('touchend', onTouchEnd);
-    return () => {
-      document.removeEventListener('touchstart', onTouchStart);
-      document.removeEventListener('touchmove', onTouchMove);
-      document.removeEventListener('touchend', onTouchEnd);
-    };
-  }, [navigate]);
+  if (location.pathname === "/export") return <Outlet />;
 
-  if (location.pathname === "/export") {
-    return <Outlet />;
-  }
+  const isHome = location.pathname === "/";
 
   return (
-    <div className="w-full h-full bg-white dark:bg-gray-900 overflow-x-hidden overflow-y-auto">
+    <div className="w-full h-full bg-white dark:bg-gray-900 overflow-hidden relative"
+      onTouchStart={e => {
+        if (isHome) return;
+        const t = e.touches[0];
+        navRef.current = { x: t.clientX, y: t.clientY, on: t.clientX < 28, off: 0 };
+      }}
+      onTouchMove={e => {
+        const n = navRef.current;
+        if (!n.on) return;
+        const t = e.touches[0];
+        const dx = t.clientX - n.x;
+        const dy = Math.abs(t.clientY - n.y);
+        if (dy > dx * 1.5) { n.on = false; return; }
+        if (dx > 0) { n.off = dx; e.currentTarget.style.transform = `translateX(${dx}px)`; }
+      }}
+      onTouchEnd={e => {
+        const n = navRef.current;
+        if (!n.on) return;
+        n.on = false;
+        const el = e.currentTarget as HTMLElement;
+        if (n.off > 80) {
+          el.style.transform = 'translateX(100%)';
+          el.style.transition = 'transform 0.3s ease-out';
+          setTimeout(() => navigate(-1), 300);
+        } else {
+          el.style.transform = '';
+          el.style.transition = 'transform 0.2s ease-out';
+        }
+      }}
+    >
       <Outlet />
     </div>
   );

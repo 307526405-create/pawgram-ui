@@ -160,7 +160,9 @@
     "goMeetFriends": "去发现页认识新朋友吧",
     "receivedLikes": "收到的赞和收藏",
     "newFollowers": "新增关注",
-    "commentsAndAt": "评论和@"
+    "commentsAndAt": "评论和@",
+    "deleteConfirmTitle": "删除该会话？",
+    "deleteConfirmDesc": "将从会话列表中移除该聊天记录。"
   },
   "profile": {
     "scanToFollow": "扫码关注我",
