@@ -30,12 +30,24 @@ export default function App() {
     }
   };
 
+  const handleOnboardingDone = () => {
+    setShowOnboarding(false);
+    localStorage.setItem("pawgram_onboarding_done", "1");
+  };
+
+  // Replace initial history entry so native swipe-back doesn't land on a blank page
+  useEffect(() => {
+    if (!showSplash && !showOnboarding) {
+      window.history.replaceState(null, "", window.location.href);
+    }
+  }, [showSplash, showOnboarding]);
+
   return (
     <>
       <DarkModeInit />
       <RouterProvider router={router} />
       {showSplash && <SplashScreen onDone={handleSplashDone} />}
-      {showOnboarding && <Onboarding onDone={() => setShowOnboarding(false)} />}
+      {showOnboarding && <Onboarding onDone={handleOnboardingDone} />}
     </>
   );
 }

@@ -1,5 +1,4 @@
-import { useRef } from "react";
-import { createHashRouter, Outlet, useLocation, useNavigate } from "react-router";
+import { createHashRouter, Outlet, useLocation } from "react-router";
 import { Home } from "./pages/Home";
 import { PostDetail } from "./pages/PostDetail";
 import { Profile } from "./pages/Profile";
@@ -20,63 +19,12 @@ import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 
 function Root() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const pageRef = useRef<HTMLDivElement>(null);
-  const gesture = useRef({ startX: 0, startY: 0, swiping: false, dx: 0 });
 
   if (location.pathname === "/export") return <Outlet />;
 
-  const isHome = location.pathname === "/";
-
-  const finish = (el: HTMLDivElement, forward: boolean) => {
-    el.style.transition = 'transform 0.3s ease-out';
-    if (forward) {
-      el.style.transform = `translateX(${window.innerWidth}px)`;
-      setTimeout(() => {
-        el.style.transition = 'none';
-        el.style.transform = '';
-        navigate(-1);
-      }, 300);
-    } else {
-      el.style.transform = 'translateX(0)';
-      setTimeout(() => { el.style.transition = 'none'; }, 300);
-    }
-  };
-
   return (
-    <div className="w-full h-full bg-gray-900 overflow-hidden"
-      onTouchStart={e => {
-        if (isHome) return;
-        const t = e.touches[0];
-        gesture.current = { startX: t.clientX, startY: t.clientY, swiping: t.clientX < 28, dx: 0 };
-      }}
-      onTouchMove={e => {
-        const g = gesture.current;
-        if (!g.swiping) return;
-        const t = e.touches[0];
-        const dx = t.clientX - g.startX;
-        const dy = Math.abs(t.clientY - g.startY);
-        if (dy > dx * 1.5) { g.swiping = false; return; }
-        if (dx > 0) {
-          g.dx = dx;
-          const el = pageRef.current;
-          if (el) {
-            el.style.transition = 'none';
-            el.style.transform = `translateX(${dx}px)`;
-          }
-        }
-      }}
-      onTouchEnd={() => {
-        const g = gesture.current;
-        if (!g.swiping) return;
-        g.swiping = false;
-        const el = pageRef.current;
-        if (!el) return;
-        const progress = g.dx / window.innerWidth;
-        finish(el, progress > 0.3);
-      }}
-    >
-      <div ref={pageRef} className="w-full h-full bg-white dark:bg-gray-900 relative">
+    <div className="w-full h-full bg-gray-900 overflow-hidden">
+      <div className="w-full h-full bg-white dark:bg-gray-900 relative">
         <Outlet />
       </div>
     </div>
