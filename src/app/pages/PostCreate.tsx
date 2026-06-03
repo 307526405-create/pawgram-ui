@@ -1,20 +1,32 @@
 import { ChevronLeft, MapPin, Hash, AtSign } from "lucide-react";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { postsApi } from "../api/client";
 
-const myPets = [
-  { id:1, name:"旺财", avatar:"https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=80", type:"金毛" },
-  { id:2, name:"咪咪", avatar:"https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=80", type:"布偶猫" },
-  { id:3, name:"大黑", avatar:"https://images.unsplash.com/photo-1489924034176-2e678c29d4c6?w=80", type:"泰迪" },
+const myPetsBase = [
+  { id:1, avatar:"https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=80" },
+  { id:2, avatar:"https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=80" },
+  { id:3, avatar:"https://images.unsplash.com/photo-1489924034176-2e678c29d4c6?w=80" },
 ];
 
 export function PostCreate() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [mediaType, setMediaType] = useState<"none" | "image" | "video">("none");
+
+  const mockData = useMemo(() => {
+    const bundle = i18n.getResourceBundle(i18n.language, 'translation');
+    return bundle?.mock || {};
+  }, [i18n.language]);
+
+  const myPets = useMemo(() =>
+    (mockData.myPetsPost || []).map((p: any, i: number) => ({
+      ...p,
+      avatar: myPetsBase[i]?.avatar || '',
+    })),
+  [mockData]);
   const [content, setContent] = useState("");
   const [images, setImages] = useState<string[]>([]);
   const [petId, setPetId] = useState<number | null>(null);

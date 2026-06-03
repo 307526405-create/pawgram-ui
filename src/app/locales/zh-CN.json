@@ -58,7 +58,8 @@
     "recommendedFollows": "推荐关注",
     "hotTopics": "热门话题",
     "postsCount": "{{count}} 篇帖子",
-    "followersCount": "粉丝 {{count}}"
+    "followersCount": "粉丝 {{count}}",
+    "and": "和"
   },
   "bottomNav": {
     "home": "首页",
@@ -419,5 +420,63 @@
     "minAgo": "{{n}}分钟前",
     "hoursAgo": "{{n}}小时前",
     "daysAgo": "{{n}}天前"
+  },
+  "mock": {
+    "stories": [
+      { "id": 1, "name": "金毛阿福", "pet": "金毛" },
+      { "id": 2, "name": "柯基小短腿", "pet": "柯基" },
+      { "id": 3, "name": "布偶汤圆", "pet": "布偶猫" },
+      { "id": 4, "name": "萨摩耶球球", "pet": "萨摩耶" },
+      { "id": 5, "name": "泰迪豆豆", "pet": "泰迪" },
+      { "id": 6, "name": "橘猫滚滚", "pet": "橘猫" }
+    ],
+    "recommendUsers": [
+      { "id": 1, "name": "大黄铲屎官", "bio": "金毛&柯基的快乐生活", "followers": "2.3k" },
+      { "id": 2, "name": "橘猫日记", "bio": "三只猫的日常", "followers": "5.1k" },
+      { "id": 3, "name": "汪星人阿呆", "bio": "萨摩耶的快乐", "followers": "8.7k" }
+    ],
+    "notifications": [
+      { "id": 1, "text": "大黄铲屎官 赞了你的帖子", "time": "3分钟前" },
+      { "id": 2, "text": "橘猫日记 关注了你", "time": "15分钟前" },
+      { "id": 3, "text": "官方小助手 发布了新活动", "time": "1小时前" }
+    ],
+    "newFriends": [
+      { "id": 1, "bio": "金毛铲屎官" },
+      { "id": 2, "bio": "猫咪控" },
+      { "id": 3, "bio": "柯基&泰迪" },
+      { "id": 4, "bio": "布偶猫主人" }
+    ],
+    "notifGroups": [
+      { "key": "likes", "label": "收到的赞和收藏", "desc": "大黄铲屎官 等3人赞了你的帖子" },
+      { "key": "follows", "label": "新增关注", "desc": "橘猫日记 等2人关注了你" },
+      { "key": "comments", "label": "评论和@", "desc": "柯基小短腿 评论了你" }
+    ],
+    "conversations": [
+      { "id": 1, "lastMsg": "周末去公园遛狗吗？", "time": "5分钟前" },
+      { "id": 2, "lastMsg": "好的，下次见！", "time": "昨天" },
+      { "id": 3, "lastMsg": "你家猫咪太可爱了！", "time": "2天前" },
+      { "id": 4, "lastMsg": "求推荐狗粮品牌", "time": "3天前" }
+    ],
+    "chatMessages": [
+      { "id": 1, "text": "周末去公园遛狗吗？" },
+      { "id": 2, "text": "好呀！几点？" },
+      { "id": 3, "text": "下午三点怎么样？带上你家金毛" },
+      { "id": 4, "text": "没问题！上次它俩玩得可开心了" },
+      { "id": 5, "text": "哈哈是的，这次我再带点零食" },
+      { "id": 6, "text": "好的，老地方见！🐶" }
+    ],
+    "myUser": { "name": "王丽丽", "bio": "金毛&布偶猫铲屎官 | 爱生活爱宠物" },
+    "myPetsProfile": [
+      { "id": 1, "name": "贝利", "type": "金毛" },
+      { "id": 2, "name": "咪咪", "type": "布偶猫" }
+    ],
+    "myPetsPost": [
+      { "id": 1, "name": "旺财", "type": "金毛" },
+      { "id": 2, "name": "咪咪", "type": "布偶猫" },
+      { "id": 3, "name": "大黑", "type": "泰迪" }
+    ],
+    "shareTitle": "爪印",
+    "shareProfileSuffix": "来爪印看我和宠物的故事",
+    "appIconAlt": "爪印"
   }
 }

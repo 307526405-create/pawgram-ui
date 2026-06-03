@@ -1,5 +1,5 @@
 import { Settings, QrCode, Share2, Scan, Heart, MessageCircle } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
@@ -7,22 +7,40 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { postsApi } from "../api/client";
 import { isLoggedIn, login as doLogin } from "../api/auth";
 
-const myUser = {
-  id:1, name:"王丽丽", avatar:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
-  bio:"金毛&布偶猫铲屎官 | 爱生活爱宠物", following:45, followers:1204, likes:1790,
+const myUserBase = {
+  id:1, avatar:"https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200",
+  following:45, followers:1204, likes:1790,
 };
 
-const myPets = [
-  { id:1, name:"贝利", avatar:"https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=120", type:"金毛" },
-  { id:2, name:"咪咪", avatar:"https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=120", type:"布偶猫" },
+const myPetsBase = [
+  { id:1, avatar:"https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=120" },
+  { id:2, avatar:"https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?w=120" },
 ];
 
 const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.poster || item?.url || '';
 
 export function Profile() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [tab, setTab] = useState<'posts'|'liked'|'favs'|'drafts'>('posts');
+
+  const mockData = useMemo(() => {
+    const bundle = i18n.getResourceBundle(i18n.language, 'translation');
+    return bundle?.mock || {};
+  }, [i18n.language]);
+
+  const myUser = useMemo(() => ({
+    ...myUserBase,
+    name: mockData.myUser?.name || '',
+    bio: mockData.myUser?.bio || '',
+  }), [mockData]);
+
+  const myPets = useMemo(() =>
+    (mockData.myPetsProfile || []).map((p: any, i: number) => ({
+      ...p,
+      avatar: myPetsBase[i]?.avatar || '',
+    })),
+  [mockData]);
   const [posts, setPosts] = useState<any[]>([]);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());
   const [showQR, setShowQR] = useState(false);
@@ -40,7 +58,7 @@ export function Profile() {
   useEffect(() => { if (loggedIn) postsApi.list(1).then(d => setPosts(d.list)).catch(() => {}); }, [loggedIn]);
 
   const handleShare = () => {
-    const text = `爪印 PawGram — ${myUser.name}\n${myUser.bio}\n${t('profile.following')}/${t('profile.followers')} ${myUser.following}/${myUser.followers}\n来爪印看我和宠物的故事`;
+    const text = `${t('common.brandName')} — ${myUser.name}\n${myUser.bio}\n${t('profile.following')}/${t('profile.followers')} ${myUser.following}/${myUser.followers}\n${mockData.shareProfileSuffix || ''}`;
     if (navigator.share) navigator.share({ title: myUser.name, text }).catch(() => {});
     else navigator.clipboard?.writeText(text);
   };
@@ -48,7 +66,7 @@ export function Profile() {
   if (!loggedIn) return (
     <div className="h-full bg-white dark:bg-gray-900 flex flex-col px-6">
       <div className="flex-1 flex flex-col items-center justify-center">
-        <img src="/app-icon.png" className="w-20 h-20 rounded-2xl mb-5 shadow-lg" alt="爪印"/>
+        <img src="/app-icon.png" className="w-20 h-20 rounded-2xl mb-5 shadow-lg" alt={t('common.brandName')}/>
         <h1 className="text-[24px] font-bold text-[#333] dark:text-gray-100 mb-1">{t('common.brandName')}</h1>
         <p className="text-[13px] text-[#666] dark:text-gray-400">{t('profile.tagline')}</p>
       </div>
@@ -71,7 +89,7 @@ export function Profile() {
           <span className="text-[15px] font-bold text-[#4285F4]">G</span>
         </button>
       </div>
-      <p className="text-center text-[11px] text-[#BBB] dark:text-gray-500 pb-8">{t('profile.loginAgreement')}<span className="text-[#FF8C42]">{t('common.termsOfService')}</span>和<span className="text-[#FF8C42]">{t('common.privacyPolicy')}</span></p>
+      <p className="text-center text-[11px] text-[#BBB] dark:text-gray-500 pb-8">{t('profile.loginAgreement')}<span className="text-[#FF8C42]">{t('common.termsOfService')}</span>{t('common.and')}<span className="text-[#FF8C42]">{t('common.privacyPolicy')}</span></p>
       <BottomNav />
     </div>
   );

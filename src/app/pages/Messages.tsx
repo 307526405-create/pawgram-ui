@@ -1,44 +1,82 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { MoreHorizontal, ChevronRight, CheckCheck, Settings, Ban, Search } from "lucide-react";
 
-const newFriends = [
-  { id:1, name:"Alice Wang", avatar:"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=120", bio:"金毛铲屎官" },
-  { id:2, name:"Bob Chen", avatar:"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120", bio:"猫咪控" },
-  { id:3, name:"Diana Wu", avatar:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120", bio:"柯基&泰迪" },
-  { id:4, name:"Eric Liu", avatar:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120", bio:"布偶猫主人" },
+const newFriendBase = [
+  { id:1, name:"Alice Wang", avatar:"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=120" },
+  { id:2, name:"Bob Chen", avatar:"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=120" },
+  { id:3, name:"Diana Wu", avatar:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120" },
+  { id:4, name:"Eric Liu", avatar:"https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120" },
 ];
 
-const notifGroups = [
-  { key:"likes", label:"收到的赞和收藏", count:3, avatar:"https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w=80", desc:"大黄铲屎官 等3人赞了你的帖子" },
-  { key:"follows", label:"新增关注", count:2, avatar:"https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=80", desc:"橘猫日记 等2人关注了你" },
-  { key:"comments", label:"评论和@", count:5, avatar:"https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=80", desc:"柯基小短腿 评论了你" },
+const notifGroupBase = [
+  { key:"likes", count:3, avatar:"https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w=80" },
+  { key:"follows", count:2, avatar:"https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=80" },
+  { key:"comments", count:5, avatar:"https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=80" },
 ];
 
-const conversations = [
-  { id:1, name:"Alice Wang", avatar:"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150", lastMsg:"周末去公园遛狗吗？", time:"5分钟前", unread:2 },
-  { id:2, name:"Charlie Lee", avatar:"https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150", lastMsg:"好的，下次见！", time:"昨天", unread:0 },
-  { id:3, name:"Bob Chen", avatar:"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150", lastMsg:"你家猫咪太可爱了！", time:"2天前", unread:0 },
-  { id:4, name:"Diana Wu", avatar:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150", lastMsg:"求推荐狗粮品牌", time:"3天前", unread:1 },
+const conversationBase = [
+  { id:1, name:"Alice Wang", avatar:"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=150", unread:2 },
+  { id:2, name:"Charlie Lee", avatar:"https://images.unsplash.com/photo-1599566150163-29194dcaad36?w=150", unread:0 },
+  { id:3, name:"Bob Chen", avatar:"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150", unread:0 },
+  { id:4, name:"Diana Wu", avatar:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150", unread:1 },
 ];
 
 export function Messages() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
-  const [convs, setConvs] = useState(conversations);
-  const [notifs, setNotifs] = useState(notifGroups);
+  const { t, i18n } = useTranslation();
+
+  const mockData = useMemo(() => {
+    const bundle = i18n.getResourceBundle(i18n.language, 'translation');
+    return bundle?.mock || {};
+  }, [i18n.language]);
+
+  const newFriends = useMemo(() =>
+    newFriendBase.map((f, i) => ({
+      ...f,
+      bio: mockData.newFriends?.[i]?.bio || '',
+    })),
+  [mockData]);
+
+  const notifGroups = useMemo(() =>
+    notifGroupBase.map((g, i) => ({
+      ...g,
+      label: mockData.notifGroups?.[i]?.label || '',
+      desc: mockData.notifGroups?.[i]?.desc || '',
+    })),
+  [mockData]);
+
+  const conversations = useMemo(() =>
+    conversationBase.map((c, i) => ({
+      ...c,
+      lastMsg: mockData.conversations?.[i]?.lastMsg || '',
+      time: mockData.conversations?.[i]?.time || '',
+    })),
+  [mockData]);
+
+  const [deletedConvIds, setDeletedConvIds] = useState<Set<number>>(new Set());
+  const [allRead, setAllRead] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
+  const convs = useMemo(() =>
+    conversations
+      .filter(c => !deletedConvIds.has(c.id))
+      .map(c => ({ ...c, unread: allRead ? 0 : c.unread })),
+  [conversations, deletedConvIds, allRead]);
+
+  const notifs = useMemo(() =>
+    notifGroups.map(g => ({ ...g, count: allRead ? 0 : g.count })),
+  [notifGroups, allRead]);
+
   const totalUnread = notifs.reduce((s, g) => s + g.count, 0) + convs.reduce((s, c) => s + c.unread, 0);
-  const deleteConv = (id: number) => setConvs(prev => prev.filter(c => c.id !== id));
+  const deleteConv = (id: number) => setDeletedConvIds(prev => new Set([...prev, id]));
   const markAllRead = () => {
-    setNotifs(prev => prev.map(g => ({...g, count: 0})));
-    setConvs(prev => prev.map(c => ({...c, unread: 0})));
+    setAllRead(true);
     setShowMenu(false);
   };
 

@@ -1,16 +1,16 @@
 import { ChevronLeft, Search, MoreHorizontal, Send, Plus, Image, Camera, MapPin, Star, User, AlertTriangle, Trash2 } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import { useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 
-const mockMessages = [
-  { id:1, from:true, text:"周末去公园遛狗吗？", time:"10:30" },
-  { id:2, from:false, text:"好呀！几点？", time:"10:32" },
-  { id:3, from:true, text:"下午三点怎么样？带上你家金毛", time:"10:33" },
-  { id:4, from:false, text:"没问题！上次它俩玩得可开心了", time:"10:35" },
-  { id:5, from:true, text:"哈哈是的，这次我再带点零食", time:"10:36" },
-  { id:6, from:false, text:"好的，老地方见！🐶", time:"10:38" },
+const mockMessageBase = [
+  { id:1, from:true, time:"10:30" },
+  { id:2, from:false, time:"10:32" },
+  { id:3, from:true, time:"10:33" },
+  { id:4, from:false, time:"10:35" },
+  { id:5, from:true, time:"10:36" },
+  { id:6, from:false, time:"10:38" },
 ];
 
 const users: Record<string, {name:string; avatar:string}> = {
@@ -25,9 +25,22 @@ const myAvatar = "https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w
 export function ChatDetail() {
   const navigate = useNavigate();
   const { id } = useParams();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const user = users[id || "1"] || { name:t('common.user'), avatar:"" };
-  const [messages, setMessages] = useState(mockMessages);
+
+  const mockData = useMemo(() => {
+    const bundle = i18n.getResourceBundle(i18n.language, 'translation');
+    return bundle?.mock || {};
+  }, [i18n.language]);
+
+  const mockMessages = useMemo(() =>
+    mockMessageBase.map((m, i) => ({
+      ...m,
+      text: mockData.chatMessages?.[i]?.text || '',
+    })),
+  [mockData]);
+
+  const [sentMessages, setSentMessages] = useState<{id:number; from:boolean; text:string; time:string}[]>([]);
   const [input, setInput] = useState("");
   const [showMore, setShowMore] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -35,13 +48,15 @@ export function ChatDetail() {
   const [searchQuery, setSearchQuery] = useState("");
   const scrollRef = useRef<HTMLDivElement>(null);
 
+  const messages = [...mockMessages, ...sentMessages];
+
   useEffect(() => { scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight); }, [messages]);
 
   const send = () => {
     const text = input.trim();
     if (!text) return;
     const now = new Date();
-    setMessages(prev => [...prev, { id:Date.now(), from:false, text, time:`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}` }]);
+    setSentMessages(prev => [...prev, { id:Date.now(), from:false, text, time:`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}` }]);
     setInput("");
     setShowMore(false);
   };
@@ -86,7 +101,7 @@ export function ChatDetail() {
                       <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">
                         <AlertTriangle className="w-4 h-4"/>{t('chat.report')}
                       </button>
-                      <button onClick={() => { setMessages(mockMessages); setShowMenu(false); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#FF4D4F] active:bg-[#F9F9F9] dark:active:bg-gray-800">
+                      <button onClick={() => { setSentMessages([]); setShowMenu(false); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#FF4D4F] active:bg-[#F9F9F9] dark:active:bg-gray-800">
                         <Trash2 className="w-4 h-4"/>{t('chat.clearChat')}
                       </button>
                     </div>
