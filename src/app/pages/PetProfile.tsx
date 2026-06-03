@@ -18,6 +18,8 @@ function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialDat
   const [weight, setWeight] = useState(init.weight || "");
   const [bio, setBio] = useState(init.bio || "");
   const [showPicker, setShowPicker] = useState(false);
+  const [avatar, setAvatar] = useState(init.avatar || "");
+  const hasAvatar = !!avatar;
   const catRef = useRef<HTMLDivElement>(null);
   const breedRef = useRef<HTMLDivElement>(null);
 
@@ -41,10 +43,14 @@ function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialDat
   return (
     <div className="px-4">
       <div className="flex flex-col items-center mb-6">
-        <div className="w-20 h-20 rounded-full bg-[#F5F5F5] dark:bg-gray-800 flex items-center justify-center mb-3 border-2 border-dashed border-[#DDD] dark:border-gray-600">
-          <span className="text-3xl text-[#CCC] dark:text-gray-600">+</span>
-        </div>
-        <p className="text-[12px] text-[#999] dark:text-gray-400">{t('pet.addAvatar')}</p>
+        {hasAvatar ? (
+          <ImageWithFallback src={avatar} className="w-20 h-20 rounded-full object-cover border-[3px] border-white dark:border-gray-900 shadow-sm mb-3" />
+        ) : (
+          <div className="w-20 h-20 rounded-full bg-[#F5F5F5] dark:bg-gray-800 flex items-center justify-center mb-3 border-2 border-dashed border-[#DDD] dark:border-gray-600">
+            <span className="text-3xl text-[#CCC] dark:text-gray-600">+</span>
+          </div>
+        )}
+        <p className="text-[12px] text-[#999] dark:text-gray-400">{hasAvatar ? petName || name : t('pet.addAvatar')}</p>
       </div>
 
       <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 shadow-sm border border-[#F0F0F0] dark:border-gray-700 space-y-4">
