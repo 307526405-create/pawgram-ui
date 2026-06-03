@@ -119,7 +119,7 @@ function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialDat
 
 export function PetProfile() {
   const navigate = useNavigate();
-  const { animClass, handleBack } = usePageTransition();
+  const { className, handleBack } = usePageTransition();
   const location = useLocation();
   const { t } = useTranslation();
   const getBreedDisplay = (b: string) => b === '其他' ? t('common.other') : t(`pet.breeds.${b}`, b);
@@ -154,9 +154,9 @@ export function PetProfile() {
   const noteIdRef = useRef(2);
 
   return (
-    <div className={`h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col ${animClass}`}>
+    <div className={`h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col ${className}`}>
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 z-10">
-        <button onClick={() => { if (isEditing) setIsEditing(false); else handleBack(); }} className="text-[#333] dark:text-gray-100 p-1 -ml-1"><ChevronLeft className="w-6 h-6" /></button>
+        <button onClick={() => { if (isEditing) setIsEditing(false); else handleBack(() => navigate(-1)); }} className="text-[#333] dark:text-gray-100 p-1 -ml-1"><ChevronLeft className="w-6 h-6" /></button>
 <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{isNew || isEditing ? t("pet.addPet") : t("pet.title")}</h1>
         {isNew ? <div className="w-8"/> : <button onClick={() => setIsEditing(true)} className="p-1"><PenSquare className="w-5 h-5 text-[#666] dark:text-gray-400"/></button>}
       </div>

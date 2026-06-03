@@ -5,13 +5,13 @@ import { usePageTransition } from "../hooks/usePageTransition";
 
 export function PrivacyPolicy() {
   const navigate = useNavigate();
-  const { animClass, handleBack } = usePageTransition();
+  const { className, handleBack } = usePageTransition();
   const { t } = useTranslation();
 
   return (
-    <div className={`h-full bg-white dark:bg-gray-900 flex flex-col ${animClass}`}>
+    <div className={`h-full bg-white dark:bg-gray-900 flex flex-col ${className}`}>
       <div className="flex items-center px-4 pt-[var(--app-safe-top)] h-[var(--app-header-height)] shrink-0 border-b border-[#F0F0F0] dark:border-gray-700">
-        <button onClick={handleBack} className="p-1 -ml-1">
+        <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1">
           <ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100" />
         </button>
         <h1 className="flex-1 text-center text-[17px] font-bold text-[#333] dark:text-gray-100 mr-6">{t('privacy.title')}</h1>

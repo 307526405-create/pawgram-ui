@@ -1,15 +1,17 @@
 import { ChevronLeft, Camera, Check } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import { usePageTransition } from "../hooks/usePageTransition";
 
 export function Register() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { className, handleBack } = usePageTransition();
 
   return (
-    <div className="h-full bg-gradient-to-b from-[#FFF3E6] dark:from-orange-900/30 to-white dark:to-gray-900 relative flex flex-col">
+    <div className={`h-full bg-gradient-to-b from-[#FFF3E6] dark:from-orange-900/30 to-white dark:to-gray-900 relative flex flex-col ${className}`}>
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-10">
-        <button onClick={() => navigate(-1)} className="text-[#333333] dark:text-gray-100 active:scale-95 transition-transform p-1 -ml-1">
+        <button onClick={() => handleBack(() => navigate(-1))} className="text-[#333333] dark:text-gray-100 active:scale-95 transition-transform p-1 -ml-1">
           <ChevronLeft className="w-6 h-6" />
         </button>
         <h1 className="text-[#333333] dark:text-gray-100 text-[17px] font-bold tracking-wider">{t('register.title')}</h1>

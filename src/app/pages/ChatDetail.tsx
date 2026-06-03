@@ -25,7 +25,7 @@ const myAvatar = "https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w
 
 export function ChatDetail() {
   const navigate = useNavigate();
-  const { animClass, handleBack } = usePageTransition();
+  const { className, handleBack } = usePageTransition();
   const { id } = useParams();
   const { t, i18n } = useTranslation();
   const user = users[id || "1"] || { name:t('common.user'), avatar:"" };
@@ -71,7 +71,7 @@ export function ChatDetail() {
   ];
 
   return (
-    <div className={`h-full bg-white dark:bg-gray-900 relative flex flex-col ${animClass}`}>
+    <div className={`h-full bg-white dark:bg-gray-900 relative flex flex-col ${className}`}>
       <div className="bg-white dark:bg-gray-900 pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center px-4 shrink-0 border-b border-[#F0F0F0] dark:border-gray-700">
         {showSearch ? (
           <div className="flex-1 flex items-center gap-2">
@@ -84,7 +84,7 @@ export function ChatDetail() {
           </div>
         ) : (
           <>
-            <button onClick={handleBack} className="p-1 -ml-1"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100"/></button>
+            <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100"/></button>
             <div className="flex-1 flex items-center gap-2 ml-2">
               <ImageWithFallback src={user.avatar} className="w-8 h-8 rounded-full object-cover"/>
               <span className="text-[16px] font-bold text-[#333] dark:text-gray-100">{user.name}</span>

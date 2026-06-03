@@ -5,7 +5,7 @@ import { usePageTransition } from "../hooks/usePageTransition";
 
 export function CheckIn() {
   const navigate = useNavigate();
-  const { animClass, handleBack } = usePageTransition();
+  const { className, handleBack } = usePageTransition();
 
   const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
   
@@ -65,10 +65,10 @@ export function CheckIn() {
   ];
 
   return (
-    <div className={`h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col ${animClass}`}>
+    <div className={`h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col ${className}`}>
       {/* 顶部导航与首页完全一致 */}
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-10">
-        <button onClick={handleBack} className="text-[#333333] dark:text-gray-100 active:scale-95 transition-transform p-1 -ml-1">
+        <button onClick={() => handleBack(() => navigate(-1))} className="text-[#333333] dark:text-gray-100 active:scale-95 transition-transform p-1 -ml-1">
           <ChevronLeft className="w-6 h-6" />
         </button>
         <h1 className="text-[#333333] dark:text-gray-100 text-[17px] font-bold tracking-wider">每日打卡</h1>

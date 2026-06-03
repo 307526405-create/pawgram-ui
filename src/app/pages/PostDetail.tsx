@@ -60,7 +60,7 @@ function flattenComments(comments: Comment[], t: any, depth: number = 0): FlatCo
 
 export function PostDetail() {
   const navigate = useNavigate();
-  const { animClass, handleBack } = usePageTransition();
+  const { className, handleBack } = usePageTransition();
   const { id } = useParams();
   const { t } = useTranslation();
   const [post, setPost] = useState<any>(null);
@@ -221,14 +221,14 @@ export function PostDetail() {
   if (!post) return (
     <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 flex flex-col items-center justify-center gap-3">
       <p className="text-[14px] text-[#999] dark:text-gray-400">{t('common.postNotFound')}</p>
-      <button onClick={handleBack} className="text-[#FF8C42] text-[14px]">{t('common.back')}</button>
+      <button onClick={() => handleBack(() => navigate(-1))} className="text-[#FF8C42] text-[14px]">{t('common.back')}</button>
     </div>
   );
 
   return (
-    <div className={`h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col ${animClass}`}>
+    <div className={`h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col ${className}`}>
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 z-10">
-        <button onClick={handleBack} className="text-[#333] dark:text-gray-100 p-1 -ml-1"><ChevronLeft className="w-6 h-6"/></button>
+        <button onClick={() => handleBack(() => navigate(-1))} className="text-[#333] dark:text-gray-100 p-1 -ml-1"><ChevronLeft className="w-6 h-6"/></button>
         <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('postDetail.title')}</h1>
         <div className="flex items-center gap-1">
           {isOwner && (

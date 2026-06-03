@@ -2,6 +2,7 @@ import { ChevronLeft, Search as SearchIcon, X } from "lucide-react";
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
+import { usePageTransition } from "../hooks/usePageTransition";
 import { posts, users } from "../data/mockData";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 
@@ -26,6 +27,7 @@ const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.poste
 export function Search() {
   const navigate = useNavigate();
   const { t } = useTranslation();
+  const { className, handleBack } = usePageTransition();
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState(["柯基", "狗粮推荐", "宠物洗澡"]);
   const [activeTab, setActiveTab] = useState(0);
@@ -58,9 +60,9 @@ export function Search() {
   const tabs = [t('common.users'), t('common.posts'), t('common.topics')];
 
   return (
-    <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
+    <div className={`h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col ${className}`}>
       <div className="absolute top-0 w-full pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center pl-3 pr-4 z-40 bg-[#FAFAFA] dark:bg-gray-950 border-b border-transparent">
-        <button onClick={() => navigate(-1)} className="p-2 -ml-1 text-[#333] dark:text-gray-100 active:opacity-70 shrink-0">
+        <button onClick={() => handleBack(() => navigate(-1))} className="p-2 -ml-1 text-[#333] dark:text-gray-100 active:opacity-70 shrink-0">
           <ChevronLeft className="w-6 h-6" />
         </button>
         <div className="flex-1 bg-white dark:bg-gray-900 rounded-full h-[32px] flex items-center px-3 shadow-sm border border-[#EEEEEE] dark:border-gray-700">

@@ -7,7 +7,7 @@ import { usePageTransition } from "../hooks/usePageTransition";
 
 export function Scan() {
   const navigate = useNavigate();
-  const { animClass, handleBack } = usePageTransition();
+  const { className, handleBack } = usePageTransition();
   const { t } = useTranslation();
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -134,9 +134,9 @@ export function Scan() {
   };
 
   return (
-    <div className={`h-full bg-black relative flex flex-col ${animClass}`}>
+    <div className={`h-full bg-black relative flex flex-col ${className}`}>
       <div className="absolute top-0 w-full pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 z-20">
-        <button onClick={handleBack} className="p-1 -ml-1 text-white"><ChevronLeft className="w-6 h-6" /></button>
+        <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1 text-white"><ChevronLeft className="w-6 h-6" /></button>
         <h1 className="text-[17px] font-bold text-white">{t('scan.title')}</h1>
         <button onClick={toggleTorch} className="p-2">
           <Zap className={`w-5 h-5 ${torch ? 'text-yellow-400' : 'text-white'}`} />
