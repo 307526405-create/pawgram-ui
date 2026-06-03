@@ -58,7 +58,7 @@ export function PostCard({ post, onLike, onShare, onFollow }: { post: any; onLik
           </div>
         </div>
         <div className="flex flex-col items-end">
-          <span className="text-xs font-medium px-2 py-1 bg-orange-50 dark:bg-orange-900/20 text-[#FF8C42] rounded-md mb-1">{post.breed}</span>
+          <span className="text-xs font-medium px-2 py-1 bg-orange-50 dark:bg-orange-900/20 text-[#FF8C42] rounded-md mb-1">{post.breedDisplay || post.breed}</span>
           {post.location && (
             <a href={`http://maps.apple.com/?q=${encodeURIComponent(post.location)}`} onClick={e => e.stopPropagation()} className="flex items-center text-xs text-gray-400 dark:text-gray-500 active:text-[#FF8C42]">
               <MapPin className="w-3 h-3 mr-0.5" />{post.location}
