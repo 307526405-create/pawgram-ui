@@ -10,8 +10,10 @@ import { posts } from "../data/mockData";
 function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialData?: any }) {
   const { t } = useTranslation();
   const init = initialData || {};
+  const dogBreeds = ["金毛","柯基","泰迪","萨摩耶","柴犬","哈士奇","拉布拉多","比熊","法斗","边牧","德牧","雪纳瑞","博美","吉娃娃","约克夏","阿拉斯加","秋田","松狮","巴哥","腊肠","杜宾","罗威纳","大丹","圣伯纳","苏牧","喜乐蒂","蝴蝶犬","马尔济斯","西施","巴吉度","可卡","阿富汗","灵缇","沙皮","纽芬兰","大白熊","伯恩山","银狐","比格","万能梗","牛头梗","西高地","凯恩梗","贝灵顿","藏獒","高加索","中亚","卡斯罗","其他"];
+  const catBreeds = ["布偶猫","橘猫","英短","美短","暹罗","波斯","缅因","折耳","无毛","蓝猫","加菲","金吉拉","德文卷","阿比","孟加拉","挪威森林","西伯利亚","土耳其梵","埃及猫","柯尼斯卷","东方短毛","新加坡猫","白猫","黑猫","三花","虎斑","奶牛猫","其他"];
   const [name, setName] = useState(init.name || "");
-  const [category, setCategory] = useState(init.type?.includes("猫") ? "猫" : init.type ? "犬" : "");
+  const [category, setCategory] = useState(init.type ? (catBreeds.includes(init.type) ? 'cat' : 'dog') : '');
   const [breed, setBreed] = useState(init.type || "");
   const [customBreed, setCustomBreed] = useState("");
   const [birthday, setBirthday] = useState(init.birthday || "");
@@ -22,16 +24,15 @@ function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialDat
   const hasAvatar = !!avatar;
   const catRef = useRef<HTMLDivElement>(null);
   const breedRef = useRef<HTMLDivElement>(null);
-
-  const dogBreeds = ["金毛","柯基","泰迪","萨摩耶","柴犬","哈士奇","拉布拉多","比熊","法斗","边牧","德牧","雪纳瑞","博美","吉娃娃","约克夏","阿拉斯加","秋田","松狮","巴哥","腊肠","杜宾","罗威纳","大丹","圣伯纳","苏牧","喜乐蒂","蝴蝶犬","马尔济斯","西施","巴吉度","可卡","阿富汗","灵缇","沙皮","纽芬兰","大白熊","伯恩山","银狐","比格","万能梗","牛头梗","西高地","凯恩梗","贝灵顿","藏獒","高加索","中亚","卡斯罗","其他"];
-  const catBreeds = ["布偶猫","橘猫","英短","美短","暹罗","波斯","缅因","折耳","无毛","蓝猫","加菲","金吉拉","德文卷","阿比","孟加拉","挪威森林","西伯利亚","土耳其梵","埃及猫","柯尼斯卷","东方短毛","新加坡猫","白猫","黑猫","三花","虎斑","奶牛猫","其他"];
-  const breeds = category === '犬' ? dogBreeds : catBreeds;
+  const breeds = category === 'dog' ? dogBreeds : catBreeds;
   const isDone = name.trim() && category && (breed && breed !== '其他' ? true : customBreed.trim());
+  const getBreedDisplay = (b: string) => b === '其他' ? t('common.other') : t(`pet.breeds.${b}`, b);
+  const getCategoryDisplay = (c: string) => c === 'dog' ? t('pet.dog') : t('pet.cat');
 
   const handleCatScroll = () => {
     const el = catRef.current; if (!el) return;
     const idx = Math.round((el.scrollTop - 110) / 40);
-    const cats = ['犬','猫'];
+    const cats = ['dog','cat'];
     if (idx >= 0 && idx < cats.length) setCategory(cats[idx]);
   };
   const handleBreedScroll = () => {
@@ -56,7 +57,7 @@ function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialDat
       <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 shadow-sm border border-[#F0F0F0] dark:border-gray-700 space-y-4">
         <input value={name} onChange={e => setName(e.target.value)} placeholder={t('pet.petName')} className="w-full h-10 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 text-[14px] outline-none"/>
         <div onClick={() => setShowPicker(true)} className="flex items-center justify-between h-10 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg px-3 cursor-pointer">
-          <span className={category && breed ? 'text-[14px] text-[#333] dark:text-gray-100' : 'text-[14px] text-[#999] dark:text-gray-400'}>{category && breed ? `${category}·${breed === '其他' ? customBreed || t('common.other') : breed}` : t('pet.selectBreed')}</span>
+          <span className={category && breed ? 'text-[14px] text-[#333] dark:text-gray-100' : 'text-[14px] text-[#999] dark:text-gray-400'}>{category && breed ? `${getCategoryDisplay(category)}·${breed === '其他' ? customBreed || t('common.other') : getBreedDisplay(breed)}` : t('pet.selectBreed')}</span>
           <span className="text-[#CCC] dark:text-gray-600 text-sm">›</span>
         </div>
         <input value={birthday}onChange={e => setBirthday(e.target.value)} placeholder={t('pet.birthdayPlaceholder')} className="w-full h-10 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 text-[14px] outline-none"/>
@@ -86,16 +87,16 @@ function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialDat
                 <div className="py-[110px]"/>
                 {[t('pet.dog'),t('pet.cat')].map((c, idx) => (
                   <div key={c}
-                    className={`h-10 flex items-center justify-center text-[17px] snap-center ${(idx === 0 ? '犬' : '猫') === category ? 'text-[#333] dark:text-gray-100 font-semibold' : 'text-[#BBB] dark:text-gray-500'}`}>{c}</div>
+                    className={`h-10 flex items-center justify-center text-[17px] snap-center ${(idx === 0 ? 'dog' : 'cat') === category ? 'text-[#333] dark:text-gray-100 font-semibold' : 'text-[#BBB] dark:text-gray-500'}`}>{c}</div>
                 ))}
                 <div className="py-[110px]"/>
               </div>
 
               <div ref={breedRef} onScroll={handleBreedScroll} className="flex-1 overflow-y-auto snap-y snap-mandatory [&::-webkit-scrollbar]:hidden" style={{WebkitOverflowScrolling:'touch'}}>
                 <div className="py-[110px]"/>
-                {category ? (category === '犬' ? dogBreeds : catBreeds).map(b => (
+                {category ? (category === 'dog' ? dogBreeds : catBreeds).map(b => (
                   <div key={b} onClick={() => { setBreed(b === breed ? '' : b); setCustomBreed(''); }}
-                    className={`h-10 flex items-center px-4 text-[17px] snap-center ${b === breed ? 'text-[#333] dark:text-gray-100 font-semibold' : 'text-[#BBB] dark:text-gray-500'}`}>{b}</div>
+                    className={`h-10 flex items-center px-4 text-[17px] snap-center ${b === breed ? 'text-[#333] dark:text-gray-100 font-semibold' : 'text-[#BBB] dark:text-gray-500'}`}>{getBreedDisplay(b)}</div>
                 )) : (
                   <div className="h-10 flex items-center px-4 text-[#BBB] dark:text-gray-500 text-[15px]">{t('pet.selectCategoryFirst')}</div>
                 )}
@@ -120,6 +121,7 @@ export function PetProfile() {
   const navigate = useNavigate();
   const location = useLocation();
   const { t } = useTranslation();
+  const getBreedDisplay = (b: string) => b === '其他' ? t('common.other') : t(`pet.breeds.${b}`, b);
   const isNew = (location.state as any)?.new;
   const petData = (location.state as any)?.pet;
   const [isEditing, setIsEditing] = useState(false);
@@ -134,8 +136,8 @@ export function PetProfile() {
   ];
 
   const [vaccines, setVaccines] = useState<{id: number, name: string, date: string}[]>([
-    { id: 1, name: '狂犬疫苗', date: '2025-03-15' },
-    { id: 2, name: '犬瘟热疫苗', date: '2025-01-20' },
+    { id: 1, name: t('pet.rabiesVaccine'), date: '2025-03-15' },
+    { id: 2, name: t('pet.distemperVaccine'), date: '2025-01-20' },
   ]);
   const [showVaccineForm, setShowVaccineForm] = useState(false);
   const [newVaccineName, setNewVaccineName] = useState('');
@@ -143,7 +145,7 @@ export function PetProfile() {
   const vaccineIdRef = useRef(3);
 
   const [dailyNotes, setDailyNotes] = useState<{id: number, note: string, date: string}[]>([
-    { id: 1, note: '今天豆豆特别活泼，在公园里跑了好几圈', date: '2025-05-20' },
+    { id: 1, note: t('pet.exampleNote'), date: '2025-05-20' },
   ]);
   const [showNoteForm, setShowNoteForm] = useState(false);
   const [newNoteContent, setNewNoteContent] = useState('');
@@ -166,14 +168,14 @@ export function PetProfile() {
             <div className="flex flex-col items-center mt-2 mb-6">
               <ImageWithFallback src={pet.avatar} className="w-20 h-20 rounded-full object-cover border-[3px] border-white dark:border-gray-900 shadow-sm"/>
               <h2 className="text-[18px] font-bold text-[#333] dark:text-gray-100 mt-3">{pet.name}</h2>
-              <p className="text-[14px] text-[#999] dark:text-gray-400 mt-0.5">{t('pet.dog')}·{pet.type}·2岁</p>
+              <p className="text-[14px] text-[#999] dark:text-gray-400 mt-0.5">{t('pet.dog')}·{getBreedDisplay(pet.type)}·{t('pet.exampleAge')}</p>
             </div>
             <div className="px-4 mb-6">
               <div className="bg-white dark:bg-gray-900 rounded-2xl p-5 shadow-sm border border-[#F0F0F0] dark:border-gray-700 space-y-4">
-                <div className="flex items-center"><span className="text-[16px] mr-2">🎂</span><span className="text-[14px] text-[#999] dark:text-gray-400 w-10">{t('pet.birthday')}</span><span className="text-[14px] font-medium text-[#333] dark:text-gray-100 ml-auto">2024年3月15日</span></div>
+                <div className="flex items-center"><span className="text-[16px] mr-2">🎂</span><span className="text-[14px] text-[#999] dark:text-gray-400 w-10">{t('pet.birthday')}</span><span className="text-[14px] font-medium text-[#333] dark:text-gray-100 ml-auto">{t('pet.exampleBirthday')}</span></div>
                 <div className="flex items-center"><span className="text-[16px] mr-2">⚖️</span><span className="text-[14px] text-[#999] dark:text-gray-400 w-10">{t('pet.weight')}</span><span className="text-[14px] font-medium text-[#333] dark:text-gray-100 ml-auto">28kg</span></div>
-                <div className="flex items-center"><span className="text-[16px] mr-2">🏷️</span><span className="text-[14px] text-[#999] dark:text-gray-400 w-10">品种</span><span className="text-[14px] font-medium text-[#333] dark:text-gray-100 ml-auto">{t('pet.dog')}·{pet.type}</span></div>
-                <div className="flex items-start"><span className="text-[16px] mr-2 mt-0.5">📝</span><span className="text-[14px] text-[#999] dark:text-gray-400 w-10">{t('pet.bio').replace('...','')}</span><span className="text-[14px] font-medium text-[#333] dark:text-gray-100 ml-auto text-right flex-1">爱笑的金毛大暖男</span></div>
+                <div className="flex items-center"><span className="text-[16px] mr-2">🏷️</span><span className="text-[14px] text-[#999] dark:text-gray-400 w-10">{t('pet.breed')}</span><span className="text-[14px] font-medium text-[#333] dark:text-gray-100 ml-auto">{t('pet.dog')}·{getBreedDisplay(pet.type)}</span></div>
+                <div className="flex items-start"><span className="text-[16px] mr-2 mt-0.5">📝</span><span className="text-[14px] text-[#999] dark:text-gray-400 w-10">{t('pet.bio').replace('...','')}</span><span className="text-[14px] font-medium text-[#333] dark:text-gray-100 ml-auto text-right flex-1">{t('pet.exampleBio')}</span></div>
               </div>
             </div>
 
