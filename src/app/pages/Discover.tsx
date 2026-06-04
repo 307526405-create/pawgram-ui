@@ -1,5 +1,5 @@
 import { Search, MapPin, Navigation, Star, Phone, ChevronRight, X, Share2, Heart, Maximize2 } from "lucide-react";
-import { TENCENT_MAP_KEY } from '../config/map';
+import { MAP_STATIC_URL } from '../config/map';
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -268,6 +268,8 @@ export function Discover() {
   const [pullState, setPullState] = useState<'idle' | 'pulling' | 'ready' | 'loading'>('idle');
   const [pullDist, setPullDist] = useState(0);
   const touchStartY = useRef(0);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
 
   const mapTypes = ['全部', ...Array.from(new Set(places.map(p => p.type)))];
   let filteredPlaces = mapFilter === '全部' ? places : places.filter(p => p.type === mapFilter);
@@ -344,9 +346,36 @@ export function Discover() {
           center: new TMap.LatLng(23.1291, 113.2644),
           zoom: 13,
         });
+        let pressStart = { x: 0, y: 0, time: 0 };
+        const handleDown = (e: MouseEvent | TouchEvent) => {
+          const pos = 'touches' in e ? (e as TouchEvent).touches[0] : (e as MouseEvent);
+          if (!pos) return;
+          pressStart = { x: pos.clientX, y: pos.clientY, time: Date.now() };
+        };
+        const handleUp = (e: MouseEvent | TouchEvent) => {
+          const pos = 'changedTouches' in e ? (e as TouchEvent).changedTouches[0] : (e as MouseEvent);
+          if (!pos) return;
+          const dx = pos.clientX - pressStart.x;
+          const dy = pos.clientY - pressStart.y;
+          const dt = Date.now() - pressStart.time;
+          if (dt > 800 && Math.sqrt(dx * dx + dy * dy) < 10) {
+            const map = mapInstanceRef.current;
+            const TMap = (window as any).TMap;
+            if (!map || !TMap) return;
+            const rect = mapContainerRef.current?.getBoundingClientRect();
+            if (!rect) return;
+            const point = new TMap.Point(pos.clientX - rect.left, pos.clientY - rect.top);
+            const latLng = map.unprojectFromContainer(point);
+            setMarkForm({ lat: latLng.getLat(), lng: latLng.getLng() });
+          }
+        };
         map.on('rightclick', (e: any) => {
           setMarkForm({ lat: e.latLng.lat, lng: e.latLng.lng });
         });
+        mapContainerRef.current.addEventListener('mousedown', handleDown);
+        mapContainerRef.current.addEventListener('mouseup', handleUp);
+        mapContainerRef.current.addEventListener('touchstart', handleDown, { passive: true });
+        mapContainerRef.current.addEventListener('touchend', handleUp);
         mapInstanceRef.current = map;
       } catch { if (!cancelled) setMapError(true); }
     };
@@ -392,7 +421,7 @@ export function Discover() {
   return (
     <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-center shrink-0"><h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('discover.title')}</h1></div>
-      {showMap&&(<div className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col" style={{paddingBottom:'calc(50px + env(safe-area-inset-bottom))'}}>
+      {showMap&&(<div className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col" style={{paddingBottom:'calc(50px + env(safe-area-inset-bottom))',transform:`translateX(${dragOffset}px)`,transition:isDragging?'none':'transform 0.3s ease'}} onTouchStart={(e)=>{if(e.touches[0].clientX<30){setIsDragging(true);setDragOffset(0);}}} onTouchMove={(e)=>{if(!isDragging)return;setDragOffset(Math.min(e.touches[0].clientX,window.innerWidth/3));}} onTouchEnd={()=>{if(dragOffset>100)setShowMap(false);setDragOffset(0);setIsDragging(false);}}>
         <div className="flex items-center justify-between px-5 bg-white dark:bg-gray-900 shrink-0" style={{paddingTop:'calc(env(safe-area-inset-top) + 4px)',paddingBottom:'2px'}}><button onClick={()=>setShowMap(false)} className="text-[#FF8C42] text-[15px] font-medium py-1 px-1">{t('discover.backToMap')}</button><h2 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><div className="w-12"/></div>
         <div className="flex gap-2 px-4 py-1.5 overflow-x-auto bg-white dark:bg-gray-900 border-b border-[#F0F0F0] dark:border-gray-700 shrink-0">
           <button onClick={() => { setFavoritesOnly(!favoritesOnly); if (!favoritesOnly) setMapFilter('全部'); }} className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-medium flex items-center gap-1 ${favoritesOnly ? 'bg-[#FF4444] text-white' : 'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>
@@ -402,15 +431,7 @@ export function Discover() {
         </div>
         <div className="flex-1 relative bg-[#E8E8E8] dark:bg-gray-800 overflow-hidden">
           {!mapError ? (
-            <>
-              <div ref={mapContainerRef} id="qq-map-container" className="absolute inset-0 w-full h-full" />
-              <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-                <button onClick={() => window.open(`http://maps.apple.com/?q=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}`, '_blank')} className="bg-white dark:bg-gray-900 rounded-2xl px-6 py-3 shadow-lg flex items-center gap-2 active:opacity-80">
-                  <MapPin className="w-5 h-5 text-[#FF8C42]" />
-                  <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.openInMaps')}</span>
-                </button>
-              </div>
-            </>
+            <div ref={mapContainerRef} id="qq-map-container" className="absolute inset-0 w-full h-full" />
           ) : (
             <div className="flex flex-col items-center justify-center h-full px-8 text-center">
               <div className="w-16 h-16 rounded-full bg-[#FFF3E6] dark:bg-orange-900/30 flex items-center justify-center mb-4">
@@ -437,7 +458,7 @@ export function Discover() {
         <div className="mt-8"><div className="flex items-center justify-between px-4 mb-4"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button className="text-[#FF8C42] text-[12px] font-medium" onClick={()=>setShowMap(true)}>{t('common.viewAll')}</button></div>{!showMap && (
           <div className="px-4">
             <div className="cursor-pointer" onClick={()=>setShowMap(true)}>
-              <img src={`https://apis.map.qq.com/ws/staticmap/v2/?center=23.1291,113.2644&zoom=13&size=600*300&key=${TENCENT_MAP_KEY}`}
+              <img src={MAP_STATIC_URL}
                    className="w-full h-[160px] object-cover rounded-xl" alt="" />
             </div>
           </div>
