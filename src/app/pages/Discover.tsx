@@ -291,7 +291,6 @@ export function Discover() {
   });
   const [mapError, setMapError] = useState(false);
   const [mapReady, setMapReady] = useState(false);
-  const [showMapHint, setShowMapHint] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -367,7 +366,6 @@ export function Discover() {
       { timeout: 5000 }
     );
   }, []);
-  useEffect(() => { if (showMap) { setShowMapHint(true); const t=setTimeout(()=>setShowMapHint(false),4000); return ()=>clearTimeout(t); } }, [showMap]);
   useEffect(() => { if (userLoc) { discoverApi.nearby(userLoc.lat, userLoc.lng, 8).then(d => setNearbyUsers(d.users || [])).catch(() => {}); } }, [userLoc]);
   useEffect(() => { const h=()=>{setShowMap(false);setSelectedPlace(null);setMarkForm(null);}; window.addEventListener('pawgram:discover-tab-click',h); return ()=>window.removeEventListener('pawgram:discover-tab-click',h); },[]);
 
@@ -518,11 +516,9 @@ export function Discover() {
           </button>
           {mapTypes.map(tp=>{const tn=tp==='全部'?t('discover.all'):tp==='公园'?t('discover.typePark'):tp==='咖啡馆'?t('discover.typeCafe'):tp==='医院'?t('discover.typeHospital'):tp==='餐厅'?t('discover.typeRestaurant'):tp==='小区'?t('discover.typeResidential'):tp==='户外'?t('discover.typeOutdoor'):tp==='美容'?t('discover.typeGrooming'):tp==='商店'?t('discover.typeShop'):tp;return(<button key={tp} onClick={()=>{setFavoritesOnly(false);setMapFilter(tp===mapFilter?'全部':tp);}} className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-medium ${!favoritesOnly&&mapFilter===tp?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>{tn}</button>);})}
         </div>
-        {showMapHint && (
-          <div className="flex justify-center py-1.5 bg-black/40 dark:bg-white/15 shrink-0">
-            <span className="text-[12px] text-white dark:text-white/80 font-medium">长按地图任意位置可标记新地点</span>
-          </div>
-        )}
+        <div className="flex justify-center py-1.5 bg-black/40 dark:bg-white/15 shrink-0">
+          <span className="text-[12px] text-white dark:text-white/80 font-medium">长按地图任意位置可标记新地点</span>
+        </div>
         <div className="flex-1 relative bg-[#E8E8E8] dark:bg-gray-800 overflow-hidden">
           {!mapError ? (
             <>
