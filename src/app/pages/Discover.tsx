@@ -1,4 +1,4 @@
-import { Search, MapPin, Navigation, Star, Phone, ChevronRight, X, Share2, Heart, Maximize2, Crosshair } from "lucide-react";
+import { Search, MapPin, Navigation, Star, Phone, ChevronRight, X, Share2, Heart, Maximize2, Crosshair, Plus } from "lucide-react";
 import { MAP_STATIC_URL } from '../config/map';
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
@@ -291,6 +291,7 @@ export function Discover() {
   });
   const [mapError, setMapError] = useState(false);
   const [mapReady, setMapReady] = useState(false);
+  const [markMode, setMarkMode] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -406,7 +407,7 @@ export function Discover() {
           if (!pos) return;
           pressStart = { x: pos.clientX, y: pos.clientY, time: Date.now() };
           pressTriggered = false;
-          pressTimer = setTimeout(triggerMark, 2000);
+          pressTimer = setTimeout(triggerMark, 1200);
         };
         const handleMove = (e: MouseEvent | TouchEvent) => {
           if (pressTriggered) return;
@@ -414,7 +415,7 @@ export function Discover() {
           if (!pos) return;
           const dx = pos.clientX - pressStart.x;
           const dy = pos.clientY - pressStart.y;
-          if (Math.sqrt(dx * dx + dy * dy) > 10) {
+          if (Math.sqrt(dx * dx + dy * dy) > 15) {
             clearTimeout(pressTimer);
           }
         };
@@ -523,7 +524,7 @@ export function Discover() {
     <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-center shrink-0"><h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('discover.title')}</h1></div>
       {showMap&&(<div className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col" style={{paddingBottom:'calc(50px + env(safe-area-inset-bottom))',transform:`translateX(${dragOffset}px)`,transition:isDragging?'none':'transform 0.3s ease'}} onTouchStart={(e)=>{if(e.touches[0].clientX<30){setIsDragging(true);setDragOffset(0);}}} onTouchMove={(e)=>{if(!isDragging)return;setDragOffset(Math.min(e.touches[0].clientX,window.innerWidth/3));}} onTouchEnd={()=>{if(dragOffset>100)setShowMap(false);setDragOffset(0);setIsDragging(false);}}>
-        <div className="flex items-center justify-between px-5 bg-white dark:bg-gray-900 shrink-0" style={{paddingTop:'calc(env(safe-area-inset-top) + 4px)',paddingBottom:'2px'}}><button onClick={()=>setShowMap(false)} className="text-[#FF8C42] text-[15px] font-medium py-1 px-1">{t('discover.backToMap')}</button><h2 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><div className="w-12"/></div>
+        <div className="flex items-center justify-between px-5 bg-white dark:bg-gray-900 shrink-0" style={{paddingTop:'calc(env(safe-area-inset-top) + 4px)',paddingBottom:'2px'}}><button onClick={()=>setShowMap(false)} className="text-[#FF8C42] text-[15px] font-medium py-1 px-1">{t('discover.backToMap')}</button><h2 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button onClick={() => setMarkMode(!markMode)} className={`w-9 h-9 rounded-full flex items-center justify-center ${markMode ? 'bg-[#FF8C42] text-white' : 'bg-[#F5F5F5] dark:bg-gray-800 text-[#333] dark:text-gray-100'}`}><Plus className="w-5 h-5" /></button></div>
         <div className="flex gap-2 px-4 py-1.5 overflow-x-auto bg-white dark:bg-gray-900 border-b border-[#F0F0F0] dark:border-gray-700 shrink-0">
           <button onClick={() => { setFavoritesOnly(!favoritesOnly); if (!favoritesOnly) setMapFilter('全部'); }} className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-medium flex items-center gap-1 ${favoritesOnly ? 'bg-[#FF4444] text-white' : 'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>
             <Heart className={`w-3 h-3 ${favoritesOnly ? 'fill-white' : ''}`} /> {t('discover.favorites')}
@@ -531,7 +532,7 @@ export function Discover() {
           {mapTypes.map(tp=>{const tn=tp==='全部'?t('discover.all'):tp==='公园'?t('discover.typePark'):tp==='咖啡馆'?t('discover.typeCafe'):tp==='医院'?t('discover.typeHospital'):tp==='餐厅'?t('discover.typeRestaurant'):tp==='小区'?t('discover.typeResidential'):tp==='户外'?t('discover.typeOutdoor'):tp==='美容'?t('discover.typeGrooming'):tp==='商店'?t('discover.typeShop'):tp;return(<button key={tp} onClick={()=>{setFavoritesOnly(false);setMapFilter(tp===mapFilter?'全部':tp);}} className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-medium ${!favoritesOnly&&mapFilter===tp?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>{tn}</button>);})}
         </div>
         <div className="flex justify-center py-1.5 bg-black/40 dark:bg-white/15 shrink-0">
-          <span className="text-[12px] text-white dark:text-white/80 font-medium">长按地图任意位置可标记新地点</span>
+          <span className="text-[12px] text-white dark:text-white/80 font-medium">点击右上角 + 可标记新地点</span>
         </div>
         <div className="flex-1 relative bg-[#E8E8E8] dark:bg-gray-800 overflow-hidden">
           {!mapError ? (
@@ -553,6 +554,23 @@ export function Discover() {
             }} className="absolute bottom-24 right-4 z-[1100] w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center active:bg-gray-100 dark:active:bg-gray-700" style={{pointerEvents:'auto'}}>
               <Crosshair className="w-5 h-5 text-[#007AFF]" />
             </button>
+            {markMode && (
+              <>
+                <div className="absolute inset-0 z-[1100] flex items-center justify-center pointer-events-none">
+                  <MapPin className="w-8 h-8 text-[#FF8C42] drop-shadow-lg" fill="#FF8C42" />
+                </div>
+                <button onClick={() => {
+                  const m = mapInstanceRef.current;
+                  if (m) {
+                    const c = m.getCenter();
+                    setMarkForm({ lat: c.lat, lng: c.lng });
+                    setMarkMode(false);
+                  }
+                }} className="absolute bottom-4 left-1/2 -translate-x-1/2 z-[1100] bg-[#FF8C42] text-white px-6 py-2.5 rounded-full text-[14px] font-bold shadow-lg active:bg-[#E67A35]">
+                  在此标记
+                </button>
+              </>
+            )}
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-full px-8 text-center">
