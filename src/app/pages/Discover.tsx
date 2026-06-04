@@ -387,50 +387,9 @@ export function Discover() {
           center: new TMap.LatLng(userLoc?.lat || 23.1291, userLoc?.lng || 113.2644),
           zoom: 15,
         });
-        let pressStart = { x: 0, y: 0, time: 0 };
-        let pressTimer: any = null;
-        let pressTriggered = false;
-        const triggerMark = () => {
-          if (pressTriggered) return;
-          pressTriggered = true;
-          const map = mapInstanceRef.current;
-          const TMap = (window as any).TMap;
-          if (!map || !TMap) return;
-          const rect = mapContainerRef.current?.getBoundingClientRect();
-          if (!rect) return;
-          const point = new TMap.Point(pressStart.x - rect.left, pressStart.y - rect.top);
-          const latLng = map.unprojectFromContainer(point);
-          setMarkForm({ lat: latLng.getLat(), lng: latLng.getLng() });
-        };
-        const handleDown = (e: MouseEvent | TouchEvent) => {
-          const pos = 'touches' in e ? (e as TouchEvent).touches[0] : (e as MouseEvent);
-          if (!pos) return;
-          pressStart = { x: pos.clientX, y: pos.clientY, time: Date.now() };
-          pressTriggered = false;
-          pressTimer = setTimeout(triggerMark, 1200);
-        };
-        const handleMove = (e: MouseEvent | TouchEvent) => {
-          if (pressTriggered) return;
-          const pos = 'touches' in e ? (e as TouchEvent).touches[0] : (e as MouseEvent);
-          if (!pos) return;
-          const dx = pos.clientX - pressStart.x;
-          const dy = pos.clientY - pressStart.y;
-          if (Math.sqrt(dx * dx + dy * dy) > 15) {
-            clearTimeout(pressTimer);
-          }
-        };
-        const handleUp = () => {
-          clearTimeout(pressTimer);
-        };
         map.on('rightclick', (e: any) => {
           setMarkForm({ lat: e.latLng.lat, lng: e.latLng.lng });
         });
-        mapContainerRef.current.addEventListener('mousedown', handleDown);
-        mapContainerRef.current.addEventListener('mouseup', handleUp);
-        mapContainerRef.current.addEventListener('mousemove', handleMove);
-        mapContainerRef.current.addEventListener('touchstart', handleDown, { passive: true });
-        mapContainerRef.current.addEventListener('touchend', handleUp);
-        mapContainerRef.current.addEventListener('touchmove', handleMove, { passive: true });
         mapInstanceRef.current = map;
         setMapReady(true);
       } catch { if (!cancelled) setMapError(true); }
