@@ -375,6 +375,7 @@ export function Discover() {
     if (!showMap) {
       mapInstanceRef.current = null;
       markersRef.current = [];
+      setMapReady(false);
       return;
     }
     let cancelled = false;
