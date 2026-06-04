@@ -327,23 +327,22 @@ export function Discover() {
   useEffect(() => { if (userLoc) { discoverApi.nearby(userLoc.lat, userLoc.lng, 8).then(d => setNearbyUsers(d.users || [])).catch(() => {}); } }, [userLoc]);
   useEffect(() => { const h=()=>{setShowMap(false);setSelectedPlace(null);setMarkForm(null);}; window.addEventListener('pawgram:discover-tab-click',h); return ()=>window.removeEventListener('pawgram:discover-tab-click',h); },[]);
 
-  // Initialize/destroy AMap when full-screen map opens/closes
+  // Initialize/destroy Tencent Map when full-screen map opens/closes
   useEffect(() => {
     if (!showMap) {
-      if (mapInstanceRef.current) { mapInstanceRef.current.destroy(); mapInstanceRef.current = null; }
+      mapInstanceRef.current = null;
       markersRef.current = [];
       return;
     }
     let cancelled = false;
     const initMap = () => {
       if (cancelled || !mapContainerRef.current) return;
-      const AMap = (window as any).AMap;
-      if (!AMap) { setTimeout(initMap, 300); return; }
+      const qqMaps = (window as any).qq?.maps;
+      if (!qqMaps) { setTimeout(initMap, 300); return; }
       try {
-        const map = new AMap.Map(mapContainerRef.current, {
-          center: [113.2644, 23.1291],
+        const map = new qqMaps.Map(mapContainerRef.current, {
+          center: new qqMaps.LatLng(23.1291, 113.2644),
           zoom: 13,
-          resizeEnable: true,
         });
         mapInstanceRef.current = map;
       } catch { if (!cancelled) setMapError(true); }
@@ -356,22 +355,22 @@ export function Discover() {
   useEffect(() => {
     const map = mapInstanceRef.current;
     if (!map) return;
-    markersRef.current.forEach(m => map.remove(m));
+    markersRef.current.forEach(m => m.setMap(null));
     markersRef.current = [];
-    const AMap = (window as any).AMap;
-    if (!AMap) return;
+    const qqMaps = (window as any).qq?.maps;
+    if (!qqMaps) return;
     sortedPlaces.forEach(p => {
-      const marker = new AMap.Marker({ position: [p.lng, p.lat], title: getPlaceName(p) });
-      marker.on('click', () => {
+      const marker = new qqMaps.Marker({ position: new qqMaps.LatLng(p.lat, p.lng), title: getPlaceName(p), map });
+      qqMaps.event.addListener(marker, 'click', () => {
         const content = `<div style="padding:4px 10px;cursor:pointer;font-size:13px;font-weight:600;color:#333;white-space:nowrap;">${getPlaceName(p)}</div>`;
         if (!infoWindowRef.current) {
-          infoWindowRef.current = new AMap.InfoWindow({ offset: new AMap.Pixel(0, -35) });
+          infoWindowRef.current = new qqMaps.InfoWindow({ map });
         }
         infoWindowRef.current.setContent(content);
-        infoWindowRef.current.open(map, [p.lng, p.lat]);
+        infoWindowRef.current.setPosition(new qqMaps.LatLng(p.lat, p.lng));
+        infoWindowRef.current.open();
         setSelectedPlace(p);
       });
-      map.add(marker);
       markersRef.current.push(marker);
     });
   }, [sortedPlaces]);
@@ -392,9 +391,9 @@ export function Discover() {
         <div className="flex-1 relative bg-[#E8E8E8] dark:bg-gray-800 overflow-hidden">
           {!mapError ? (
             <>
-              <div ref={mapContainerRef} id="amap-container" className="absolute inset-0 w-full h-full" />
+              <div ref={mapContainerRef} id="qq-map-container" className="absolute inset-0 w-full h-full" />
               <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-                <button onClick={() => window.open(`https://uri.amap.com/marker?position=${userLoc?.lng || 113.2644},${userLoc?.lat || 23.1291}`, '_blank')} className="bg-white dark:bg-gray-900 rounded-2xl px-6 py-3 shadow-lg flex items-center gap-2 active:opacity-80">
+                <button onClick={() => window.open(`http://maps.apple.com/?q=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}`, '_blank')} className="bg-white dark:bg-gray-900 rounded-2xl px-6 py-3 shadow-lg flex items-center gap-2 active:opacity-80">
                   <MapPin className="w-5 h-5 text-[#FF8C42]" />
                   <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.openInMaps')}</span>
                 </button>
