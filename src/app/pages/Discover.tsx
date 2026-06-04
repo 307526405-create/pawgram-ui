@@ -518,6 +518,11 @@ export function Discover() {
           </button>
           {mapTypes.map(tp=>{const tn=tp==='全部'?t('discover.all'):tp==='公园'?t('discover.typePark'):tp==='咖啡馆'?t('discover.typeCafe'):tp==='医院'?t('discover.typeHospital'):tp==='餐厅'?t('discover.typeRestaurant'):tp==='小区'?t('discover.typeResidential'):tp==='户外'?t('discover.typeOutdoor'):tp==='美容'?t('discover.typeGrooming'):tp==='商店'?t('discover.typeShop'):tp;return(<button key={tp} onClick={()=>{setFavoritesOnly(false);setMapFilter(tp===mapFilter?'全部':tp);}} className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-medium ${!favoritesOnly&&mapFilter===tp?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>{tn}</button>);})}
         </div>
+        {showMapHint && (
+          <div className="flex justify-center py-1.5 bg-black/40 dark:bg-white/15 shrink-0">
+            <span className="text-[12px] text-white dark:text-white/80 font-medium">长按地图任意位置可标记新地点</span>
+          </div>
+        )}
         <div className="flex-1 relative bg-[#E8E8E8] dark:bg-gray-800 overflow-hidden">
           {!mapError ? (
             <>
@@ -555,11 +560,6 @@ export function Discover() {
             </div>
           )}
         </div>
-        {showMapHint && (
-          <div className="flex justify-center py-1.5 bg-white dark:bg-gray-900 border-t border-[#F0F0F0] dark:border-gray-700 shrink-0">
-            <span className="text-[11px] text-[#BBB] dark:text-gray-500">长按地图任意位置可标记新地点</span>
-          </div>
-        )}
         <div className="flex gap-2 p-3 overflow-x-auto bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 shrink-0">{sortedPlaces.map(p=>(<div key={p.id} onClick={()=>setSelectedPlace(p)} className="shrink-0 bg-white dark:bg-gray-900 rounded-xl px-3 py-2 cursor-pointer shadow-sm border border-[#F0F0F0] dark:border-gray-700" style={{borderLeftWidth:'3px',borderLeftColor:getTypeColor(p.type)}}><div className="flex items-center gap-1.5"><span className="text-[13px] font-semibold text-[#333] dark:text-gray-100">{getPlaceName(p)}</span>{favorites.has(p.id)&&<Heart className="w-3 h-3 text-[#FF4444] fill-[#FF4444] shrink-0"/>}</div><div className="text-[11px] text-[#FF8C42] mt-0.5">★{p.rating} · {getDistanceKm(p, userLoc)===Infinity?p.distance:`${getDistanceKm(p, userLoc).toFixed(1)}km`}</div></div>))}</div>
       </div>)}
       {selectedPlace&&<PlaceDetail place={selectedPlace} userLoc={userLoc} isFavorite={favorites.has(selectedPlace.id)} wantCount={wantCount(selectedPlace.id)} onToggleFavorite={()=>toggleFavorite(selectedPlace.id)} onClose={()=>setSelectedPlace(null)}/>}
