@@ -455,11 +455,15 @@ export function Discover() {
       <div className="flex-1 overflow-y-auto pb-24" ref={scrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onScroll={handleScroll}>
         {pullState!=='idle'&&(<div className="flex items-center justify-center gap-2 text-[12px] text-[#999] dark:text-gray-400" style={{height:pullDist}}>{pullState==='loading'&&<span className="w-3.5 h-3.5 border-2 border-[#FF8C42] border-t-transparent rounded-full animate-spin"/>}{pullState==='pulling'&&t('common.pullRefresh')}{pullState==='ready'&&t('common.releaseRefresh')}{pullState==='loading'&&t('common.refreshing')}</div>)}
         <div className="px-4 mt-5" onClick={()=>navigate('/search')}><div className="bg-white dark:bg-gray-900 border border-[#E5E5E5] dark:border-gray-600 rounded-lg px-3 py-2.5 flex items-center cursor-pointer"><Search className="w-4 h-4 text-[#999] dark:text-gray-400 mr-2 shrink-0"/><span className="flex-1 text-[14px] text-[#999] dark:text-gray-400">{t('discover.searchPlaceholder')}</span></div></div>
-        <div className="mt-8"><div className="flex items-center justify-between px-4 mb-4"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button className="text-[#FF8C42] text-[12px] font-medium" onClick={()=>setShowMap(true)}>{t('common.viewAll')}</button></div>{!showMap && (
-          <div className="px-4">
-            <div className="cursor-pointer" onClick={()=>setShowMap(true)}>
-              <img src={MAP_STATIC_URL}
-                   className="w-full h-[160px] object-cover rounded-xl" alt="" />
+        <div className="mt-8"><h2 className="px-4 mb-4 text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2>{!showMap && (
+          <div className="px-4 cursor-pointer" onClick={()=>setShowMap(true)}>
+            <div className="w-full h-[160px] rounded-xl bg-gradient-to-br from-green-50 via-blue-50 to-green-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 flex flex-col items-center justify-center gap-2 relative overflow-hidden border border-gray-200 dark:border-gray-700">
+              <div className="absolute top-5 left-6 w-2 h-2 rounded-full bg-orange-400" />
+              <div className="absolute top-12 left-[45%] w-2 h-2 rounded-full bg-green-500" />
+              <div className="absolute top-7 right-8 w-2 h-2 rounded-full bg-blue-400" />
+              <div className="absolute bottom-10 left-[30%] w-2 h-2 rounded-full bg-pink-400" />
+              <MapPin className="w-6 h-6 text-gray-400 relative z-10" />
+              <span className="text-[11px] text-gray-400 relative z-10">点击查看宠物地图</span>
             </div>
           </div>
         )}
