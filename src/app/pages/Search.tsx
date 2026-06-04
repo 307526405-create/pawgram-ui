@@ -31,7 +31,12 @@ export function Search() {
   const [query, setQuery] = useState("");
   const [history, setHistory] = useState(["柯基", "狗粮推荐", "宠物洗澡"]);
   const [activeTab, setActiveTab] = useState(0);
+  const [followedIds, setFollowedIds] = useState<Set<number>>(new Set());
   const inputRef = useRef<HTMLInputElement>(null);
+
+  const toggleFollow = (userId: number) => {
+    setFollowedIds(prev => { const next = new Set(prev); if (next.has(userId)) next.delete(userId); else next.add(userId); return next; });
+  };
 
   useEffect(() => {
     if (inputRef.current) {
@@ -134,7 +139,7 @@ export function Search() {
                       <div className="text-[14px] font-bold text-[#333] dark:text-gray-100">{u.name}</div>
                       <div className="text-[11px] text-[#999] dark:text-gray-400">{t('common.followersCount', { count: u.followers })} · {u.bio}</div>
                     </div>
-                    <button onClick={() => alert(t('common.featureInDev'))} className="shrink-0 bg-[#FF8C42] text-white px-4 py-1.5 rounded-full text-[12px] font-bold active:bg-[#E67A35]">{t('common.follow')}</button>
+                    <button onClick={() => toggleFollow(u.id)} className={`shrink-0 px-4 py-1.5 rounded-full text-[12px] font-bold cursor-pointer active:opacity-80 ${followedIds.has(u.id) ? 'bg-[#F0F0F0] dark:bg-gray-800 text-[#999] dark:text-gray-400' : 'bg-[#FF8C42] text-white active:bg-[#E67A35]'}`}>{followedIds.has(u.id) ? t('common.followed') : t('common.follow')}</button>
                   </div>
                 ))}
               </div>
@@ -180,8 +185,8 @@ export function Search() {
                           <h4 className="text-[15px] font-bold text-[#333] dark:text-gray-100 truncate">{user.name}</h4>
                           <p className="text-[12px] text-[#999] dark:text-gray-400 mt-0.5 truncate">{t('common.followersCount', { count: user.followers })}</p>
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); alert(t('common.featureInDev')); }} className="shrink-0 bg-transparent border border-[#FF8C42] text-[#FF8C42] px-4 py-1.5 rounded-full text-[13px] font-bold active:opacity-70 transition-opacity">
-                          {t('common.follow')}
+                        <button onClick={(e) => { e.stopPropagation(); toggleFollow(user.id); }} className={`shrink-0 px-4 py-1.5 rounded-full text-[13px] font-bold cursor-pointer active:opacity-70 transition-opacity ${followedIds.has(user.id) ? 'bg-[#F0F0F0] dark:bg-gray-800 text-[#999] dark:text-gray-400 border-[#CCC] dark:border-gray-700' : 'bg-transparent border border-[#FF8C42] text-[#FF8C42]'}`}>
+                          {followedIds.has(user.id) ? t('common.followed') : t('common.follow')}
                         </button>
                       </div>
                     ))

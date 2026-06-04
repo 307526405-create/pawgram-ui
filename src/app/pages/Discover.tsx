@@ -256,6 +256,7 @@ export function Discover() {
   const [favorites, setFavorites] = useState<Set<number>>(() => {
     try { return new Set(JSON.parse(localStorage.getItem('pawgram_favorites') || '[]')); } catch { return new Set(); }
   });
+  const [mapError, setMapError] = useState(false);
   const [nearbyUsers, setNearbyUsers] = useState<any[]>([]);
   const [likedNotes, setLikedNotes] = useState<Set<number>>(new Set());
   const toggleNoteLike = (noteId: number) => { setLikedNotes(prev => { const next = new Set(prev); if (next.has(noteId)) next.delete(noteId); else next.add(noteId); return next; }); };
@@ -337,10 +338,15 @@ export function Discover() {
           {mapTypes.map(tp=>{const tn=tp==='全部'?t('discover.all'):tp==='公园'?t('discover.typePark'):tp==='咖啡馆'?t('discover.typeCafe'):tp==='医院'?t('discover.typeHospital'):tp==='餐厅'?t('discover.typeRestaurant'):tp==='小区'?t('discover.typeResidential'):tp==='户外'?t('discover.typeOutdoor'):tp==='美容'?t('discover.typeGrooming'):tp==='商店'?t('discover.typeShop'):tp;return(<button key={tp} onClick={()=>{setFavoritesOnly(false);setMapFilter(tp===mapFilter?'全部':tp);}} className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-medium ${!favoritesOnly&&mapFilter===tp?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>{tn}</button>);})}
         </div>
         <div className="flex-1 relative bg-[#E8E8E8] dark:bg-gray-800 overflow-hidden">
-          <div className="absolute inset-0 bg-cover bg-center" style={{
-            backgroundImage: `url(https://snapshot.apple-mapkit.com/map?center=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}&size=600x400&scale=2&z=13&t=standard&poi=0)`,
-          }} />
-          {sortedPlaces.map(p => {
+          {!mapError ? (
+            <>
+              <img
+                src={`https://snapshot.apple-mapkit.com/map?center=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}&size=600x400&scale=2&z=13&t=standard&poi=0`}
+                alt=""
+                onError={() => setMapError(true)}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              {sortedPlaces.map(p => {
             const centerLat = userLoc?.lat || 23.1291;
             const centerLng = userLoc?.lng || 113.2644;
             const dLat = p.lat - centerLat;
@@ -374,6 +380,22 @@ export function Discover() {
               <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.openInMaps')}</span>
             </button>
           </div>
+            </>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-full px-8 text-center">
+              <div className="w-16 h-16 rounded-full bg-[#FFF3E6] dark:bg-orange-900/30 flex items-center justify-center mb-4">
+                <MapPin className="w-8 h-8 text-[#FF8C42]" />
+              </div>
+              <p className="text-[15px] font-semibold text-[#333] dark:text-gray-100 mb-1">{t('discover.mapLoadFailed')}</p>
+              <p className="text-[13px] text-[#999] dark:text-gray-400 mb-5">{t('discover.mapLoadFailedHint')}</p>
+              <button
+                onClick={() => setShowMap(false)}
+                className="bg-[#FF8C42] text-white px-6 py-2.5 rounded-full text-[14px] font-bold active:bg-[#E67A35]"
+              >
+                {t('discover.viewPlaceList')}
+              </button>
+            </div>
+          )}
         </div>
         <div className="flex gap-2 p-3 overflow-x-auto bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 shrink-0">{sortedPlaces.map(p=>(<div key={p.id} onClick={()=>setSelectedPlace(p)} className="shrink-0 bg-white dark:bg-gray-900 rounded-xl px-3 py-2 cursor-pointer shadow-sm border border-[#F0F0F0] dark:border-gray-700" style={{borderLeftWidth:'3px',borderLeftColor:getTypeColor(p.type)}}><div className="flex items-center gap-1.5"><span className="text-[13px] font-semibold text-[#333] dark:text-gray-100">{getPlaceName(p)}</span>{favorites.has(p.id)&&<Heart className="w-3 h-3 text-[#FF4444] fill-[#FF4444] shrink-0"/>}</div><div className="text-[11px] text-[#FF8C42] mt-0.5">★{p.rating} · {getDistanceKm(p, userLoc)===Infinity?p.distance:`${getDistanceKm(p, userLoc).toFixed(1)}km`}</div></div>))}</div>
       </div>)}
@@ -382,7 +404,7 @@ export function Discover() {
       <div className="flex-1 overflow-y-auto pb-24" ref={scrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onScroll={handleScroll}>
         {pullState!=='idle'&&(<div className="flex items-center justify-center gap-2 text-[12px] text-[#999] dark:text-gray-400" style={{height:pullDist}}>{pullState==='loading'&&<span className="w-3.5 h-3.5 border-2 border-[#FF8C42] border-t-transparent rounded-full animate-spin"/>}{pullState==='pulling'&&t('common.pullRefresh')}{pullState==='ready'&&t('common.releaseRefresh')}{pullState==='loading'&&t('common.refreshing')}</div>)}
         <div className="px-4 mt-5" onClick={()=>navigate('/search')}><div className="bg-white dark:bg-gray-900 border border-[#E5E5E5] dark:border-gray-600 rounded-lg px-3 py-2.5 flex items-center cursor-pointer"><Search className="w-4 h-4 text-[#999] dark:text-gray-400 mr-2 shrink-0"/><span className="flex-1 text-[14px] text-[#999] dark:text-gray-400">{t('discover.searchPlaceholder')}</span></div></div>
-        <div className="mt-8"><div className="flex items-center justify-between px-4 mb-4"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button className="text-[#FF8C42] text-[12px] font-medium" onClick={()=>setShowMap(true)}>{t('common.viewAll')}</button></div><div className="px-4"><div onClick={()=>setShowMap(true)} className="bg-white dark:bg-gray-900 rounded-xl border border-[#EEE] dark:border-gray-700 overflow-hidden shadow-sm cursor-pointer active:opacity-80"><div className="relative h-[120px] w-full"><div className="w-full h-full bg-cover bg-center" style={{backgroundImage: `url(https://snapshot.apple-mapkit.com/map?center=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}&size=600x200&scale=2&z=13&t=standard&poi=0)`}} /><div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"/><div className="absolute bottom-3 left-3 flex items-center text-white"><MapPin className="w-4 h-4 mr-1"/><span className="text-[12px] font-medium">{t('discover.nearbyPlaces', { count: places.length })}</span></div></div></div></div></div>
+        <div className="mt-8"><div className="flex items-center justify-between px-4 mb-4"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button className="text-[#FF8C42] text-[12px] font-medium" onClick={()=>setShowMap(true)}>{t('common.viewAll')}</button></div><div className="px-4"><div onClick={()=>setShowMap(true)} className="bg-white dark:bg-gray-900 rounded-xl border border-[#EEE] dark:border-gray-700 overflow-hidden shadow-sm cursor-pointer active:opacity-80"><div className="relative h-[120px] w-full">{!mapError ? <img src={`https://snapshot.apple-mapkit.com/map?center=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}&size=600x200&scale=2&z=13&t=standard&poi=0`} onError={() => setMapError(true)} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full bg-[#E8E8E8] dark:bg-gray-800 flex items-center justify-center"><MapPin className="w-6 h-6 text-[#BBB] dark:text-gray-600" /></div>}<div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"/><div className="absolute bottom-3 left-3 flex items-center text-white"><MapPin className="w-4 h-4 mr-1"/><span className="text-[12px] font-medium">{t('discover.nearbyPlaces', { count: places.length })}</span></div></div></div></div></div>
         {favPlaces.length>0&&(<div className="mt-8"><h2 className="px-4 text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">{t('discover.myWishlist')} ({favPlaces.length})</h2><div className="flex gap-3 px-4 overflow-x-auto pb-2">{favPlaces.map(p=>(<div key={p.id} onClick={()=>setSelectedPlace(p)} className="shrink-0 w-[130px] bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80"><div className="h-[70px] flex items-center justify-center" style={{backgroundColor:getTypeColor(p.type)+'20'}}><MapPin className="w-6 h-6" style={{color:getTypeColor(p.type)}}/></div><div className="p-2.5"><div className="text-[13px] font-semibold text-[#333] dark:text-gray-100 truncate">{getPlaceName(p)}</div><div className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{p.type} · ★{p.rating}</div></div></div>))}</div></div>)}
         {nearbyUsers.length > 0 && (
           <div className="mt-6 px-4">

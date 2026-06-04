@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
@@ -59,44 +59,45 @@ export function Messages() {
   [mockData]);
 
   const { containerRef: scrollRef, onScroll } = useScrollRestore();
+  const [clearedUnreadIds, setClearedUnreadIds] = useState<Set<number>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('pawgram_read_convs') || '[]')); } catch { return new Set(); }
+  });
   const [deletedConvIds, setDeletedConvIds] = useState<Set<number>>(new Set());
   const [allRead, setAllRead] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
-  const [activeNotifGroup, setActiveNotifGroup] = useState<string | null>(null);
 
-  const notifDetails: Record<string, { name: string; avatar: string; time: string; text: string }[]> = {
-    likes: [
-      { name: '大黄铲屎官', avatar: 'https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w=80', time: '3分钟前', text: '赞了你的帖子' },
-      { name: '橘猫日记', avatar: 'https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=80', time: '15分钟前', text: '收藏了你的帖子' },
-      { name: '柯基小短腿', avatar: 'https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=80', time: '1小时前', text: '赞了你的帖子' },
-    ],
-    follows: [
-      { name: '橘猫日记', avatar: 'https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=80', time: '15分钟前', text: '关注了你' },
-      { name: '汪星人阿呆', avatar: 'https://images.unsplash.com/photo-1608744882201-52a7f7f3dd60?w=80', time: '2小时前', text: '关注了你' },
-    ],
-    comments: [
-      { name: '柯基小短腿', avatar: 'https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=80', time: '30分钟前', text: '评论了你：好可爱！' },
-      { name: '大黄铲屎官', avatar: 'https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w=80', time: '1小时前', text: '@了你' },
-      { name: '萨摩耶球球', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80', time: '2小时前', text: '评论了你：在哪里拍的？' },
-      { name: '橘猫日记', avatar: 'https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=80', time: '3小时前', text: '评论了你：好可爱的小狗！' },
-      { name: '布偶汤圆', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=80', time: '昨天', text: '@了你' },
-    ],
-  };
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const detail = (e as CustomEvent).detail;
+      setClearedUnreadIds(prev => {
+        const next = new Set([...prev, detail]);
+        try { localStorage.setItem('pawgram_read_convs', JSON.stringify([...next])); } catch {}
+        return next;
+      });
+    };
+    window.addEventListener('pawgram:clear-conv-unread', handler);
+    return () => window.removeEventListener('pawgram:clear-conv-unread', handler);
+  }, []);
 
   const convs = useMemo(() =>
     conversations
       .filter(c => !deletedConvIds.has(c.id))
-      .map(c => ({ ...c, unread: allRead ? 0 : c.unread })),
-  [conversations, deletedConvIds, allRead]);
+      .map(c => ({ ...c, unread: allRead || clearedUnreadIds.has(c.id) ? 0 : c.unread })),
+  [conversations, deletedConvIds, allRead, clearedUnreadIds]);
 
   const notifs = useMemo(() =>
     notifGroups.map(g => ({ ...g, count: allRead ? 0 : g.count })),
   [notifGroups, allRead]);
 
   const totalUnread = notifs.reduce((s, g) => s + g.count, 0) + convs.reduce((s, c) => s + c.unread, 0);
+
+  useEffect(() => {
+    window.dispatchEvent(new CustomEvent('pawgram:unread-count', { detail: totalUnread }));
+  }, [totalUnread]);
+
   const deleteConv = (id: number) => setDeletedConvIds(prev => new Set([...prev, id]));
   const markAllRead = () => {
     setAllRead(true);
@@ -117,25 +118,22 @@ export function Messages() {
           </div>
         ) : (
           <>
-            <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">
-              {t('messages.title')}
-              {totalUnread > 0 && <span className="inline-flex items-center justify-center min-w-[18px] h-[18px] rounded-full bg-[#FF4D4F] text-white text-[10px] font-bold px-1 ml-2 align-middle">{totalUnread}</span>}
-            </h1>
+            <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('messages.title')}</h1>
             <div className="flex items-center gap-1">
-              <button onClick={() => setShowSearch(true)} className="p-1.5"><Search className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
+              <button onClick={() => setShowSearch(true)} className="p-1.5 cursor-pointer active:opacity-70"><Search className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
               <div className="relative">
-                <button onClick={() => setShowMenu(!showMenu)} className="p-1"><MoreHorizontal className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
+                <button onClick={() => setShowMenu(!showMenu)} className="p-1 cursor-pointer active:opacity-70"><MoreHorizontal className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
                 {showMenu && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)}/>
                     <div className="absolute right-0 top-10 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-[#F0F0F0] dark:border-gray-700 py-1 z-50 min-w-[150px]">
-                      <button onClick={markAllRead} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">
+                      <button onClick={markAllRead} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
                         <CheckCheck className="w-4 h-4"/>{t('messages.markAllRead')}
                       </button>
-                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">
+                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
                         <Settings className="w-4 h-4"/>{t('messages.messageSettings')}
                       </button>
-                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">
+                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
                         <Ban className="w-4 h-4"/>{t('messages.blockSettings')}
                       </button>
                     </div>
@@ -152,7 +150,7 @@ export function Messages() {
           <div className="flex gap-3 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
             {newFriends.map(f => (
               <div key={f.id} className="shrink-0 flex flex-col items-center gap-1.5 w-[64px]">
-                <ImageWithFallback src={f.avatar} className="w-[52px] h-[52px] rounded-full object-cover cursor-pointer active:opacity-70"/>
+                <ImageWithFallback src={f.avatar} onClick={() => navigate(`/user/${f.id}`)} className="w-[52px] h-[52px] rounded-full object-cover cursor-pointer active:opacity-70"/>
                 <span className="text-[11px] text-[#333] dark:text-gray-100 text-center leading-tight line-clamp-2">{f.name}</span>
               </div>
             ))}
@@ -161,7 +159,7 @@ export function Messages() {
 
         <div className="bg-white dark:bg-gray-900 mb-2">
           {notifs.map(g => (
-            <div key={g.key} onClick={() => setActiveNotifGroup(g.key)} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 active:bg-[#F9F9F9] dark:active:bg-gray-800 cursor-pointer">
+            <div key={g.key} onClick={() => navigate(`/notifications/${g.key}`)} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 active:bg-[#F9F9F9] dark:active:bg-gray-800 cursor-pointer">
               <ImageWithFallback src={g.avatar} className="w-11 h-11 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/>
               <div className="flex-1 min-w-0">
                 <div className="text-[14px] font-bold text-[#333] dark:text-gray-100">{g.label}</div>
@@ -228,33 +226,6 @@ export function Messages() {
       </div>
 
       <BottomNav />
-
-      {activeNotifGroup && (
-        <div className="fixed inset-0 z-50 flex items-end" onClick={() => setActiveNotifGroup(null)}>
-          <div className="absolute inset-0 bg-black/40" />
-          <div className="relative w-full bg-white dark:bg-gray-900 rounded-t-[20px] px-5 pt-4 pb-8 max-h-[60vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-[17px] font-bold text-[#333] dark:text-gray-100">
-                {notifs.find(g => g.key === activeNotifGroup)?.label}
-              </h2>
-              <button onClick={() => setActiveNotifGroup(null)}><X className="w-5 h-5 text-[#999] dark:text-gray-400" /></button>
-            </div>
-            <div className="space-y-2">
-              {(notifDetails[activeNotifGroup] || []).map((item, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-xl bg-[#F8F8F8] dark:bg-gray-800">
-                  <ImageWithFallback src={item.avatar} className="w-10 h-10 rounded-full object-cover shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] text-[#333] dark:text-gray-100 font-medium">{item.name}</div>
-                    <div className="text-[12px] text-[#999] dark:text-gray-400 mt-0.5">{item.text}</div>
-                  </div>
-                  <span className="text-[10px] text-[#BBB] dark:text-gray-500 shrink-0">{item.time}</span>
-                </div>
-              ))}
-            </div>
-            <button onClick={() => setActiveNotifGroup(null)} className="w-full h-10 mt-4 text-[#999] dark:text-gray-400 text-[13px]">{t('common.close')}</button>
-          </div>
-        </div>
-      )}
 
       {confirmDeleteId !== null && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">

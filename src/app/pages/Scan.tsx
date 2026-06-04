@@ -136,9 +136,9 @@ export function Scan() {
   return (
     <div className={`h-full bg-black relative flex flex-col ${className}`}>
       <div className="absolute top-0 w-full pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 z-20">
-        <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1 text-white"><ChevronLeft className="w-6 h-6" /></button>
+        <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1 text-white cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6" /></button>
         <h1 className="text-[17px] font-bold text-white">{t('scan.title')}</h1>
-        <button onClick={toggleTorch} className="p-2">
+        <button onClick={toggleTorch} className="p-2 cursor-pointer active:opacity-70">
           <Zap className={`w-5 h-5 ${torch ? 'text-yellow-400' : 'text-white'}`} />
         </button>
       </div>

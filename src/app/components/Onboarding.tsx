@@ -67,7 +67,7 @@ export function Onboarding({ onDone }: OnboardingProps) {
       {!isLast && (
         <button
           onClick={goSkip}
-          className="absolute top-[max(env(safe-area-inset-top),16px)] right-4 z-10 text-white/80 text-[14px] px-4 py-2 active:opacity-70"
+          className="absolute top-[max(env(safe-area-inset-top),16px)] right-4 z-10 text-white/80 text-[14px] px-4 py-2 cursor-pointer active:opacity-70"
         >
           跳过
         </button>
@@ -107,7 +107,7 @@ export function Onboarding({ onDone }: OnboardingProps) {
         <div className="px-8">
           <button
             onClick={goNext}
-            className={`w-full h-12 rounded-full text-[16px] font-bold active:scale-[0.98] transition-transform ${
+            className={`w-full h-12 rounded-full text-[16px] font-bold cursor-pointer active:scale-[0.98] transition-transform ${
               isLast
                 ? "bg-white text-[#FF8C42]"
                 : "bg-white/20 text-white border border-white/40"

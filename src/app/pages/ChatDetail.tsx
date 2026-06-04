@@ -5,6 +5,8 @@ import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { usePageTransition } from "../hooks/usePageTransition";
 
+const FAVORITES_KEY = 'pawgram_chat_favorites';
+
 const mockMessageBase = [
   { id:1, from:true, time:"10:30" },
   { id:2, from:false, time:"10:32" },
@@ -42,17 +44,49 @@ export function ChatDetail() {
     })),
   [mockData]);
 
-  const [sentMessages, setSentMessages] = useState<{id:number; from:boolean; text:string; time:string}[]>([]);
+  const [sentMessages, setSentMessages] = useState<{id:number; from:boolean; text:string; time:string; image?:string}[]>([]);
   const [input, setInput] = useState("");
   const [showMore, setShowMore] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [locating, setLocating] = useState(false);
+  const [favorites, setFavorites] = useState<string[]>(() => {
+    try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); } catch { return []; }
+  });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const photoInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [keyboardOffset, setKeyboardOffset] = useState(0);
 
   const messages = [...mockMessages, ...sentMessages];
 
-  useEffect(() => { scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight); }, [messages]);
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const initialHeight = window.innerHeight;
+    const handler = () => {
+      const offset = initialHeight - vv.height;
+      setKeyboardOffset(offset > 0 ? offset : 0);
+    };
+    vv.addEventListener('resize', handler);
+    return () => vv.removeEventListener('resize', handler);
+  }, []);
+
+  useEffect(() => {
+    const convId = Number(id);
+    window.dispatchEvent(new CustomEvent('pawgram:clear-conv-unread', { detail: convId }));
+    // persist so Messages can pick it up even after remount
+    try {
+      const key = 'pawgram_read_convs';
+      const read: number[] = JSON.parse(localStorage.getItem(key) || '[]');
+      if (!read.includes(convId)) {
+        read.push(convId);
+        localStorage.setItem(key, JSON.stringify(read));
+      }
+    } catch {}
+  }, [id]);
+  useEffect(() => { scrollRef.current?.scrollTo(0, scrollRef.current.scrollHeight); }, [messages, keyboardOffset]);
 
   const send = () => {
     const text = input.trim();
@@ -63,11 +97,60 @@ export function ChatDetail() {
     setShowMore(false);
   };
 
+  const sendImage = (src: string) => {
+    const now = new Date();
+    setSentMessages(prev => [...prev, { id:Date.now(), from:false, text:'', time:`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`, image:src }]);
+    setShowMore(false);
+  };
+
+  const handlePhotoPick = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { if (reader.result) sendImage(reader.result as string); };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { if (reader.result) sendImage(reader.result as string); };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const sendLocation = () => {
+    setLocating(true);
+    navigator.geolocation?.getCurrentPosition(
+      (pos) => {
+        const text = `📍 ${t('chat.location')}: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
+        const now = new Date();
+        setSentMessages(prev => [...prev, { id:Date.now(), from:false, text, time:`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}` }]);
+        setLocating(false);
+        setShowMore(false);
+      },
+      () => { setLocating(false); },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  };
+
+  const addToFavorites = () => {
+    const convKey = `chat_${id}`;
+    setFavorites(prev => {
+      const next = prev.includes(convKey) ? prev : [...prev, convKey];
+      localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
+      return next;
+    });
+    setShowMore(false);
+  };
+
   const moreActions = [
-    { icon:Image, label:t('chat.photo'), onClick:(e: React.MouseEvent) => { e.stopPropagation(); setShowMore(false); alert(t('common.featureInDev')); } },
-    { icon:Camera, label:t('chat.takePhoto'), onClick:(e: React.MouseEvent) => { e.stopPropagation(); setShowMore(false); alert(t('common.featureInDev')); } },
-    { icon:MapPin, label:t('chat.location'), onClick:(e: React.MouseEvent) => { e.stopPropagation(); setShowMore(false); alert(t('common.featureInDev')); } },
-    { icon:Star, label:t('chat.favorites'), onClick:(e: React.MouseEvent) => { e.stopPropagation(); setShowMore(false); alert(t('common.featureInDev')); } },
+    { icon:Image, label:t('chat.photo'), onClick:() => photoInputRef.current?.click() },
+    { icon:Camera, label:t('chat.takePhoto'), onClick:() => cameraInputRef.current?.click() },
+    { icon:MapPin, label:t('chat.location'), onClick:sendLocation },
+    { icon:Star, label:t('chat.favorites'), onClick:addToFavorites },
   ];
 
   return (
@@ -86,13 +169,13 @@ export function ChatDetail() {
           <>
             <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100"/></button>
             <div className="flex-1 flex items-center gap-2 ml-2">
-              <ImageWithFallback src={user.avatar} className="w-8 h-8 rounded-full object-cover cursor-pointer active:opacity-70"/>
+              <ImageWithFallback src={user.avatar} onClick={() => navigate(`/user/${id}`)} className="w-8 h-8 rounded-full object-cover cursor-pointer active:opacity-70"/>
               <span className="text-[16px] font-bold text-[#333] dark:text-gray-100">{user.name}</span>
             </div>
             <div className="flex items-center gap-1">
-              <button onClick={() => setShowSearch(true)} className="p-1.5"><Search className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
+              <button onClick={() => setShowSearch(true)} className="p-1.5 cursor-pointer active:opacity-70"><Search className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
               <div className="relative">
-                <button onClick={() => setShowMenu(!showMenu)} className="p-1.5"><MoreHorizontal className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
+                <button onClick={() => setShowMenu(!showMenu)} className="p-1.5 cursor-pointer active:opacity-70"><MoreHorizontal className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
                 {showMenu && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)}/>
@@ -122,9 +205,13 @@ export function ChatDetail() {
             <div key={m.id}>
               {showTime && <div className="text-center py-2"><span className="text-[11px] text-[#BBB] dark:text-gray-500">{m.time}</span></div>}
               <div className={`flex mb-3 items-end gap-2 ${m.from ? 'justify-start' : 'justify-end'}`}>
-                {m.from && <ImageWithFallback src={user.avatar} className="w-8 h-8 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/>}
-                <div className={`max-w-[70%] px-3 py-2 rounded-2xl text-[14px] leading-relaxed ${m.from ? 'bg-[#F5F5F5] dark:bg-gray-800 text-[#333] dark:text-gray-100 rounded-bl-sm' : 'bg-[#FF8C42] text-white rounded-br-sm'}`}>
-                  {m.text}
+                {m.from && <ImageWithFallback src={user.avatar} onClick={() => navigate(`/user/${id}`)} className="w-8 h-8 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/>}
+                <div className={`max-w-[70%] rounded-2xl text-[14px] leading-relaxed overflow-hidden ${m.from ? 'bg-[#F5F5F5] dark:bg-gray-800 text-[#333] dark:text-gray-100 rounded-bl-sm' : 'bg-[#FF8C42] text-white rounded-br-sm'}`}>
+                  {m.image ? (
+                    <img src={m.image} className="max-w-full max-h-[200px] object-cover" alt="" />
+                  ) : m.text ? (
+                    <div className="px-3 py-2">{m.text}</div>
+                  ) : null}
                 </div>
                 {!m.from && <ImageWithFallback src={myAvatar} className="w-8 h-8 rounded-full object-cover shrink-0"/>}
               </div>
@@ -133,13 +220,16 @@ export function ChatDetail() {
         })}
       </div>
 
+      <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoPick} />
+      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleCameraCapture} />
+
       {showMore && (
         <div className="bg-[#F5F5F5] dark:bg-gray-800 border-t border-[#EEE] dark:border-gray-700 px-4 py-3">
           <div className="flex justify-around">
             {moreActions.map((a, i) => (
-              <button key={i} onClick={a.onClick} className="flex flex-col items-center gap-1.5">
+              <button key={i} onClick={(e) => { e.stopPropagation(); a.onClick(); }} className="flex flex-col items-center gap-1.5 cursor-pointer active:opacity-70">
                 <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
-                  <a.icon className="w-6 h-6 text-[#333] dark:text-gray-100"/>
+                  {locating && a.icon === MapPin ? <span className="w-5 h-5 border-2 border-[#FF8C42] border-t-transparent rounded-full animate-spin"/> : <a.icon className="w-6 h-6 text-[#333] dark:text-gray-100"/>}
                 </div>
                 <span className="text-[10px] text-[#666] dark:text-gray-400">{a.label}</span>
               </button>
@@ -148,8 +238,8 @@ export function ChatDetail() {
         </div>
       )}
 
-      <div className="bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 px-3 py-2 flex items-center gap-2" style={{paddingBottom:'calc(env(safe-area-inset-bottom) + 8px)'}}>
-        <button onClick={() => setShowMore(!showMore)} className={`p-1.5 rounded-full ${showMore ? 'bg-[#FF8C42] text-white' : 'text-[#666] dark:text-gray-400'}`}>
+      <div className="bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 px-3 py-2 flex items-center gap-2 shrink-0" style={{paddingBottom: `calc(env(safe-area-inset-bottom) + 8px + ${keyboardOffset}px)`}}>
+        <button onClick={() => setShowMore(!showMore)} className={`p-1.5 rounded-full cursor-pointer active:opacity-70 ${showMore ? 'bg-[#FF8C42] text-white' : 'text-[#666] dark:text-gray-400'}`}>
           <Plus className="w-5 h-5"/>
         </button>
         <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key==='Enter' && send()}

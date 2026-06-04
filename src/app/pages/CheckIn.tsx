@@ -114,7 +114,7 @@ export function CheckIn() {
 
         {/* 拍照打卡大按钮 */}
         <div className="px-4 mb-8">
-          <button className="w-full h-[48px] bg-[#FF8C42] rounded-[12px] text-white text-[16px] font-bold active:bg-[#F27E36] transition-colors flex items-center justify-center gap-2">
+          <button className="w-full h-[48px] bg-[#FF8C42] rounded-[12px] text-white text-[16px] font-bold cursor-pointer active:bg-[#F27E36] transition-colors flex items-center justify-center gap-2">
             📸 拍照打卡
           </button>
         </div>

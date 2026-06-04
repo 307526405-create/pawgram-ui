@@ -44,7 +44,7 @@ export function Login() {
               placeholder={t('login.enterCode')}
               className="w-full h-[44px] rounded-[8px] border border-[#E5E5E5] dark:border-gray-700 pl-3 pr-[90px] text-[14px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] placeholder:text-[#999999] dark:placeholder:text-gray-500 transition-colors"
             />
-            <button className="absolute right-3 text-[#FF8C42] text-[14px] font-medium bg-transparent active:opacity-70 transition-opacity">
+            <button className="absolute right-3 text-[#FF8C42] text-[14px] font-medium bg-transparent cursor-pointer active:opacity-70 transition-opacity">
               {t('login.getCode')}
             </button>
           </div>

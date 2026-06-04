@@ -85,6 +85,9 @@
   "discover": {
     "title": "发现",
     "petMap": "遛宠地图",
+    "openMap": "打开地图",
+    "viewNearbyPlaces": "查看附近宠物友好地点",
+    "petFriendly": "宠物友好",
     "searchPlaceholder": "搜索宠物、用户或话题",
     "nearbyPlaces": "发现附近 {{count}} 个宠物友好地点",
     "myWishlist": "我的想去",
@@ -123,7 +126,10 @@
     "typeOutdoor": "户外",
     "typeGrooming": "美容",
     "typeShop": "商店",
-    "defaultType": "宠物友好"
+    "defaultType": "宠物友好",
+    "mapLoadFailed": "地图加载失败",
+    "mapLoadFailedHint": "请检查网络连接后重试",
+    "viewPlaceList": "查看地点列表"
   },
   "post": {
     "thoughts": "这一刻的想法...",
@@ -184,7 +190,9 @@
     "myPets": "我的宠物",
     "following": "关注",
     "followers": "粉丝",
-    "likes": "获赞"
+    "likes": "获赞",
+    "editProfile": "编辑资料",
+    "message": "私信"
   },
   "settings": {
     "title": "设置",
@@ -223,7 +231,6 @@
     "interactionReminder": "互动提醒",
     "systemNotification": "系统通知",
     "sound": "声音",
-    "aboutPawgram": "关于爪印",
     "brandName": "爪印 PawGram",
     "darkMode": "深色模式",
     "darkModeSystem": "跟随系统",
@@ -462,6 +469,24 @@
       { "id": 3, "lastMsg": "你家猫咪太可爱了！", "time": "2天前" },
       { "id": 4, "lastMsg": "求推荐狗粮品牌", "time": "3天前" }
     ],
+    "notificationDetails": {
+      "likes": [
+        { "name": "大黄铲屎官", "text": "赞了你的帖子", "time": "3分钟前" },
+        { "name": "橘猫日记", "text": "收藏了你的帖子", "time": "15分钟前" },
+        { "name": "柯基小短腿", "text": "赞了你的帖子", "time": "1小时前" }
+      ],
+      "follows": [
+        { "name": "橘猫日记", "text": "关注了你", "time": "15分钟前" },
+        { "name": "汪星人阿呆", "text": "关注了你", "time": "2小时前" }
+      ],
+      "comments": [
+        { "name": "柯基小短腿", "text": "评论了你：好可爱！", "time": "30分钟前" },
+        { "name": "大黄铲屎官", "text": "@了你", "time": "1小时前" },
+        { "name": "萨摩耶球球", "text": "评论了你：在哪里拍的？", "time": "2小时前" },
+        { "name": "橘猫日记", "text": "评论了你：好可爱的小狗！", "time": "3小时前" },
+        { "name": "布偶汤圆", "text": "@了你", "time": "昨天" }
+      ]
+    },
     "chatMessages": [
       { "id": 1, "text": "周末去公园遛狗吗？" },
       { "id": 2, "text": "好呀！几点？" },

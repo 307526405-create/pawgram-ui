@@ -85,6 +85,9 @@
   "discover": {
     "title": "Discover",
     "petMap": "Pet Map",
+    "openMap": "Open Map",
+    "viewNearbyPlaces": "View nearby pet-friendly places",
+    "petFriendly": "pet friendly",
     "searchPlaceholder": "Search pets, users or topics",
     "nearbyPlaces": "{{count}} pet-friendly places nearby",
     "myWishlist": "My Wishlist",
@@ -123,7 +126,10 @@
     "typeOutdoor": "Outdoor",
     "typeGrooming": "Grooming",
     "typeShop": "Shop",
-    "defaultType": "Pet Friendly"
+    "defaultType": "Pet Friendly",
+    "mapLoadFailed": "Map failed to load",
+    "mapLoadFailedHint": "Check your connection and try again",
+    "viewPlaceList": "View Place List"
   },
   "post": {
     "thoughts": "What's on your mind...",
@@ -184,7 +190,9 @@
     "myPets": "My Pets",
     "following": "Following",
     "followers": "Followers",
-    "likes": "Likes"
+    "likes": "Likes",
+    "editProfile": "Edit Profile",
+    "message": "Message"
   },
   "settings": {
     "title": "Settings",
@@ -461,6 +469,24 @@
       { "id": 3, "lastMsg": "Your cat is so cute!", "time": "2 days ago" },
       { "id": 4, "lastMsg": "Any dog food recommendations?", "time": "3 days ago" }
     ],
+    "notificationDetails": {
+      "likes": [
+        { "name": "Dahuang's Human", "text": "liked your post", "time": "3 min ago" },
+        { "name": "Orange Cat Diary", "text": "favorited your post", "time": "15 min ago" },
+        { "name": "Short Legs Corgi", "text": "liked your post", "time": "1h ago" }
+      ],
+      "follows": [
+        { "name": "Orange Cat Diary", "text": "followed you", "time": "15 min ago" },
+        { "name": "Adai the Doggo", "text": "followed you", "time": "2h ago" }
+      ],
+      "comments": [
+        { "name": "Short Legs Corgi", "text": "commented: So cute!", "time": "30 min ago" },
+        { "name": "Dahuang's Human", "text": "@mentioned you", "time": "1h ago" },
+        { "name": "Snowball Samoyed", "text": "commented: Where was this?", "time": "2h ago" },
+        { "name": "Orange Cat Diary", "text": "commented: What a cute pup!", "time": "3h ago" },
+        { "name": "Tangyuan Ragdoll", "text": "@mentioned you", "time": "Yesterday" }
+      ]
+    },
     "chatMessages": [
       { "id": 1, "text": "Let's walk the dog this weekend?" },
       { "id": 2, "text": "Sure! What time?" },

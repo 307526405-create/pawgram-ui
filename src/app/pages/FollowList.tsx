@@ -18,45 +18,56 @@ export function FollowList() {
 
   // 模拟数据：关注列表
   const followingList = [
-    { id: 101, name: "柯基小王子", avatar: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=150", bio: "每天分享快乐柯基，是个大胃王", status: "mutual" },
-    { id: 102, name: "喵星人日记", avatar: "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?auto=format&fit=crop&q=80&w=150", bio: "佛系养猫，随缘更新", status: "followed" },
-    { id: 103, name: "大金毛的日常", avatar: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=150", bio: "记录大金毛的成长点滴", status: "followed" },
-    { id: 104, name: "哈士奇不拆家", avatar: "https://images.unsplash.com/photo-1605568427561-40dd23c2acea?auto=format&fit=crop&q=80&w=150", bio: "可能是全网最乖的二哈", status: "mutual" },
+    { id: 101, name: "柯基小王子", avatar: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=150", bio: "每天分享快乐柯基，是个大胃王" },
+    { id: 102, name: "喵星人日记", avatar: "https://images.unsplash.com/photo-1574144611937-0df059b5ef3e?auto=format&fit=crop&q=80&w=150", bio: "佛系养猫，随缘更新" },
+    { id: 103, name: "大金毛的日常", avatar: "https://images.unsplash.com/photo-1552053831-71594a27632d?auto=format&fit=crop&q=80&w=150", bio: "记录大金毛的成长点滴" },
+    { id: 104, name: "哈士奇不拆家", avatar: "https://images.unsplash.com/photo-1605568427561-40dd23c2acea?auto=format&fit=crop&q=80&w=150", bio: "可能是全网最乖的二哈" },
   ];
 
   // 模拟数据：粉丝列表
   const followersList = [
-    { id: 101, name: "柯基小王子", avatar: "https://images.unsplash.com/photo-1583337130417-3346a1be7dee?auto=format&fit=crop&q=80&w=150", bio: "每天分享快乐柯基，是个大胃王", status: "mutual" },
-    { id: 105, name: "铲屎官老王", avatar: "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?auto=format&fit=crop&q=80&w=150", bio: "专业遛狗二十年", status: "none" },
-    { id: 104, name: "哈士奇不拆家", avatar: "https://images.unsplash.com/photo-1605568427561-40dd23c2acea?auto=format&fit=crop&q=80&w=150", bio: "可能是全网最乖的二哈", status: "mutual" },
-    { id: 106, name: "爱猫的小仙女", avatar: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=150", bio: "家有三只神仙主子", status: "none" },
-    { id: 107, name: "柴犬多多", avatar: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=150", bio: "多多的搞笑日常", status: "none" },
+    { id: 105, name: "铲屎官老王", avatar: "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?auto=format&fit=crop&q=80&w=150", bio: "专业遛狗二十年" },
+    { id: 106, name: "爱猫的小仙女", avatar: "https://images.unsplash.com/photo-1514888286974-6c03e2ca1dba?auto=format&fit=crop&q=80&w=150", bio: "家有三只神仙主子" },
+    { id: 107, name: "柴犬多多", avatar: "https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?auto=format&fit=crop&q=80&w=150", bio: "多多的搞笑日常" },
   ];
+
+  // 已关注的用户ID集合
+  const [followedIds, setFollowedIds] = useState<Set<number>>(() => new Set([101, 102, 103, 104]));
+
+  const toggleFollow = (userId: number) => {
+    setFollowedIds(prev => {
+      const next = new Set(prev);
+      if (next.has(userId)) next.delete(userId); else next.add(userId);
+      return next;
+    });
+  };
 
   const currentList = activeTab === 'following' ? followingList : followersList;
 
-  const renderActionButton = (status: string) => {
-    switch (status) {
-      case 'mutual':
-        return (
-          <button onClick={(e) => { e.stopPropagation(); alert(t('common.featureInDev')); }} className="text-[#FF8C42] text-[13px] font-bold px-3 py-1.5 active:opacity-70 transition-opacity">
-            互相关注
-          </button>
-        );
-      case 'followed':
-        return (
-          <button onClick={(e) => { e.stopPropagation(); alert(t('common.featureInDev')); }} className="text-[#999999] dark:text-gray-400 text-[13px] font-bold px-3.5 py-1.5 rounded-full border border-[#CCCCCC] dark:border-gray-700 active:scale-95 transition-transform">
-            已关注
-          </button>
-        );
-      case 'none':
-      default:
-        return (
-          <button onClick={(e) => { e.stopPropagation(); alert(t('common.featureInDev')); }} className="bg-[#FF8C42] text-white text-[13px] font-bold px-4 py-1.5 rounded-full active:scale-95 transition-transform shadow-sm">
-            关注
-          </button>
-        );
+  const renderActionButton = (userId: number) => {
+    const isFollowed = followedIds.has(userId);
+    // Check if mutual (both in following and followers)
+    const isMutual = isFollowed && followingList.some(f => f.id === userId) && followersList.some(f => f.id === userId);
+
+    if (isMutual) {
+      return (
+        <button onClick={(e) => { e.stopPropagation(); toggleFollow(userId); }} className="text-[#FF8C42] text-[13px] font-bold px-3 py-1.5 cursor-pointer active:opacity-70 transition-opacity">
+          互相关注
+        </button>
+      );
     }
+    if (isFollowed) {
+      return (
+        <button onClick={(e) => { e.stopPropagation(); toggleFollow(userId); }} className="text-[#999999] dark:text-gray-400 text-[13px] font-bold px-3.5 py-1.5 rounded-full border border-[#CCCCCC] dark:border-gray-700 cursor-pointer active:scale-95 transition-transform">
+          已关注
+        </button>
+      );
+    }
+    return (
+      <button onClick={(e) => { e.stopPropagation(); toggleFollow(userId); }} className="bg-[#FF8C42] text-white text-[13px] font-bold px-4 py-1.5 rounded-full cursor-pointer active:scale-95 transition-transform shadow-sm">
+        关注
+      </button>
+    );
   };
 
   return (
@@ -111,7 +122,7 @@ export function FollowList() {
                 </div>
               </div>
               <div className="shrink-0 ml-3">
-                {renderActionButton(user.status)}
+                {renderActionButton(user.id)}
               </div>
             </div>
           ))}

@@ -9,14 +9,14 @@ import { usePageTransition } from "../hooks/usePageTransition";
 
 const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.url || item?.poster || '';
 
-function formatTime(iso: string, t: any): string {
+function formatTime(iso: string, t: any, lang: string): string {
   if (!iso) return '';
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
   if (diff < 60) return t('time.justNow');
   if (diff < 3600) return t('time.minAgo', { n: Math.floor(diff / 60) });
   if (diff < 86400) return t('time.hoursAgo', { n: Math.floor(diff / 3600) });
   if (diff < 604800) return t('time.daysAgo', { n: Math.floor(diff / 86400) });
-  return new Date(iso).toLocaleDateString('zh-CN');
+  return new Date(iso).toLocaleDateString(lang === 'en' ? 'en-US' : 'zh-CN');
 }
 
 interface Comment {
@@ -40,19 +40,19 @@ interface FlatComment {
   replies: FlatComment[];
 }
 
-function flattenComments(comments: Comment[], t: any, depth: number = 0): FlatComment[] {
+function flattenComments(comments: Comment[], t: any, lang: string, depth: number = 0): FlatComment[] {
   const result: FlatComment[] = [];
   for (const c of comments) {
     result.push({
       id: c.id,
       user: c.user,
       text: c.content,
-      time: formatTime(c.created_at, t),
+      time: formatTime(c.created_at, t, lang),
       likes: 0,
       isLiked: false,
       parentId: c.parent_id || null,
       depth,
-      replies: c.replies ? flattenComments(c.replies, t, depth + 1) : [],
+      replies: c.replies ? flattenComments(c.replies, t, lang, depth + 1) : [],
     });
   }
   return result;
@@ -62,7 +62,7 @@ export function PostDetail() {
   const navigate = useNavigate();
   const { className, handleBack } = usePageTransition();
   const { id } = useParams();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
@@ -81,7 +81,7 @@ export function PostDetail() {
     if (!id) return;
     try {
       const data = await postsApi.comments(Number(id));
-      setComments(flattenComments(data || [], t));
+      setComments(flattenComments(data || [], t, i18n.language));
     } catch {
       // fallback to empty
     }
@@ -101,8 +101,8 @@ export function PostDetail() {
   };
   const handleShare = () => {
     if (!post) return;
-    const text = `爪印 PawGram\n${post.user?.name}: ${post.content}`;
-    if (navigator.share) navigator.share({ title: '爪印', text }).catch(() => {});
+    const text = `${t('common.brandName')}\n${post.user?.name}: ${post.content}`;
+    if (navigator.share) navigator.share({ title: t('common.brandName'), text }).catch(() => {});
     else navigator.clipboard?.writeText(text);
   };
   const handleDoubleTap = () => {
@@ -150,7 +150,7 @@ export function PostDetail() {
 
   const handleDelete = async () => {
     if (!post) return;
-    await fetch(`http://192.168.3.52:3000/api/posts/${post.id}`, { method: 'DELETE' });
+    await postsApi.delete(post.id);
     setShowMenu(false);
     handleBack();
   };
@@ -233,7 +233,7 @@ export function PostDetail() {
         <div className="flex items-center gap-1">
           {isOwner && (
             <div className="relative">
-              <button onClick={() => setShowMenu(!showMenu)} className="p-1"><MoreHorizontal className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
+              <button onClick={() => setShowMenu(!showMenu)} className="p-1 cursor-pointer active:opacity-70"><MoreHorizontal className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
               {showMenu && (
                 <>
                   <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)}/>
@@ -252,12 +252,12 @@ export function PostDetail() {
               )}
             </div>
           )}
-          <button onClick={handleShare} className="p-1 text-[#666] dark:text-gray-400"><Share2 className="w-5 h-5"/></button>
-          <button onClick={() => setIsFaved(!isFaved)} className={`p-1 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}><Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/></button>
+          <button onClick={handleShare} className="p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70"><Share2 className="w-5 h-5"/></button>
+          <button onClick={() => setIsFaved(!isFaved)} className={`p-1 cursor-pointer active:opacity-70 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}><Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/></button>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto pb-[80px] [&::-webkit-scrollbar]:hidden">
+      <div className="flex-1 overflow-y-auto pb-[100px] [&::-webkit-scrollbar]:hidden">
         <div className="flex items-center justify-between px-4 py-3 bg-white dark:bg-gray-900">
           <div className="flex items-center gap-3">
             <ImageWithFallback src={post.user?.avatar} onClick={() => navigate(`/user/${post.user?.id}`)} className="w-9 h-9 rounded-full object-cover cursor-pointer active:opacity-70"/>
@@ -269,7 +269,7 @@ export function PostDetail() {
               return !prev;
             });
           }}
-            className={`text-[13px] font-bold px-3 py-1 rounded-full ${isFollowing ? 'text-[#999] dark:text-gray-400 bg-[#F5F5F5] dark:bg-gray-800' : 'text-[#FF8C42] bg-[#FFF3E6] dark:bg-orange-900/30'}`}>
+            className={`text-[13px] font-bold px-3 py-1.5 rounded-full cursor-pointer active:opacity-80 ${isFollowing ? 'text-[#999] dark:text-gray-400 bg-[#F5F5F5] dark:bg-gray-800' : 'text-[#FF8C42] bg-[#FFF3E6] dark:bg-orange-900/30'}`}>
             {isFollowing ? t('common.followed') : t('common.follow')}
           </button>
         </div>
@@ -308,7 +308,7 @@ export function PostDetail() {
             {post.location && <span className="bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400 px-2.5 py-1 rounded-md text-[12px]">📍{post.location}</span>}
           </div>
           <div className="text-[11px] text-[#BBB] dark:text-gray-500 mb-3">
-            {post.created_at ? new Date(post.created_at).toLocaleString('zh-CN', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}
+            {post.created_at ? new Date(post.created_at).toLocaleString(i18n.language === 'en' ? 'en-US' : 'zh-CN', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}
             · {(post.view_count||0)+(post.id*7+3)%1000} {t('postDetail.views')}
           </div>
           <div className="flex items-center justify-between py-2 mb-2">

@@ -11,7 +11,7 @@ export function Register() {
   return (
     <div className={`h-full bg-gradient-to-b from-[#FFF3E6] dark:from-orange-900/30 to-white dark:to-gray-900 relative flex flex-col ${className}`}>
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-10">
-        <button onClick={() => handleBack(() => navigate(-1))} className="text-[#333333] dark:text-gray-100 active:scale-95 transition-transform p-1 -ml-1">
+        <button onClick={() => handleBack(() => navigate(-1))} className="text-[#333333] dark:text-gray-100 cursor-pointer active:scale-95 transition-transform p-1 -ml-1">
           <ChevronLeft className="w-6 h-6" />
         </button>
         <h1 className="text-[#333333] dark:text-gray-100 text-[17px] font-bold tracking-wider">{t('register.title')}</h1>
@@ -52,7 +52,7 @@ export function Register() {
               placeholder={t('register.enterCode')}
               className="w-full h-[44px] rounded-[8px] border border-[#E5E5E5] dark:border-gray-700 pl-3 pr-[90px] text-[14px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] placeholder:text-[#999999] dark:placeholder:text-gray-500 transition-colors"
             />
-            <button className="absolute right-3 text-[#FF8C42] text-[14px] font-medium bg-transparent active:opacity-70 transition-opacity">
+            <button className="absolute right-3 text-[#FF8C42] text-[14px] font-medium bg-transparent cursor-pointer active:opacity-70 transition-opacity">
               {t('register.getCode')}
             </button>
           </div>

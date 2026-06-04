@@ -18,27 +18,38 @@ import { ChatDetail } from "./pages/ChatDetail";
 import { Scan } from "./pages/Scan";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import { UserProfile } from "./pages/UserProfile";
+import { NotificationDetail } from "./pages/NotificationDetail";
+
+const TAB_ROUTES = new Set(["/", "/discover", "/messages", "/profile"]);
 
 function Root() {
   const location = useLocation();
 
   if (location.pathname === "/export") return <Outlet />;
 
+  const isTab = TAB_ROUTES.has(location.pathname);
+
   return (
     <div className="w-full h-full bg-gray-900 overflow-hidden">
       <div className="w-full h-full bg-white dark:bg-gray-900 relative">
-        <AnimatePresence mode="wait">
-          <motion.div
-            key={location.pathname}
-            initial={{ x: "100%" }}
-            animate={{ x: 0 }}
-            exit={{ x: "100%" }}
-            transition={{ type: "spring", stiffness: 350, damping: 35 }}
-            className="w-full h-full"
-          >
+        {isTab ? (
+          <div className="w-full h-full">
             <Outlet />
-          </motion.div>
-        </AnimatePresence>
+          </div>
+        ) : (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={location.pathname}
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 350, damping: 35 }}
+              className="w-full h-full"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
+        )}
       </div>
     </div>
   );
@@ -69,6 +80,7 @@ export const router = createHashRouter([
       { path: "post/edit/:id", Component: PostCreate },
       { path: "privacy", Component: PrivacyPolicy },
       { path: "user/:id", Component: UserProfile },
+      { path: "notifications/:type", Component: NotificationDetail },
     ],
   },
 ]);

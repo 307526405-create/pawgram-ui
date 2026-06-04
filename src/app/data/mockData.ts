@@ -2,42 +2,59 @@ export const users = {
   1: {
     id: 1,
     name: "王丽丽",
-    avatar: "https://images.unsplash.com/photo-1761933808230-9a2e78956daa?auto=format&fit=crop&q=80&w=150",
+    avatar: "https://images.unsplash.com/photo-1761933808230-9a2e78956daa?auto=format&fit=crop&q=80&w=300",
     bio: "疯狂植物与宠物爱好者 🌿🐶",
     followers: 1204,
-    following: 45
+    following: 45,
+    pets: [
+      { name: "贝利", breed: "金毛", avatar: "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?auto=format&fit=crop&q=80&w=150" },
+      { name: "咪咪", breed: "布偶猫", avatar: "https://images.unsplash.com/photo-1586289883499-f11d28aaf52f?auto=format&fit=crop&q=80&w=150" },
+    ],
   },
   2: {
     id: 2,
     name: "陈小波",
-    avatar: "https://images.unsplash.com/photo-1536548665027-b96d34a005ae?auto=format&fit=crop&q=80&w=150",
+    avatar: "https://images.unsplash.com/photo-1536548665027-b96d34a005ae?auto=format&fit=crop&q=80&w=300",
     bio: "只是个爱猫的人",
     followers: 89,
-    following: 120
+    following: 120,
+    pets: [
+      { name: "小橘", breed: "橘猫", avatar: "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?auto=format&fit=crop&q=80&w=150" },
+    ],
   },
   3: {
     id: 3,
     name: "张小花",
-    avatar: "https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?auto=format&fit=crop&q=80&w=150",
+    avatar: "https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?auto=format&fit=crop&q=80&w=300",
     bio: "八哥犬选择了我的生活",
     followers: 567,
-    following: 342
+    following: 342,
+    pets: [
+      { name: "八哥", breed: "八哥犬", avatar: "https://images.unsplash.com/photo-1518020382113-a7e8fc38eac9?auto=format&fit=crop&q=80&w=150" },
+    ],
   },
   4: {
     id: 4,
     name: "李大伟",
-    avatar: "https://images.unsplash.com/photo-1536548665027-b96d34a005ae?auto=format&fit=crop&q=80&w=150",
+    avatar: "https://images.unsplash.com/photo-1536548665027-b96d34a005ae?auto=format&fit=crop&q=80&w=300",
     bio: "带着哈士奇户外探险",
     followers: 231,
-    following: 45
+    following: 45,
+    pets: [
+      { name: "二哈", breed: "哈士奇", avatar: "https://images.unsplash.com/photo-1489924034176-2e678c29d4c6?auto=format&fit=crop&q=80&w=150" },
+      { name: "小白", breed: "萨摩耶", avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?auto=format&fit=crop&q=80&w=150" },
+    ],
   },
   5: {
     id: 5,
     name: "赵小美",
-    avatar: "https://images.unsplash.com/photo-1761933808230-9a2e78956daa?auto=format&fit=crop&q=80&w=150",
+    avatar: "https://images.unsplash.com/photo-1761933808230-9a2e78956daa?auto=format&fit=crop&q=80&w=300",
     bio: "泰迪妈妈 🐩",
     followers: 890,
-    following: 12
+    following: 12,
+    pets: [
+      { name: "球球", breed: "泰迪", avatar: "https://images.unsplash.com/photo-1516371535707-512a1e83bb9a?auto=format&fit=crop&q=80&w=150" },
+    ],
   }
 };
 

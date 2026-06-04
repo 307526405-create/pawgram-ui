@@ -138,9 +138,9 @@ export function Profile() {
 
       <div className="absolute top-0 w-full pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 z-40">
         <div className="flex items-center gap-1">
-          <button onClick={() => setShowQR(true)} className="p-2"><QrCode className="w-5 h-5 text-[#666] dark:text-gray-400"/></button>
-          <button onClick={() => navigate('/scan')} className="p-2"><Scan className="w-5 h-5 text-[#666] dark:text-gray-400"/></button>
-          <button onClick={handleShare} className="p-2"><Share2 className="w-5 h-5 text-[#666] dark:text-gray-400"/></button>
+          <button onClick={() => setShowQR(true)} className="p-2 cursor-pointer active:opacity-70"><QrCode className="w-5 h-5 text-[#666] dark:text-gray-400"/></button>
+          <button onClick={() => navigate('/scan')} className="p-2 cursor-pointer active:opacity-70"><Scan className="w-5 h-5 text-[#666] dark:text-gray-400"/></button>
+          <button onClick={handleShare} className="p-2 cursor-pointer active:opacity-70"><Share2 className="w-5 h-5 text-[#666] dark:text-gray-400"/></button>
         </div>
         <button onClick={() => navigate('/settings')} className="p-2 -mr-2"><Settings className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
       </div>
@@ -154,16 +154,16 @@ export function Profile() {
               {editingBio ? (
                 <input autoFocus value={bio} onChange={e => setBio(e.target.value)} onBlur={() => setEditingBio(false)} className="text-[13px] text-[#666] dark:text-gray-400 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg px-2 py-1 outline-none w-full"/>
               ) : (
-                <p className="text-[13px] text-[#666] dark:text-gray-400 leading-relaxed" onClick={() => setEditingBio(true)}>{bio || t('profile.addBio')}</p>
+                <p className="text-[13px] text-[#666] dark:text-gray-400 leading-relaxed cursor-pointer active:opacity-70" onClick={() => setEditingBio(true)}>{bio || t('profile.addBio')}</p>
               )}
             </div>
           </div>
 
           <div className="flex justify-around mb-4">
-            <div className="flex flex-col items-center" onClick={() => navigate('/follows')}>
+            <div className="flex flex-col items-center cursor-pointer active:opacity-70" onClick={() => navigate('/follows')}>
               <span className="text-[18px] font-bold text-[#333] dark:text-gray-100">{myUser.following}</span><span className="text-[11px] text-[#999] dark:text-gray-400">{t('profile.following')}</span>
             </div>
-            <div className="flex flex-col items-center" onClick={() => navigate('/follows')}>
+            <div className="flex flex-col items-center cursor-pointer active:opacity-70" onClick={() => navigate('/follows', { state: { tab: 'followers' } })}>
               <span className="text-[18px] font-bold text-[#333] dark:text-gray-100">{myUser.followers}</span><span className="text-[11px] text-[#999] dark:text-gray-400">{t('profile.followers')}</span>
             </div>
             <div className="flex flex-col items-center">

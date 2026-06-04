@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router";
-import { ChevronLeft, UserPen, Shield, Lock, Bell, Info, Trash2, ChevronRight, X, MessageSquare, Moon, Sun, Monitor, Globe } from "lucide-react";
-import { useState } from "react";
+import { ChevronLeft, UserPen, Shield, Lock, Bell, Info, Trash2, ChevronRight, X, MessageSquare, Moon, Sun, Monitor, Globe, ExternalLink } from "lucide-react";
+import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { motion } from "motion/react";
 import { logout } from "../api/auth";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { usePageTransition } from "../hooks/usePageTransition";
@@ -22,7 +23,7 @@ function FeedbackForm({ onDone }: { onDone: () => void }) {
       </div>
       <p className="text-[17px] font-bold text-[#333] dark:text-gray-100 mb-2">{t('settings.thanksFeedback')}</p>
       <p className="text-[13px] text-[#999] dark:text-gray-400 text-center">{t('settings.feedbackDesc')}</p>
-      <button onClick={onDone} className="mt-8 w-full h-11 bg-[#FF8C42] text-white rounded-xl text-[15px] font-bold">{t('common.back')}</button>
+      <button onClick={onDone} className="mt-8 w-full h-11 bg-[#FF8C42] text-white rounded-xl text-[15px] font-bold cursor-pointer active:opacity-80">{t('common.back')}</button>
     </div>
   );
 
@@ -46,7 +47,7 @@ function FeedbackForm({ onDone }: { onDone: () => void }) {
       <p className="text-[11px] text-[#BBB] dark:text-gray-500">{t('settings.feedbackNotice')}</p>
       <button onClick={() => { if (text.trim()) { setSent(true); setTimeout(onDone, 2000); } }}
         disabled={!text.trim()}
-        className={`w-full h-11 rounded-xl text-[15px] font-bold ${text.trim() ? 'bg-[#FF8C42] text-white' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-500'}`}>
+        className={`w-full h-11 rounded-xl text-[15px] font-bold cursor-pointer active:opacity-80 ${text.trim() ? 'bg-[#FF8C42] text-white' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-500'}`}>
         {t('common.submitFeedback')}
       </button>
     </div>
@@ -55,13 +56,19 @@ function FeedbackForm({ onDone }: { onDone: () => void }) {
 
 function SubPage({ title, onClose, children }: { title:string; onClose:()=>void; children:React.ReactNode }) {
   return (
-    <div className="fixed inset-0 z-[100] bg-white dark:bg-gray-900 flex flex-col">
+    <motion.div
+      initial={{ x: "100%" }}
+      animate={{ x: 0 }}
+      exit={{ x: "100%" }}
+      transition={{ type: "spring", stiffness: 350, damping: 35 }}
+      className="fixed inset-0 z-[100] bg-white dark:bg-gray-900 flex flex-col"
+    >
       <div className="pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center px-4 shrink-0 border-b border-[#F0F0F0] dark:border-gray-700">
-        <button onClick={onClose} className="p-1 -ml-1"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100"/></button>
+        <button onClick={onClose} className="p-1 -ml-1 cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100"/></button>
         <h1 className="flex-1 text-center text-[17px] font-bold text-[#333] dark:text-gray-100 mr-8">{title}</h1>
       </div>
       <div className="flex-1 overflow-y-auto">{children}</div>
-    </div>
+    </motion.div>
   );
 }
 
@@ -78,10 +85,37 @@ export function Settings() {
   const [showTheme, setShowTheme] = useState(false);
   const [showLang, setShowLang] = useState(false);
   const [page, setPage] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState("https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200");
+  const [nickname, setNickname] = useState("王丽丽");
+  const [bio, setBio] = useState("金毛&布偶猫铲屎官 | 爱生活爱宠物");
+  const [saved, setSaved] = useState(false);
+  const [notifToggles, setNotifToggles] = useState({ push: true, interaction: true, system: true, sound: false });
+  const [privacyItems, setPrivacyItems] = useState({ whoCanSee: 'everyone', hideLocation: false });
+  const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const languages = [
     { code: 'zh-CN', label: t('settings.languageZh') },
     { code: 'en', label: t('settings.languageEn') },
+  ];
+
+  const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => { if (reader.result) setAvatar(reader.result as string); };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleSaveProfile = () => {
+    setSaved(true);
+    setTimeout(() => { setSaved(false); setPage(null); }, 1500);
+  };
+
+  const visibilityOptions = [
+    { value: 'everyone', label: t('settings.everyone') },
+    { value: 'friends', label: '仅好友' },
+    { value: 'private', label: '仅自己' },
   ];
 
   const renderPage = () => {
@@ -90,18 +124,23 @@ export function Settings() {
         <SubPage title={t('settings.editProfilePage')} onClose={() => setPage(null)}>
           <div className="p-4 space-y-4">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-[#F5F5F5] dark:bg-gray-800"/>
-              <div><button className="text-[#FF8C42] text-[13px]">{t('settings.changeAvatar')}</button></div>
+              <div className="w-16 h-16 rounded-full bg-[#F5F5F5] dark:bg-gray-800 overflow-hidden cursor-pointer active:opacity-80" onClick={() => avatarInputRef.current?.click()}>
+                <img src={avatar} className="w-full h-full object-cover" alt="" />
+              </div>
+              <div><button onClick={() => avatarInputRef.current?.click()} className="text-[#FF8C42] text-[13px] cursor-pointer active:opacity-70">{t('settings.changeAvatar')}</button></div>
+              <input ref={avatarInputRef} type="file" accept="image/*" className="hidden" onChange={handleAvatarChange} />
             </div>
             <div>
               <label className="text-[12px] text-[#999] dark:text-gray-400 mb-1 block">{t('settings.nickname')}</label>
-              <input className="w-full h-10 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg px-3 text-[14px] dark:text-gray-100 outline-none" defaultValue="王丽丽"/>
+              <input value={nickname} onChange={e => setNickname(e.target.value)} className="w-full h-10 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg px-3 text-[14px] dark:text-gray-100 outline-none"/>
             </div>
             <div>
               <label className="text-[12px] text-[#999] dark:text-gray-400 mb-1 block">{t('settings.bio')}</label>
-              <textarea className="w-full h-20 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg px-3 py-2 text-[14px] dark:text-gray-100 outline-none resize-none" defaultValue="金毛&布偶猫铲屎官 | 爱生活爱宠物"/>
+              <textarea value={bio} onChange={e => setBio(e.target.value)} className="w-full h-20 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg px-3 py-2 text-[14px] dark:text-gray-100 outline-none resize-none"/>
             </div>
-            <button className="w-full h-11 bg-[#FF8C42] text-white rounded-xl text-[15px] font-bold">{t('common.save')}</button>
+            <button onClick={handleSaveProfile} disabled={!nickname.trim()} className={`w-full h-11 rounded-xl text-[15px] font-bold cursor-pointer active:opacity-80 ${nickname.trim() ? 'bg-[#FF8C42] text-white' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-500'}`}>
+              {saved ? '✓ ' + t('common.save') : t('common.save')}
+            </button>
           </div>
         </SubPage>
       );
@@ -109,34 +148,50 @@ export function Settings() {
         <SubPage title={t('settings.accountSecurity')} onClose={() => setPage(null)}>
           <div className="divide-y divide-[#F5F5F5] dark:divide-gray-700">
             {[{label:t('settings.changePassword'),desc:'******'},{label:t('settings.bindPhone'),desc:'138****8888'},{label:t('settings.wechatBinding'),desc:t('settings.bound')}].map((m,i) => (
-              <div key={i} className="px-4 py-4 flex items-center justify-between">
+              <div key={i} className="px-4 py-4 flex items-center justify-between cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
                 <div><div className="text-[14px] text-[#333] dark:text-gray-100">{m.label}</div><div className="text-[12px] text-[#999] dark:text-gray-400">{m.desc}</div></div>
                 <ChevronRight className="w-4 h-4 text-[#CCC] dark:text-gray-600"/>
               </div>
             ))}
+          </div>
+          <div className="px-4 py-6 text-center">
+            <p className="text-[12px] text-[#BBB] dark:text-gray-500">{t('settings.feedbackNotice')}</p>
           </div>
         </SubPage>
       );
       case 'privacy': return (
         <SubPage title={t('settings.privacySettings')} onClose={() => setPage(null)}>
           <div className="divide-y divide-[#F5F5F5] dark:divide-gray-700">
-            {[{label:t('settings.blockList'),desc:t('settings.blockListCount', { count: 0 })},{label:t('settings.whoCanSee'),desc:t('settings.everyone')},{label:t('settings.hideLocation'),desc:t('settings.off')}].map((m,i) => (
-              <div key={i} className="px-4 py-4 flex items-center justify-between">
-                <div><div className="text-[14px] text-[#333] dark:text-gray-100">{m.label}</div><div className="text-[12px] text-[#999] dark:text-gray-400">{m.desc}</div></div>
-                <ChevronRight className="w-4 h-4 text-[#CCC] dark:text-gray-600"/>
+            <div className="px-4 py-4 flex items-center justify-between cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
+              <div><div className="text-[14px] text-[#333] dark:text-gray-100">{t('settings.blockList')}</div><div className="text-[12px] text-[#999] dark:text-gray-400">{t('settings.blockListCount', { count: 0 })}</div></div>
+              <ChevronRight className="w-4 h-4 text-[#CCC] dark:text-gray-600"/>
+            </div>
+            <div onClick={() => { const opts = ['everyone','friends','private']; const idx = opts.indexOf(privacyItems.whoCanSee); setPrivacyItems(prev => ({...prev, whoCanSee: opts[(idx+1)%3]})); }} className="px-4 py-4 flex items-center justify-between cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
+              <div><div className="text-[14px] text-[#333] dark:text-gray-100">{t('settings.whoCanSee')}</div><div className="text-[12px] text-[#999] dark:text-gray-400">{visibilityOptions.find(o => o.value === privacyItems.whoCanSee)?.label || t('settings.everyone')}</div></div>
+              <ChevronRight className="w-4 h-4 text-[#CCC] dark:text-gray-600"/>
+            </div>
+            <div onClick={() => setPrivacyItems(prev => ({...prev, hideLocation: !prev.hideLocation}))} className="px-4 py-4 flex items-center justify-between cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
+              <div><div className="text-[14px] text-[#333] dark:text-gray-100">{t('settings.hideLocation')}</div><div className="text-[12px] text-[#999] dark:text-gray-400">{privacyItems.hideLocation ? t('common.confirm') : t('settings.off')}</div></div>
+              <div className={`w-11 h-6 rounded-full relative transition-colors ${privacyItems.hideLocation ? 'bg-[#FF8C42]' : 'bg-[#E5E5E5] dark:bg-gray-700'}`}>
+                <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${privacyItems.hideLocation ? 'left-[22px]' : 'left-0.5'}`}/>
               </div>
-            ))}
+            </div>
           </div>
         </SubPage>
       );
       case 'notification': return (
         <SubPage title={t('settings.notificationSettings')} onClose={() => setPage(null)}>
           <div className="divide-y divide-[#F5F5F5] dark:divide-gray-700">
-            {[{label:t('settings.pushNotifications'),on:true},{label:t('settings.interactionReminder'),on:true},{label:t('settings.systemNotification'),on:true},{label:t('settings.sound'),on:false}].map((m,i) => (
-              <div key={i} className="px-4 py-4 flex items-center justify-between">
+            {[
+              {label:t('settings.pushNotifications'),key:'push' as const},
+              {label:t('settings.interactionReminder'),key:'interaction' as const},
+              {label:t('settings.systemNotification'),key:'system' as const},
+              {label:t('settings.sound'),key:'sound' as const},
+            ].map((m,i) => (
+              <div key={i} onClick={() => setNotifToggles(prev => ({...prev, [m.key]: !prev[m.key]}))} className="px-4 py-4 flex items-center justify-between cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
                 <span className="text-[14px] text-[#333] dark:text-gray-100">{m.label}</span>
-                <div className={`w-11 h-6 rounded-full relative transition-colors ${m.on ? 'bg-[#FF8C42]' : 'bg-[#E5E5E5] dark:bg-gray-700'}`}>
-                  <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${m.on ? 'left-[22px]' : 'left-0.5'}`}/>
+                <div className={`w-11 h-6 rounded-full relative transition-colors ${notifToggles[m.key] ? 'bg-[#FF8C42]' : 'bg-[#E5E5E5] dark:bg-gray-700'}`}>
+                  <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${notifToggles[m.key] ? 'left-[22px]' : 'left-0.5'}`}/>
                 </div>
               </div>
             ))}
@@ -150,6 +205,9 @@ export function Settings() {
             <div className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('settings.brandName')}</div>
             <div className="text-[13px] text-[#999] dark:text-gray-400">{t('common.version')} 1.0.0</div>
             <div className="text-[12px] text-[#BBB] dark:text-gray-500 pt-4">{t('settings.copyright')}</div>
+            <button onClick={() => { setPage(null); navigate('/privacy'); }} className="inline-flex items-center gap-1 text-[13px] text-[#FF8C42] cursor-pointer active:opacity-70 pt-2">
+              {t('common.privacyPolicy')} <ExternalLink className="w-3 h-3" />
+            </button>
           </div>
         </SubPage>
       );
@@ -167,7 +225,7 @@ export function Settings() {
       {page && renderPage()}
 
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center px-4 shrink-0">
-        <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100"/></button>
+        <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1 cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100"/></button>
         <h1 className="flex-1 text-center text-[17px] font-bold text-[#333] dark:text-gray-100 mr-8">{t('settings.title')}</h1>
       </div>
 

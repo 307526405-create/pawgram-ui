@@ -1,4 +1,5 @@
-import { ChevronLeft, MapPin, Heart, MessageCircle } from "lucide-react";
+import { useState } from "react";
+import { ChevronLeft, MapPin, Heart, MessageCircle, Plus, UserPlus, Send } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -12,6 +13,8 @@ export function UserProfile() {
   const { handleBack } = usePageTransition();
   const userId = Number(id);
   const user = users[userId as keyof typeof users];
+  const isOwnProfile = userId === 1;
+  const [isFollowing, setIsFollowing] = useState(false);
 
   if (!user) {
     return (
@@ -36,6 +39,7 @@ export function UserProfile() {
   }));
 
   const likesReceived = userPosts.reduce((sum, p) => sum + (p.like_count || 0), 0);
+  const pets = (user as any).pets || [];
 
   return (
     <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
@@ -47,33 +51,91 @@ export function UserProfile() {
       </div>
 
       <div className="flex-1 overflow-y-auto pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden">
-        <div className="flex flex-col items-center pt-8 pb-6 px-4">
+        {/* Big avatar + name + bio */}
+        <div className="flex flex-col items-center pt-8 pb-4 px-4">
           <ImageWithFallback
             src={user.avatar}
             alt={user.name}
-            className="w-24 h-24 rounded-full object-cover border-2 border-white dark:border-gray-700 shadow-md"
+            className="w-28 h-28 rounded-full object-cover border-[3px] border-white dark:border-gray-700 shadow-lg"
           />
-          <h2 className="text-[20px] font-bold text-[#333] dark:text-gray-100 mt-4">{user.name}</h2>
-          <p className="text-[14px] text-[#999] dark:text-gray-400 mt-1 text-center">{user.bio}</p>
+          <h2 className="text-[22px] font-bold text-[#333] dark:text-gray-100 mt-4">{user.name}</h2>
+          <p className="text-[13px] text-[#999] dark:text-gray-400 mt-1.5 text-center px-6">{user.bio}</p>
+        </div>
 
-          <div className="flex items-center gap-8 mt-6">
-            <div className="flex flex-col items-center">
-              <span className="text-[18px] font-bold text-[#333] dark:text-gray-100">{user.following}</span>
-              <span className="text-[12px] text-[#999] dark:text-gray-400">{t('profile.following')}</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-[18px] font-bold text-[#333] dark:text-gray-100">{user.followers}</span>
-              <span className="text-[12px] text-[#999] dark:text-gray-400">{t('profile.followers')}</span>
-            </div>
-            <div className="flex flex-col items-center">
-              <span className="text-[18px] font-bold text-[#333] dark:text-gray-100">{likesReceived}</span>
-              <span className="text-[12px] text-[#999] dark:text-gray-400">{t('profile.likes')}</span>
-            </div>
+        {/* Stats row */}
+        <div className="flex items-center justify-center gap-10 py-3 border-y border-[#F0F0F0] dark:border-gray-800">
+          <div className="flex flex-col items-center cursor-pointer active:opacity-70" onClick={() => navigate('/follows', { state: { tab: 'following' } })}>
+            <span className="text-[18px] font-bold text-[#333] dark:text-gray-100">{user.following}</span>
+            <span className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{t('profile.following')}</span>
+          </div>
+          <div className="flex flex-col items-center cursor-pointer active:opacity-70" onClick={() => navigate('/follows', { state: { tab: 'followers' } })}>
+            <span className="text-[18px] font-bold text-[#333] dark:text-gray-100">{user.followers}</span>
+            <span className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{t('profile.followers')}</span>
+          </div>
+          <div className="flex flex-col items-center">
+            <span className="text-[18px] font-bold text-[#333] dark:text-gray-100">{likesReceived}</span>
+            <span className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{t('profile.likes')}</span>
           </div>
         </div>
 
-        <div className="px-4">
-          <h3 className="text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">
+        {/* Action buttons */}
+        <div className="px-4 py-3 flex gap-3">
+          {isOwnProfile ? (
+            <button onClick={() => navigate('/profile')} className="flex-1 h-10 rounded-xl bg-[#F0F0F0] dark:bg-gray-800 text-[14px] font-bold text-[#333] dark:text-gray-100 active:bg-[#E5E5E5]">
+              {t('profile.editProfile')}
+            </button>
+          ) : (
+            <>
+              <button
+                onClick={() => setIsFollowing(!isFollowing)}
+                className={`flex-1 h-10 rounded-xl text-[14px] font-bold active:opacity-80 flex items-center justify-center gap-1.5 ${isFollowing ? 'bg-[#F0F0F0] dark:bg-gray-800 text-[#666] dark:text-gray-400' : 'bg-[#FF8C42] text-white'}`}
+              >
+                <UserPlus className="w-4 h-4" />
+                {isFollowing ? t('common.followed') : t('common.follow')}
+              </button>
+              <button
+                onClick={() => navigate(`/chat/${userId}`)}
+                className="flex-1 h-10 rounded-xl border border-[#DDD] dark:border-gray-600 text-[14px] font-bold text-[#333] dark:text-gray-100 active:bg-[#F5F5F5] dark:active:bg-gray-800 flex items-center justify-center gap-1.5"
+              >
+                <Send className="w-4 h-4" />
+                {t('profile.message')}
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Pets horizontal scroll bar */}
+        {pets.length > 0 && (
+          <div className="py-4">
+            <div className="flex gap-4 px-4 overflow-x-auto [&::-webkit-scrollbar]:hidden">
+              {pets.map((pet: any, i: number) => (
+                <div key={i} className="shrink-0 flex flex-col items-center gap-2">
+                  <div className="w-[68px] h-[68px] rounded-full bg-gradient-to-br from-[#FF8C42] to-[#FFB380] p-[2.5px]">
+                    <img
+                      src={pet.avatar}
+                      alt={pet.name}
+                      className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-900"
+                    />
+                  </div>
+                  <span className="text-[12px] font-bold text-[#333] dark:text-gray-100">{pet.name}</span>
+                  <span className="text-[10px] text-[#999] dark:text-gray-400 -mt-1.5">{pet.breed}</span>
+                </div>
+              ))}
+              {isOwnProfile && (
+                <div className="shrink-0 flex flex-col items-center gap-2">
+                  <div className="w-[68px] h-[68px] rounded-full border-2 border-dashed border-[#DDD] dark:border-gray-600 flex items-center justify-center">
+                    <Plus className="w-5 h-5 text-[#CCC] dark:text-gray-500" />
+                  </div>
+                  <span className="text-[12px] text-[#999] dark:text-gray-400">{t('profile.addPet')}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* Posts grid - 3 columns */}
+        <div className="px-2">
+          <h3 className="px-2 text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">
             {t('profile.posts')} ({userPosts.length})
           </h3>
 
@@ -85,30 +147,32 @@ export function UserProfile() {
               <p className="text-[14px] text-[#999] dark:text-gray-400">{t('home.noPostsYet')}</p>
             </div>
           ) : (
-            <div className="space-y-4">
+            <div className="grid grid-cols-3 gap-1">
               {userPosts.map(post => (
                 <div
                   key={post.id}
                   onClick={() => navigate(`/post/${post.id}`)}
-                  className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-gray-50 dark:border-gray-800 cursor-pointer active:opacity-80"
+                  className="relative cursor-pointer active:opacity-80"
+                  style={{ aspectRatio: '1/1' }}
                 >
-                  {post.images && post.images[0] && (
-                    <img src={typeof post.images[0] === 'string' ? post.images[0] : ''} className="w-full h-48 object-cover" />
+                  {post.images && post.images[0] ? (
+                    <img
+                      src={typeof post.images[0] === 'string' ? post.images[0] : ''}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-[#F0F0F0] dark:bg-gray-800 flex items-center justify-center">
+                      <span className="text-[#CCC] dark:text-gray-600 text-xl">🐾</span>
+                    </div>
                   )}
-                  <div className="p-3">
-                    <p className="text-[14px] text-[#333] dark:text-gray-100 leading-relaxed line-clamp-2">{post.content}</p>
-                    <div className="flex items-center justify-between mt-3">
-                      <div className="flex items-center gap-1 text-[12px] text-[#999] dark:text-gray-400">
-                        {post.location && <><MapPin className="w-3 h-3" />{post.location}</>}
-                      </div>
-                      <div className="flex items-center gap-3">
-                        <span className="flex items-center gap-1 text-[12px] text-[#999] dark:text-gray-400">
-                          <Heart className="w-3.5 h-3.5" />{post.like_count}
-                        </span>
-                        <span className="flex items-center gap-1 text-[12px] text-[#999] dark:text-gray-400">
-                          <MessageCircle className="w-3.5 h-3.5" />{post.comment_count}
-                        </span>
-                      </div>
+                  <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/50 to-transparent p-2">
+                    <div className="flex items-center gap-2">
+                      <span className="flex items-center gap-0.5 text-[10px] text-white">
+                        <Heart className="w-3 h-3 fill-white" />{post.like_count}
+                      </span>
+                      <span className="flex items-center gap-0.5 text-[10px] text-white">
+                        <MessageCircle className="w-3 h-3" />{post.comment_count}
+                      </span>
                     </div>
                   </div>
                 </div>

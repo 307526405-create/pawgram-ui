@@ -4,8 +4,9 @@ import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { PostCard, PostCardSkeleton } from "../components/PostCard";
 import { BottomNav } from "../components/BottomNav";
+import { Toast, toast } from "../components/Toast";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { postsApi } from "../api/client";
+import { postsApi, usersApi } from "../api/client";
 import { sendLikeNotification, sendFollowNotification, sendNewNotification } from "../utils/notifications";
 import { useScrollRestore } from "../hooks/useScrollRestore";
 
@@ -91,6 +92,7 @@ export function Home() {
   const [pullState, setPullState] = useState<'idle'|'pulling'|'ready'|'loading'>('idle');
   const [pullDist, setPullDist] = useState(0);
   const touchStartY = useRef(0);
+  const pullRefreshing = useRef(false);
 
   const fetchingRef = useRef(false);
 
@@ -138,21 +140,45 @@ export function Home() {
     setBookmarkedPosts(prev => { const next = new Set(prev); if (next.has(postId)) next.delete(postId); else next.add(postId); return next; });
   };
 
-  const toggleLike = (postId: number, userName?: string) => {
+  const toggleLike = async (postId: number, userName?: string) => {
+    const wasLiked = likedPosts.has(postId);
     setLikedPosts(prev => {
       const next = new Set(prev);
       if (next.has(postId)) { next.delete(postId); }
       else { next.add(postId); if (userName) sendLikeNotification(userName); }
       return next;
     });
+    try {
+      if (wasLiked) await postsApi.unlike(postId);
+      else await postsApi.like(postId);
+    } catch {
+      setLikedPosts(prev => {
+        const next = new Set(prev);
+        wasLiked ? next.add(postId) : next.delete(postId);
+        return next;
+      });
+      toast(wasLiked ? '取消点赞失败' : '点赞失败');
+    }
   };
-  const toggleFollow = (userId: number, userName?: string) => {
+  const toggleFollow = async (userId: number, userName?: string) => {
+    const wasFollowed = followedUsers.has(userId);
     setFollowedUsers(prev => {
       const next = new Set(prev);
       if (next.has(userId)) { next.delete(userId); }
       else { next.add(userId); if (userName) sendFollowNotification(userName); }
       return next;
     });
+    try {
+      if (wasFollowed) await usersApi.unfollow(userId);
+      else await usersApi.follow(userId);
+    } catch {
+      setFollowedUsers(prev => {
+        const next = new Set(prev);
+        wasFollowed ? next.add(userId) : next.delete(userId);
+        return next;
+      });
+      toast(wasFollowed ? '取消关注失败' : '关注失败');
+    }
   };
   const handleShare = (post: any) => {
     const text = `${t('common.brandName')}\n${post.user?.name ? post.user.name + ': ' : ''}${post.content}`;
@@ -162,10 +188,23 @@ export function Home() {
 
   const handleTouchStart = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop===0) touchStartY.current=e.touches[0].clientY; };
   const handleTouchMove = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop!==0||touchStartY.current===0) return; const d=e.touches[0].clientY-touchStartY.current; if(d>0){setPullDist(Math.min(d*.5,80));setPullState(d>60?'ready':'pulling');} };
-  const handleTouchEnd = async () => {
-    if(pullState==='ready'){setPullState('loading');setPullDist(40);await fetchPosts(1);setPullState('idle');setPullDist(0);}
-    else{setPullState('idle');setPullDist(0);} touchStartY.current=0;
+  const handleTouchEnd = () => {
+    if(pullState==='ready'){
+      setPullState('loading');setPullDist(40);
+      pullRefreshing.current = true;
+      fetchPosts(1);
+    } else {
+      setPullState('idle');setPullDist(0);
+    }
+    touchStartY.current=0;
   };
+
+  useEffect(() => {
+    if (!loading && pullRefreshing.current) {
+      setPullState('idle');setPullDist(0);
+      pullRefreshing.current = false;
+    }
+  }, [loading]);
   const handleScroll = () => {
     saveScrollPos();
     const el=scrollRef.current; if(!el)return;
@@ -248,10 +287,10 @@ export function Home() {
           </div>
 
           <div className="flex items-center gap-6 mt-1">
-            <button onClick={()=>setActiveTab('hot')} className={`text-[17px] font-bold relative pb-2 ${activeTab==='hot'?'text-[#333] dark:text-gray-100':'text-[#999] dark:text-gray-400'}`}>
+            <button onClick={()=>setActiveTab('hot')} className={`text-[17px] font-bold relative pb-2 cursor-pointer active:opacity-70 ${activeTab==='hot'?'text-[#333] dark:text-gray-100':'text-[#999] dark:text-gray-400'}`}>
               {t('home.hot')}{activeTab==='hot'&&<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"/>}
             </button>
-            <button onClick={()=>setActiveTab('following')} className={`text-[17px] font-bold relative pb-2 ${activeTab==='following'?'text-[#333] dark:text-gray-100':'text-[#999] dark:text-gray-400'}`}>
+            <button onClick={()=>setActiveTab('following')} className={`text-[17px] font-bold relative pb-2 cursor-pointer active:opacity-70 ${activeTab==='following'?'text-[#333] dark:text-gray-100':'text-[#999] dark:text-gray-400'}`}>
               {t('home.following')}{activeTab==='following'&&<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"/>}
             </button>
           </div>
@@ -332,6 +371,7 @@ export function Home() {
       </div>
 
       <BottomNav />
+      <Toast />
     </div>
   );
 }
