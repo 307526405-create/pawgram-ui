@@ -257,6 +257,10 @@ export function Discover() {
     try { return new Set(JSON.parse(localStorage.getItem('pawgram_favorites') || '[]')); } catch { return new Set(); }
   });
   const [mapError, setMapError] = useState(false);
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapInstanceRef = useRef<any>(null);
+  const markersRef = useRef<any[]>([]);
+  const infoWindowRef = useRef<any>(null);
   const [nearbyUsers, setNearbyUsers] = useState<any[]>([]);
   const [likedNotes, setLikedNotes] = useState<Set<number>>(new Set());
   const toggleNoteLike = (noteId: number) => { setLikedNotes(prev => { const next = new Set(prev); if (next.has(noteId)) next.delete(noteId); else next.add(noteId); return next; }); };
@@ -323,6 +327,54 @@ export function Discover() {
   useEffect(() => { if (userLoc) { discoverApi.nearby(userLoc.lat, userLoc.lng, 8).then(d => setNearbyUsers(d.users || [])).catch(() => {}); } }, [userLoc]);
   useEffect(() => { const h=()=>{setShowMap(false);setSelectedPlace(null);setMarkForm(null);}; window.addEventListener('pawgram:discover-tab-click',h); return ()=>window.removeEventListener('pawgram:discover-tab-click',h); },[]);
 
+  // Initialize/destroy AMap when full-screen map opens/closes
+  useEffect(() => {
+    if (!showMap) {
+      if (mapInstanceRef.current) { mapInstanceRef.current.destroy(); mapInstanceRef.current = null; }
+      markersRef.current = [];
+      return;
+    }
+    let cancelled = false;
+    const initMap = () => {
+      if (cancelled || !mapContainerRef.current) return;
+      const AMap = (window as any).AMap;
+      if (!AMap) { setTimeout(initMap, 300); return; }
+      try {
+        const map = new AMap.Map(mapContainerRef.current, {
+          center: [113.2644, 23.1291],
+          zoom: 13,
+          resizeEnable: true,
+        });
+        mapInstanceRef.current = map;
+      } catch { if (!cancelled) setMapError(true); }
+    };
+    setTimeout(initMap, 100);
+    return () => { cancelled = true; };
+  }, [showMap]);
+
+  // Update markers when sortedPlaces changes
+  useEffect(() => {
+    const map = mapInstanceRef.current;
+    if (!map) return;
+    markersRef.current.forEach(m => map.remove(m));
+    markersRef.current = [];
+    const AMap = (window as any).AMap;
+    if (!AMap) return;
+    sortedPlaces.forEach(p => {
+      const marker = new AMap.Marker({ position: [p.lng, p.lat], title: getPlaceName(p) });
+      marker.on('click', () => {
+        const content = `<div style="padding:4px 10px;cursor:pointer;font-size:13px;font-weight:600;color:#333;white-space:nowrap;">${getPlaceName(p)}</div>`;
+        if (!infoWindowRef.current) {
+          infoWindowRef.current = new AMap.InfoWindow({ offset: new AMap.Pixel(0, -35) });
+        }
+        infoWindowRef.current.setContent(content);
+        infoWindowRef.current.open(map, [p.lng, p.lat]);
+        setSelectedPlace(p);
+      });
+      map.add(marker);
+      markersRef.current.push(marker);
+    });
+  }, [sortedPlaces]);
 
   const sortLabels: Record<string, string> = { hot: t('discover.hot'), nearby: t('discover.nearby'), newest: t('discover.newest') };
 
@@ -340,46 +392,13 @@ export function Discover() {
         <div className="flex-1 relative bg-[#E8E8E8] dark:bg-gray-800 overflow-hidden">
           {!mapError ? (
             <>
-              <img
-                src={`https://snapshot.apple-mapkit.com/map?center=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}&size=600x400&scale=2&z=13&t=standard&poi=0`}
-                alt=""
-                onError={() => setMapError(true)}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-              {sortedPlaces.map(p => {
-            const centerLat = userLoc?.lat || 23.1291;
-            const centerLng = userLoc?.lng || 113.2644;
-            const dLat = p.lat - centerLat;
-            const dLng = p.lng - centerLng;
-            const zoom = 13;
-            const metersPerPixel = 156543.03392 * Math.cos(centerLat * Math.PI / 180) / Math.pow(2, zoom);
-            const px = (dLng * 111320 * Math.cos(centerLat * Math.PI / 180)) / metersPerPixel;
-            const py = -(dLat * 111320) / metersPerPixel;
-            const color = getTypeColor(p.type);
-            return (
-              <div
-                key={p.id}
-                onClick={() => setSelectedPlace(p)}
-                className="absolute cursor-pointer active:scale-125 transition-transform"
-                style={{
-                  left: `calc(50% + ${px}px)`,
-                  top: `calc(50% + ${py}px)`,
-                  transform: 'translate(-50%, -50%)',
-                }}
-              >
-                <div className="relative">
-                  <MapPin className="w-6 h-6 drop-shadow-lg" style={{ color, fill: color }} />
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 rounded-full bg-white border-2" style={{ borderColor: color }} />
-                </div>
+              <div ref={mapContainerRef} id="amap-container" className="absolute inset-0 w-full h-full" />
+              <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+                <button onClick={() => window.open(`https://uri.amap.com/marker?position=${userLoc?.lng || 113.2644},${userLoc?.lat || 23.1291}`, '_blank')} className="bg-white dark:bg-gray-900 rounded-2xl px-6 py-3 shadow-lg flex items-center gap-2 active:opacity-80">
+                  <MapPin className="w-5 h-5 text-[#FF8C42]" />
+                  <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.openInMaps')}</span>
+                </button>
               </div>
-            );
-          })}
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
-            <button onClick={() => window.open(`http://maps.apple.com/?q=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}`, '_blank')} className="bg-white dark:bg-gray-900 rounded-2xl px-6 py-3 shadow-lg flex items-center gap-2 active:opacity-80">
-              <MapPin className="w-5 h-5 text-[#FF8C42]" />
-              <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.openInMaps')}</span>
-            </button>
-          </div>
             </>
           ) : (
             <div className="flex flex-col items-center justify-center h-full px-8 text-center">
@@ -404,7 +423,7 @@ export function Discover() {
       <div className="flex-1 overflow-y-auto pb-24" ref={scrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onScroll={handleScroll}>
         {pullState!=='idle'&&(<div className="flex items-center justify-center gap-2 text-[12px] text-[#999] dark:text-gray-400" style={{height:pullDist}}>{pullState==='loading'&&<span className="w-3.5 h-3.5 border-2 border-[#FF8C42] border-t-transparent rounded-full animate-spin"/>}{pullState==='pulling'&&t('common.pullRefresh')}{pullState==='ready'&&t('common.releaseRefresh')}{pullState==='loading'&&t('common.refreshing')}</div>)}
         <div className="px-4 mt-5" onClick={()=>navigate('/search')}><div className="bg-white dark:bg-gray-900 border border-[#E5E5E5] dark:border-gray-600 rounded-lg px-3 py-2.5 flex items-center cursor-pointer"><Search className="w-4 h-4 text-[#999] dark:text-gray-400 mr-2 shrink-0"/><span className="flex-1 text-[14px] text-[#999] dark:text-gray-400">{t('discover.searchPlaceholder')}</span></div></div>
-        <div className="mt-8"><div className="flex items-center justify-between px-4 mb-4"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button className="text-[#FF8C42] text-[12px] font-medium" onClick={()=>setShowMap(true)}>{t('common.viewAll')}</button></div><div className="px-4"><div onClick={()=>setShowMap(true)} className="bg-white dark:bg-gray-900 rounded-xl border border-[#EEE] dark:border-gray-700 overflow-hidden shadow-sm cursor-pointer active:opacity-80"><div className="relative h-[120px] w-full">{!mapError ? <img src={`https://snapshot.apple-mapkit.com/map?center=${userLoc?.lat || 23.1291},${userLoc?.lng || 113.2644}&size=600x200&scale=2&z=13&t=standard&poi=0`} onError={() => setMapError(true)} className="w-full h-full object-cover" alt="" /> : <div className="w-full h-full bg-[#E8E8E8] dark:bg-gray-800 flex items-center justify-center"><MapPin className="w-6 h-6 text-[#BBB] dark:text-gray-600" /></div>}<div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent pointer-events-none"/><div className="absolute bottom-3 left-3 flex items-center text-white"><MapPin className="w-4 h-4 mr-1"/><span className="text-[12px] font-medium">{t('discover.nearbyPlaces', { count: places.length })}</span></div></div></div></div></div>
+        <div className="mt-8"><div className="flex items-center justify-between px-4 mb-4"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button className="text-[#FF8C42] text-[12px] font-medium" onClick={()=>setShowMap(true)}>{t('common.viewAll')}</button></div><div className="px-4"><div onClick={()=>setShowMap(true)} className="bg-white dark:bg-gray-900 rounded-xl border border-[#EEE] dark:border-gray-700 overflow-hidden shadow-sm cursor-pointer active:opacity-80"><div className="relative h-[120px] w-full bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/10"><div className="absolute inset-0 flex items-center justify-center"><MapPin className="w-10 h-10 text-[#FF8C42] opacity-20" /></div><div className="absolute bottom-3 left-3 flex items-center text-[#333] dark:text-gray-100"><MapPin className="w-4 h-4 mr-1 text-[#FF8C42]"/><span className="text-[12px] font-medium">{t('discover.nearbyPlaces', { count: places.length })}</span></div></div></div></div></div>
         {favPlaces.length>0&&(<div className="mt-8"><h2 className="px-4 text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">{t('discover.myWishlist')} ({favPlaces.length})</h2><div className="flex gap-3 px-4 overflow-x-auto pb-2">{favPlaces.map(p=>(<div key={p.id} onClick={()=>setSelectedPlace(p)} className="shrink-0 w-[130px] bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80"><div className="h-[70px] flex items-center justify-center" style={{backgroundColor:getTypeColor(p.type)+'20'}}><MapPin className="w-6 h-6" style={{color:getTypeColor(p.type)}}/></div><div className="p-2.5"><div className="text-[13px] font-semibold text-[#333] dark:text-gray-100 truncate">{getPlaceName(p)}</div><div className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{p.type} · ★{p.rating}</div></div></div>))}</div></div>)}
         {nearbyUsers.length > 0 && (
           <div className="mt-6 px-4">
