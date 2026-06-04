@@ -350,7 +350,7 @@ export function Discover() {
     setFeedLoading(false);
   };
 
-  useEffect(() => { placesApi.list(userLoc?.lat, userLoc?.lng).then(d => setPlaces(d.list)).catch(() => {}); }, [userLoc]);
+  useEffect(() => { placesApi.list().then(d => setPlaces(d.list)).catch(() => {}); }, []);
   useEffect(() => { fetchFeed(1); }, []);
   const loadMore = () => { if (feedHasMore && !feedLoading) { const next = feedPage + 1; setFeedPage(next); fetchFeed(next); } };
 
