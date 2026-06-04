@@ -1,5 +1,8 @@
 {
   "appId": "com.pawgram.app",
   "appName": "爪印",
-  "webDir": "dist"
+  "webDir": "dist",
+  "server": {
+    "iosScheme": "http"
+  }
 }
