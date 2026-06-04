@@ -387,6 +387,7 @@ export function Discover() {
         const map = new TMap.Map(mapContainerRef.current, {
           center: new TMap.LatLng(userLoc?.lat || 23.1291, userLoc?.lng || 113.2644),
           zoom: 15,
+          rotatable: true,
         });
         map.on('rightclick', (e: any) => {
           setMarkForm({ lat: e.latLng.lat, lng: e.latLng.lng });
