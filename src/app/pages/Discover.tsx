@@ -268,6 +268,11 @@ export function Discover() {
   const [pullState, setPullState] = useState<'idle' | 'pulling' | 'ready' | 'loading'>('idle');
   const [pullDist, setPullDist] = useState(0);
   const touchStartY = useRef(0);
+  const [inlineMapError, setInlineMapError] = useState(false);
+  const inlineMapContainerRef = useRef<HTMLDivElement>(null);
+  const inlineMapInstanceRef = useRef<any>(null);
+  const inlineMarkersRef = useRef<any[]>([]);
+  const inlineInfoWindowRef = useRef<any>(null);
 
   const mapTypes = ['全部', ...Array.from(new Set(places.map(p => p.type)))];
   let filteredPlaces = mapFilter === '全部' ? places : places.filter(p => p.type === mapFilter);
@@ -375,6 +380,61 @@ export function Discover() {
     });
   }, [sortedPlaces]);
 
+  // inline map – init with 10s timeout
+  useEffect(() => {
+    let cancelled = false;
+    let attempts = 0;
+    const tryInit = () => {
+      if (cancelled || !inlineMapContainerRef.current) return;
+      attempts++;
+      const qqMaps = (window as any).qq?.maps;
+      if (!qqMaps) {
+        if (attempts < 34) { setTimeout(tryInit, 300); }
+        else { if (!cancelled) setInlineMapError(true); }
+        return;
+      }
+      try {
+        const map = new qqMaps.Map(inlineMapContainerRef.current, {
+          center: new qqMaps.LatLng(23.1291, 113.2644),
+          zoom: 13,
+        });
+        inlineMapInstanceRef.current = map;
+      } catch { if (!cancelled) setInlineMapError(true); }
+    };
+    setTimeout(tryInit, 100);
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    const map = inlineMapInstanceRef.current;
+    const qqMaps = (window as any).qq?.maps;
+    if (!map || !qqMaps || !userLoc) return;
+    map.setCenter(new qqMaps.LatLng(userLoc.lat, userLoc.lng));
+  }, [userLoc]);
+
+  useEffect(() => {
+    const map = inlineMapInstanceRef.current;
+    if (!map) return;
+    inlineMarkersRef.current.forEach(m => m.setMap(null));
+    inlineMarkersRef.current = [];
+    const qqMaps = (window as any).qq?.maps;
+    if (!qqMaps) return;
+    places.forEach(p => {
+      const marker = new qqMaps.Marker({ position: new qqMaps.LatLng(p.lat, p.lng), title: getPlaceName(p), map });
+      qqMaps.event.addListener(marker, 'click', () => {
+        const content = '<div style="padding:4px 10px;cursor:pointer;font-size:13px;font-weight:600;color:#333;white-space:nowrap;">' + getPlaceName(p) + '</div>';
+        if (!inlineInfoWindowRef.current) {
+          inlineInfoWindowRef.current = new qqMaps.InfoWindow({ map });
+        }
+        inlineInfoWindowRef.current.setContent(content);
+        inlineInfoWindowRef.current.setPosition(new qqMaps.LatLng(p.lat, p.lng));
+        inlineInfoWindowRef.current.open();
+        setSelectedPlace(p);
+      });
+      inlineMarkersRef.current.push(marker);
+    });
+  }, [places]);
+
   const sortLabels: Record<string, string> = { hot: t('discover.hot'), nearby: t('discover.nearby'), newest: t('discover.newest') };
 
   return (
@@ -422,7 +482,19 @@ export function Discover() {
       <div className="flex-1 overflow-y-auto pb-24" ref={scrollRef} onTouchStart={handleTouchStart} onTouchMove={handleTouchMove} onTouchEnd={handleTouchEnd} onScroll={handleScroll}>
         {pullState!=='idle'&&(<div className="flex items-center justify-center gap-2 text-[12px] text-[#999] dark:text-gray-400" style={{height:pullDist}}>{pullState==='loading'&&<span className="w-3.5 h-3.5 border-2 border-[#FF8C42] border-t-transparent rounded-full animate-spin"/>}{pullState==='pulling'&&t('common.pullRefresh')}{pullState==='ready'&&t('common.releaseRefresh')}{pullState==='loading'&&t('common.refreshing')}</div>)}
         <div className="px-4 mt-5" onClick={()=>navigate('/search')}><div className="bg-white dark:bg-gray-900 border border-[#E5E5E5] dark:border-gray-600 rounded-lg px-3 py-2.5 flex items-center cursor-pointer"><Search className="w-4 h-4 text-[#999] dark:text-gray-400 mr-2 shrink-0"/><span className="flex-1 text-[14px] text-[#999] dark:text-gray-400">{t('discover.searchPlaceholder')}</span></div></div>
-        <div className="mt-8"><div className="flex items-center justify-between px-4 mb-4"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button className="text-[#FF8C42] text-[12px] font-medium" onClick={()=>setShowMap(true)}>{t('common.viewAll')}</button></div><div className="px-4"><div onClick={()=>setShowMap(true)} className="bg-white dark:bg-gray-900 rounded-xl border border-[#EEE] dark:border-gray-700 overflow-hidden shadow-sm cursor-pointer active:opacity-80"><div className="relative h-[120px] w-full bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/20 dark:to-orange-800/10"><div className="absolute inset-0 flex items-center justify-center"><MapPin className="w-10 h-10 text-[#FF8C42] opacity-20" /></div><div className="absolute bottom-3 left-3 flex items-center text-[#333] dark:text-gray-100"><MapPin className="w-4 h-4 mr-1 text-[#FF8C42]"/><span className="text-[12px] font-medium">{t('discover.nearbyPlaces', { count: places.length })}</span></div></div></div></div></div>
+        <div className="mt-8"><div className="flex items-center justify-between px-4 mb-4"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button className="text-[#FF8C42] text-[12px] font-medium" onClick={()=>setShowMap(true)}>{t('common.viewAll')}</button></div><div className="px-4"><div className="bg-white dark:bg-gray-900 rounded-xl border border-[#EEE] dark:border-gray-700 overflow-hidden shadow-sm">
+          {!inlineMapError ? (
+            <div ref={inlineMapContainerRef} id="qq-map" className="w-full" style={{height:'300px'}} />
+          ) : (
+            <div className="flex flex-col items-center justify-center" style={{height:'300px'}}>
+              <div className="w-14 h-14 rounded-full bg-[#FFF3E6] dark:bg-orange-900/30 flex items-center justify-center mb-3">
+                <MapPin className="w-7 h-7 text-[#FF8C42]" />
+              </div>
+              <p className="text-[13px] font-semibold text-[#333] dark:text-gray-100 mb-1">{t('discover.mapLoadFailed')}</p>
+              <p className="text-[13px] text-[#999] dark:text-gray-400">{t('discover.mapLoadFailedHint')}</p>
+            </div>
+          )}
+        </div></div></div>
         {favPlaces.length>0&&(<div className="mt-8"><h2 className="px-4 text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">{t('discover.myWishlist')} ({favPlaces.length})</h2><div className="flex gap-3 px-4 overflow-x-auto pb-2">{favPlaces.map(p=>(<div key={p.id} onClick={()=>setSelectedPlace(p)} className="shrink-0 w-[130px] bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80"><div className="h-[70px] flex items-center justify-center" style={{backgroundColor:getTypeColor(p.type)+'20'}}><MapPin className="w-6 h-6" style={{color:getTypeColor(p.type)}}/></div><div className="p-2.5"><div className="text-[13px] font-semibold text-[#333] dark:text-gray-100 truncate">{getPlaceName(p)}</div><div className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{p.type} · ★{p.rating}</div></div></div>))}</div></div>)}
         {nearbyUsers.length > 0 && (
           <div className="mt-6 px-4">
