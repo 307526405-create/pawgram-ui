@@ -62,5 +62,9 @@
 	<string>爪印需要访问相册来选择宠物照片</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>爪印需要保存照片到相册</string>
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>爪印需要获取位置来显示附近地点和宠物地图</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>爪印需要在后台获取位置来推荐附近宠物友好地点</string>
 </dict>
 </plist>

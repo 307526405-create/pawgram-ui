@@ -1,4 +1,4 @@
-import { Search, MapPin, Navigation, Star, Phone, ChevronRight, X, Share2, Heart, Maximize2 } from "lucide-react";
+import { Search, MapPin, Navigation, Star, Phone, ChevronRight, X, Share2, Heart, Maximize2, Crosshair } from "lucide-react";
 import { MAP_STATIC_URL } from '../config/map';
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
@@ -42,6 +42,9 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
   const [routesLoading, setRoutesLoading] = useState(true);
   const [expandedNote, setExpandedNote] = useState<any>(null);
   const [likedNotes, setLikedNotes] = useState<Set<number>>(new Set());
+  const [showMapPicker, setShowMapPicker] = useState(false);
+  const [pickerRoute, setPickerRoute] = useState<any>(null);
+  const [wantGo, setWantGo] = useState(false);
   const toggleNoteLike = (noteId: number) => { setLikedNotes(prev => { const next = new Set(prev); if (next.has(noteId)) next.delete(noteId); else next.add(noteId); return next; }); };
 
   useEffect(() => {
@@ -73,7 +76,7 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
   const fmt = (s: number) => s < 60 ? '<1min' : s < 3600 ? `${Math.round(s / 60)}min` : `${Math.floor(s / 3600)}h${Math.round((s % 3600) / 60)}min`;
 
   return (
-    <div className="fixed inset-0 z-[70] bg-black/40 flex items-end" onClick={onClose}>
+    <div className="fixed inset-0 z-[1200] bg-black/40 flex items-end" onClick={onClose}>
       <div className="w-full bg-white dark:bg-gray-900 rounded-t-[20px] px-5 pt-5 pb-8 max-h-[80vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
         <div className="flex items-start justify-between mb-1">
           <h2 className="text-[18px] font-bold text-[#333] dark:text-gray-100 flex-1">{getPlaceName(place)}</h2>
@@ -93,7 +96,10 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
           <div className="flex items-center gap-0.5 text-[#FF8C42]"><Star className="w-3.5 h-3.5 fill-[#FF8C42]" /><span className="text-[13px] font-medium">{place.rating}</span></div>
           <span className="text-[12px] text-[#999] dark:text-gray-400">{place.reviews} · {place.type || ''}</span>
           <span className="text-[12px] text-[#999] dark:text-gray-400">{place.distance_km !== undefined ? `${place.distance_km.toFixed(1)}km` : (userLoc ? `${getDistanceKm(place).toFixed(1)}km` : place.distance)}</span>
-          <span className="text-[12px] text-[#FF8C42]">{wantCount}{t('discover.wantGo') || '人想去'}</span>
+          <div className="flex items-center gap-1 text-[12px] text-[#FF8C42] cursor-pointer active:opacity-70" onClick={() => setWantGo(!wantGo)}>
+            <Star className={`w-3.5 h-3.5 ${wantGo ? 'fill-[#FF8C42]' : ''}`} />
+            <span>{wantCount + (wantGo ? 1 : 0)}{t('discover.wantGo') || '人想去'}</span>
+          </div>
         </div>
         <p className="text-[14px] text-[#666] dark:text-gray-400 leading-relaxed mb-4">{place.desc}</p>
 
@@ -110,7 +116,7 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
           {routesLoading ? <div className="text-[12px] text-[#999] dark:text-gray-400 py-2">{t('discover.calculatingRoute')}</div> : (
             <div className="grid grid-cols-4 gap-1.5">
               {routes.map((r: any) => (
-                <button key={r.flag} onClick={() => { onClose(); window.open(`http://maps.apple.com/?daddr=${place.lat},${place.lng}&dirflg=${r.flag}`, '_blank'); }}
+                <button key={r.flag} onClick={() => { setPickerRoute({ lat: place.lat, lng: place.lng, flag: r.flag, label: r.label, name: getPlaceName(place) }); setShowMapPicker(true); }}
                   className="bg-white dark:bg-gray-900 rounded-lg py-2 flex flex-col items-center gap-0.5 active:bg-[#F5F5F5] dark:active:bg-gray-800">
                   <span className="text-[12px] font-medium text-[#333] dark:text-gray-100">{r.label}</span>
                   <span className="text-[10px] text-[#999] dark:text-gray-400">{r.duration ? fmt(r.duration) : t('discover.view')}</span>
@@ -161,6 +167,33 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
         <button onClick={onClose} className="w-full h-10 mt-4 text-[#999] dark:text-gray-400 text-[13px] border-t border-[#EEE] dark:border-gray-700 pt-3">{t('common.close')}</button>
       </div>
       {expandedNote && <NoteExpanded note={expandedNote} onClose={() => setExpandedNote(null)} likedNotes={likedNotes} onToggleLike={toggleNoteLike} />}
+      {showMapPicker && pickerRoute && (
+        <div className="fixed inset-0 z-[1300] bg-black/50 flex items-end" onClick={(e) => { e.stopPropagation(); setShowMapPicker(false); }}>
+          <div className="w-full bg-[#F2F2F7] dark:bg-gray-900 rounded-t-[14px] pt-4 pb-8 px-4" onClick={e => e.stopPropagation()}>
+            <div className="bg-white dark:bg-gray-800 rounded-[14px] overflow-hidden mb-3">
+              {[
+                { name: '苹果地图', url: `http://maps.apple.com/?daddr=${pickerRoute.lat},${pickerRoute.lng}&dirflg=${pickerRoute.flag}` },
+                { name: '高德地图', url: pickerRoute.flag === 'd' ? `iosamap://path?sourceApplication=app&dlat=${pickerRoute.lat}&dlon=${pickerRoute.lng}&dev=0&t=0` : `iosamap://navi?sourceApplication=app&lat=${pickerRoute.lat}&lon=${pickerRoute.lng}&dev=0` },
+                { name: '百度地图', url: `baidumap://map/direction?destination=${pickerRoute.lat},${pickerRoute.lng}&coord_type=gcj02&mode=${pickerRoute.flag === 'd' ? 'driving' : pickerRoute.flag === 'w' ? 'walking' : pickerRoute.flag === 'b' ? 'riding' : 'transit'}` },
+                { name: '腾讯地图', url: `qqmap://map/routeplan?type=${pickerRoute.flag === 'd' ? 'drive' : pickerRoute.flag === 'w' ? 'walk' : pickerRoute.flag === 'b' ? 'bike' : 'transit'}&to=${encodeURIComponent(pickerRoute.name)}&tocoord=${pickerRoute.lat},${pickerRoute.lng}` },
+              ].map((m, i) => (
+                <button key={m.name} onClick={() => {
+                  setShowMapPicker(false);
+                  const u = m.url;
+                  setTimeout(() => { u.startsWith('http') ? window.open(u, '_system') : (window.location.href = u); }, 150);
+                }}
+                  className={`w-full h-[50px] flex items-center justify-center text-[17px] text-[#007AFF] dark:text-[#0A84FF] font-normal ${i < 3 ? 'border-b border-[#E5E5EA] dark:border-gray-700' : ''} active:bg-[#D1D1D6]/30 dark:active:bg-gray-700`}>
+                  {m.name}
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setShowMapPicker(false)}
+              className="w-full h-[50px] bg-white dark:bg-gray-800 rounded-[14px] flex items-center justify-center text-[17px] font-semibold text-[#007AFF] dark:text-[#0A84FF] active:bg-[#D1D1D6]/30 dark:active:bg-gray-700">
+              {t('common.cancel')}
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -219,16 +252,15 @@ const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.poste
 const typeOptions = [
   { value: '公园', key: 'discover.typePark' },
   { value: '咖啡馆', key: 'discover.typeCafe' },
-  { value: '医院', key: 'discover.typeHospital' },
+  { value: '宠物医院', key: 'discover.typeHospital' },
   { value: '餐厅', key: 'discover.typeRestaurant' },
-  { value: '小区', key: 'discover.typeResidential' },
+  { value: '商场', key: 'discover.typeShop' },
   { value: '户外', key: 'discover.typeOutdoor' },
   { value: '美容', key: 'discover.typeGrooming' },
-  { value: '商店', key: 'discover.typeShop' },
   { value: '其他', key: 'common.other' },
 ];
 
-const typeColors = ['#4CAF50', '#795548', '#F44336', '#FF8C42', '#2196F3', '#E91E63', '#9C27B0', '#607D8B', '#FF8C42'];
+const typeColors = ['#4CAF50', '#795548', '#F44336', '#FF8C42', '#2196F3', '#E91E63', '#9C27B0', '#607D8B'];
 
 function getTypeColor(type: string): string {
   const idx = typeOptions.findIndex(o => o.value === type);
@@ -258,6 +290,7 @@ export function Discover() {
     try { return new Set(JSON.parse(localStorage.getItem('pawgram_favorites') || '[]')); } catch { return new Set(); }
   });
   const [mapError, setMapError] = useState(false);
+  const [mapReady, setMapReady] = useState(false);
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapInstanceRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -325,7 +358,14 @@ export function Discover() {
   const handleTouchMove = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop!==0||touchStartY.current===0) return; const d=e.touches[0].clientY-touchStartY.current; if(d>0){setPullDist(Math.min(d*.5,80));setPullState(d>60?'ready':'pulling');} };
   const handleTouchEnd = async () => { if(pullState==='ready'){setPullState('loading');setPullDist(40);setFeedPage(1);await fetchFeed(1);setPullState('idle');setPullDist(0);}else{setPullState('idle');setPullDist(0);} touchStartY.current=0; };
   const handleScroll = () => { saveScrollPos(); const el=scrollRef.current; if(!el)return; if(el.scrollHeight-el.scrollTop-el.clientHeight<200)loadMore(); };
-  useEffect(() => { navigator.geolocation?.getCurrentPosition(p=>setUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}),()=>setUserLoc({lat:23.1291,lng:113.2644})); },[]);
+  useEffect(() => {
+    const timeout = setTimeout(() => setUserLoc({lat:23.1291,lng:113.2644}), 5000);
+    navigator.geolocation?.getCurrentPosition(
+      p => { clearTimeout(timeout); setUserLoc({lat:p.coords.latitude,lng:p.coords.longitude}); },
+      () => { clearTimeout(timeout); setUserLoc({lat:23.1291,lng:113.2644}); },
+      { timeout: 5000 }
+    );
+  }, []);
   useEffect(() => { if (userLoc) { discoverApi.nearby(userLoc.lat, userLoc.lng, 8).then(d => setNearbyUsers(d.users || [])).catch(() => {}); } }, [userLoc]);
   useEffect(() => { const h=()=>{setShowMap(false);setSelectedPlace(null);setMarkForm(null);}; window.addEventListener('pawgram:discover-tab-click',h); return ()=>window.removeEventListener('pawgram:discover-tab-click',h); },[]);
 
@@ -343,8 +383,8 @@ export function Discover() {
       if (!TMap) { setTimeout(initMap, 300); return; }
       try {
         const map = new TMap.Map(mapContainerRef.current, {
-          center: new TMap.LatLng(23.1291, 113.2644),
-          zoom: 13,
+          center: new TMap.LatLng(userLoc?.lat || 23.1291, userLoc?.lng || 113.2644),
+          zoom: 15,
         });
         let pressStart = { x: 0, y: 0, time: 0 };
         const handleDown = (e: MouseEvent | TouchEvent) => {
@@ -377,43 +417,90 @@ export function Discover() {
         mapContainerRef.current.addEventListener('touchstart', handleDown, { passive: true });
         mapContainerRef.current.addEventListener('touchend', handleUp);
         mapInstanceRef.current = map;
+        setMapReady(true);
       } catch { if (!cancelled) setMapError(true); }
     };
     setTimeout(initMap, 100);
     return () => { cancelled = true; };
   }, [showMap]);
 
-  // Update markers when sortedPlaces changes
+  // Auto-center map on user location when it becomes available
   useEffect(() => {
-    const map = mapInstanceRef.current;
-    if (!map) return;
+    if (showMap && mapReady && userLoc && mapInstanceRef.current) {
+      const TMap = (window as any).TMap;
+      if (TMap) {
+        mapInstanceRef.current.setCenter(new TMap.LatLng(userLoc.lat, userLoc.lng));
+        mapInstanceRef.current.setZoom(15);
+      }
+    }
+  }, [userLoc, showMap, mapReady]);
+
+  // Update markers when sortedPlaces or userLoc changes
+  useEffect(() => {
+    if (!mapReady) return;
     const TMap = (window as any).TMap;
     if (!TMap) return;
     markersRef.current.forEach((m: any) => m.setMap && m.setMap(null));
     markersRef.current = [];
-    if (sortedPlaces.length === 0) return;
+    if (sortedPlaces.length === 0 && !userLoc) return;
+
+    const styles: any = {
+      marker: new TMap.MarkerStyle({
+        width: 25,
+        height: 35,
+        anchor: { x: 12, y: 35 },
+      }),
+    };
+    const geometries: any[] = sortedPlaces.map((p) => ({
+      id: String(p.id),
+      styleId: 'marker',
+      position: new TMap.LatLng(p.lat, p.lng),
+      properties: { place: p },
+    }));
+
+    // User location: native-style blue dot with pulse ring
+    if (userLoc) {
+      const canvas = document.createElement('canvas');
+      canvas.width = 40;
+      canvas.height = 40;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.beginPath();
+        ctx.arc(20, 20, 18, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(0,122,255,0.15)';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(20, 20, 7, 0, Math.PI * 2);
+        ctx.fillStyle = '#007AFF';
+        ctx.fill();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+      }
+      styles.myLoc = new TMap.MarkerStyle({
+        width: 40,
+        height: 40,
+        anchor: { x: 20, y: 20 },
+        src: canvas.toDataURL(),
+      });
+      geometries.push({
+        id: 'my-location',
+        styleId: 'myLoc',
+        position: new TMap.LatLng(userLoc.lat, userLoc.lng),
+      });
+    }
+
     const markerLayer = new TMap.MultiMarker({
-      map,
-      styles: {
-        marker: new TMap.MarkerStyle({
-          width: 25,
-          height: 35,
-          anchor: { x: 12, y: 35 },
-        }),
-      },
-      geometries: sortedPlaces.map((p) => ({
-        id: String(p.id),
-        styleId: 'marker',
-        position: new TMap.LatLng(p.lat, p.lng),
-        properties: { place: p },
-      })),
+      map: mapInstanceRef.current,
+      styles,
+      geometries,
     });
     markerLayer.on('click', (e: any) => {
       const place = e.geometry?.properties?.place;
       if (place) setSelectedPlace(place);
     });
     markersRef.current.push(markerLayer);
-  }, [sortedPlaces]);
+  }, [sortedPlaces, userLoc, mapReady]);
 
 
   const sortLabels: Record<string, string> = { hot: t('discover.hot'), nearby: t('discover.nearby'), newest: t('discover.newest') };
@@ -431,7 +518,25 @@ export function Discover() {
         </div>
         <div className="flex-1 relative bg-[#E8E8E8] dark:bg-gray-800 overflow-hidden">
           {!mapError ? (
+            <>
             <div ref={mapContainerRef} id="qq-map-container" className="absolute inset-0 w-full h-full" />
+            <button onClick={() => {
+              const m = mapInstanceRef.current;
+              if (m) {
+                const T = (window as any).TMap;
+                if (T && userLoc) {
+                  if (typeof (m as any).setCenter === 'function') {
+                    m.setCenter(new T.LatLng(userLoc.lat, userLoc.lng));
+                    m.setZoom(15);
+                  } else if (typeof (m as any).panTo === 'function') {
+                    m.panTo(new T.LatLng(userLoc.lat, userLoc.lng), 15);
+                  }
+                }
+              }
+            }} className="absolute bottom-24 right-4 z-[1100] w-10 h-10 rounded-full bg-white dark:bg-gray-800 shadow-lg flex items-center justify-center active:bg-gray-100 dark:active:bg-gray-700" style={{pointerEvents:'auto'}}>
+              <Crosshair className="w-5 h-5 text-[#007AFF]" />
+            </button>
+            </>
           ) : (
             <div className="flex flex-col items-center justify-center h-full px-8 text-center">
               <div className="w-16 h-16 rounded-full bg-[#FFF3E6] dark:bg-orange-900/30 flex items-center justify-center mb-4">
@@ -457,13 +562,26 @@ export function Discover() {
         <div className="px-4 mt-5" onClick={()=>navigate('/search')}><div className="bg-white dark:bg-gray-900 border border-[#E5E5E5] dark:border-gray-600 rounded-lg px-3 py-2.5 flex items-center cursor-pointer"><Search className="w-4 h-4 text-[#999] dark:text-gray-400 mr-2 shrink-0"/><span className="flex-1 text-[14px] text-[#999] dark:text-gray-400">{t('discover.searchPlaceholder')}</span></div></div>
         <div className="mt-8"><h2 className="px-4 mb-4 text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2>{!showMap && (
           <div className="px-4 cursor-pointer" onClick={()=>setShowMap(true)}>
-            <div className="w-full h-[160px] rounded-xl bg-gradient-to-br from-green-50 via-blue-50 to-green-100 dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 flex flex-col items-center justify-center gap-2 relative overflow-hidden border border-gray-200 dark:border-gray-700">
-              <div className="absolute top-5 left-6 w-2 h-2 rounded-full bg-orange-400" />
-              <div className="absolute top-12 left-[45%] w-2 h-2 rounded-full bg-green-500" />
-              <div className="absolute top-7 right-8 w-2 h-2 rounded-full bg-blue-400" />
-              <div className="absolute bottom-10 left-[30%] w-2 h-2 rounded-full bg-pink-400" />
-              <MapPin className="w-6 h-6 text-gray-400 relative z-10" />
-              <span className="text-[11px] text-gray-400 relative z-10">点击查看宠物地图</span>
+            <div className="w-full h-[160px] rounded-xl bg-gradient-to-br from-[#E8F5E9] via-[#E3F2FD] to-[#F1F8E9] dark:from-gray-800 dark:via-gray-800 dark:to-gray-800 flex flex-col items-center justify-center gap-2 relative overflow-hidden border border-gray-200 dark:border-gray-700">
+              {/* 道路 */}
+              <div className="absolute top-[55%] left-0 w-full h-[2px] bg-[#CCC] dark:bg-gray-600" />
+              <div className="absolute top-[55%] left-0 w-[25%] h-0 border-t border-dashed border-[#BBB] dark:border-gray-500" />
+              <div className="absolute top-0 left-[38%] w-[2px] h-full bg-[#CCC] dark:bg-gray-600" />
+              <div className="absolute top-[35%] left-[60%] w-[40%] h-[1.5px] bg-[#DDD] dark:bg-gray-600" />
+              <div className="absolute top-0 left-[68%] w-[1.5px] h-[55%] bg-[#DDD] dark:bg-gray-600" />
+              {/* 区域块 */}
+              <div className="absolute top-3 left-3 w-[28%] h-[35%] rounded-md bg-green-300/30 dark:bg-green-800/20 border border-green-400/20 dark:border-green-700/20" />
+              <div className="absolute top-1.5 left-1.5 w-4 h-4 rounded-full bg-green-400/40 dark:bg-green-700/30" />
+              <div className="absolute top-4 right-3 w-[22%] h-[30%] rounded-md bg-blue-300/25 dark:bg-blue-800/15 border border-blue-400/15 dark:border-blue-700/15" />
+              <div className="absolute bottom-3 left-3 w-[24%] h-[28%] rounded-md bg-amber-200/25 dark:bg-amber-800/15 border border-amber-300/20 dark:border-amber-700/15" />
+              <div className="absolute bottom-4 right-4 w-[18%] h-[25%] rounded-md bg-purple-200/25 dark:bg-purple-800/15 border border-purple-300/20 dark:border-purple-700/15" />
+              {/* 标记点 */}
+              <div className="absolute top-[20%] left-[50%] w-2.5 h-2.5 rounded-full bg-orange-400 shadow-sm" />
+              <div className="absolute top-[42%] left-[55%] w-2 h-2 rounded-full bg-green-500 shadow-sm" />
+              <div className="absolute top-[25%] right-[12%] w-2 h-2 rounded-full bg-blue-400 shadow-sm" />
+              <div className="absolute bottom-[15%] left-[20%] w-2 h-2 rounded-full bg-pink-400 shadow-sm" />
+              <MapPin className="w-6 h-6 text-gray-400 relative z-10 drop-shadow" />
+              <span className="text-[14px] text-gray-600 dark:text-gray-300 font-medium relative z-10">点击查看溜宠地图</span>
             </div>
           </div>
         )}

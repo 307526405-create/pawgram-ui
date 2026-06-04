@@ -5,7 +5,7 @@ import WebKit
 class PawgramViewController: CAPBridgeViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        webView?.allowsBackForwardNavigationGestures = true
+        webView?.allowsBackForwardNavigationGestures = false
         webView?.isOpaque = false
         webView?.backgroundColor = UIColor(red: 1.0, green: 0.549, blue: 0.259, alpha: 1.0)
         webView?.scrollView.backgroundColor = UIColor(red: 1.0, green: 0.549, blue: 0.259, alpha: 1.0)
