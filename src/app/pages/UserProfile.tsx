@@ -7,17 +7,18 @@ import { usePageTransition } from "../hooks/usePageTransition";
 import { useSwipeBack } from "../hooks/useSwipeBack";
 import { users, posts } from "../data/mockData";
 
-export function UserProfile() {
+export function UserProfile({ userId: propId, onBack }: { userId?: number; onBack?: () => void } = {}) {
   const navigate = useNavigate();
   const { id } = useParams();
   const { t } = useTranslation();
   const { handleBack } = usePageTransition();
-  const userId = Number(id);
+  const userId = propId ?? Number(id);
   const user = users[userId as keyof typeof users];
   const swipeRef = useRef<HTMLDivElement>(null);
   useSwipeBack(swipeRef);
   const isOwnProfile = userId === 1;
   const [isFollowing, setIsFollowing] = useState(false);
+  const goBack = () => onBack ? onBack() : handleBack(() => navigate(-1));
 
   if (!user) {
     return (
@@ -47,7 +48,7 @@ export function UserProfile() {
   return (
     <div ref={swipeRef} className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center px-4 shrink-0 z-10">
-        <button onClick={() => handleBack(() => navigate(-1))} className="text-[#333] dark:text-gray-100 p-1 -ml-1">
+        <button onClick={goBack} className="text-[#333] dark:text-gray-100 p-1 -ml-1">
           <ChevronLeft className="w-6 h-6" />
         </button>
         <h1 className="flex-1 text-center text-[17px] font-bold text-[#333] dark:text-gray-100 mr-8">{user.name}</h1>

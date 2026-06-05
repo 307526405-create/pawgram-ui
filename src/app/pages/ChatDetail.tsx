@@ -4,6 +4,7 @@ import { useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { usePageTransition } from "../hooks/usePageTransition";
+import { UserProfile } from "./UserProfile";
 
 const FAVORITES_KEY = 'pawgram_chat_favorites';
 
@@ -58,6 +59,7 @@ export function ChatDetail() {
   const photoInputRef = useRef<HTMLInputElement>(null);
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
+  const [overlayUser, setOverlayUser] = useState<number | null>(null);
 
   const messages = [...mockMessages, ...sentMessages];
 
@@ -169,7 +171,7 @@ export function ChatDetail() {
           <>
             <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100"/></button>
             <div className="flex-1 flex items-center gap-2 ml-2">
-              <ImageWithFallback src={user.avatar} onClick={() => navigate(`/user/${id}`)} className="w-8 h-8 rounded-full object-cover cursor-pointer active:opacity-70"/>
+              <ImageWithFallback src={user.avatar} onClick={() => setOverlayUser(Number(id))} className="w-8 h-8 rounded-full object-cover cursor-pointer active:opacity-70"/>
               <span className="text-[16px] font-bold text-[#333] dark:text-gray-100">{user.name}</span>
             </div>
             <div className="flex items-center gap-1">
@@ -205,7 +207,7 @@ export function ChatDetail() {
             <div key={m.id}>
               {showTime && <div className="text-center py-2"><span className="text-[11px] text-[#BBB] dark:text-gray-500">{m.time}</span></div>}
               <div className={`flex mb-3 items-end gap-2 ${m.from ? 'justify-start' : 'justify-end'}`}>
-                {m.from && <ImageWithFallback src={user.avatar} onClick={() => navigate(`/user/${id}`)} className="w-8 h-8 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/>}
+                {m.from && <ImageWithFallback src={user.avatar} onClick={() => setOverlayUser(Number(id))} className="w-8 h-8 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/>}
                 <div className={`max-w-[70%] rounded-2xl text-[14px] leading-relaxed overflow-hidden ${m.from ? 'bg-[#F5F5F5] dark:bg-gray-800 text-[#333] dark:text-gray-100 rounded-bl-sm' : 'bg-[#FF8C42] text-white rounded-br-sm'}`}>
                   {m.image ? (
                     <img src={m.image} className="max-w-full max-h-[200px] object-cover" alt="" />
@@ -249,6 +251,11 @@ export function ChatDetail() {
           <Send className="w-4 h-4 text-white"/>
         </button>
       </div>
+      {overlayUser !== null && (
+        <div className="fixed inset-0 z-[2000]">
+          <UserProfile userId={overlayUser} onBack={() => setOverlayUser(null)} />
+        </div>
+      )}
     </div>
   );
 }

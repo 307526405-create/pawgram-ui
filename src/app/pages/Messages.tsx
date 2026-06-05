@@ -209,7 +209,7 @@ export function Messages() {
                 <div onClick={() => navigate(`/chat/${c.id}`)} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 active:bg-[#F9F9F9] dark:active:bg-gray-800 cursor-pointer">
                   <ImageWithFallback
                     src={c.avatar}
-                    onClick={(e) => { e.stopPropagation(); navigate(`/user/${c.id}`); }}
+                    onClick={(e) => { e.stopPropagation(); navigate(`/chat/${c.id}`); }}
                     className="w-12 h-12 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"
                   />
                   <div className="flex-1 min-w-0">
