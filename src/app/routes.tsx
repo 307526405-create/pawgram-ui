@@ -38,13 +38,13 @@ function Root() {
             <Outlet />
           </div>
         ) : (
-          <AnimatePresence mode="wait">
+          <AnimatePresence>
             <motion.div
               key={location.pathname}
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
-              exit={{ x: "100%" }}
-              transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+              exit={{ x: "-30%", opacity: 0.5 }}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
               className="w-full h-full absolute inset-0"
             >
               <Outlet />
