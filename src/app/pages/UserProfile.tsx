@@ -138,7 +138,7 @@ export function UserProfile({ userId: propId, onBack }: { userId?: number; onBac
               {isOwnProfile && (
                 <div className="shrink-0 flex flex-col items-center gap-2">
                   <div className="w-[68px] h-[68px] rounded-full border-2 border-dashed border-[#DDD] dark:border-gray-600 flex items-center justify-center">
-                    <Plus className="w-5 h-5 text-[#CCC] dark:text-gray-500" />
+                    <Plus className="w-5 h-5 text-[#CCC] dark:text-gray-400" />
                   </div>
                   <span className="text-[12px] text-[#999] dark:text-gray-400">{t('profile.addPet')}</span>
                 </div>

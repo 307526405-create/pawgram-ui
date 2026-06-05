@@ -132,7 +132,7 @@ export function PetOnboarding({ onClose }: Props) {
                 onChange={(e) => setPetName(e.target.value)}
                 placeholder={t("petOnboarding.petNamePlaceholder")}
                 maxLength={20}
-                className="w-full px-4 py-3 rounded-xl bg-[#F5F5F5] dark:bg-gray-800 text-[14px] text-[#333] dark:text-gray-100 placeholder-[#BBB] dark:placeholder-gray-500 border border-transparent focus:border-[#FF8C42] focus:outline-none mb-4 transition-colors"
+                className="w-full px-4 py-3 rounded-xl bg-[#F5F5F5] dark:bg-gray-800 text-[14px] text-[#333] dark:text-gray-100 placeholder-[#BBB] dark:placeholder-gray-400 border border-transparent focus:border-[#FF8C42] focus:outline-none mb-4 transition-colors"
               />
 
               <div className="flex flex-wrap gap-2 mb-4">
@@ -152,7 +152,7 @@ export function PetOnboarding({ onClose }: Props) {
               </div>
               {otherBreeds.length > 0 && (
                 <>
-                  <p className="text-[12px] text-[#BBB] dark:text-gray-500 mb-2">
+                  <p className="text-[12px] text-[#BBB] dark:text-gray-400 mb-2">
                     更多品种
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -163,7 +163,7 @@ export function PetOnboarding({ onClose }: Props) {
                         className={`px-3 py-1.5 rounded-full text-[12px] transition-colors ${
                           breed === b
                             ? "bg-[#FF8C42] text-white"
-                            : "bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-500 active:bg-[#EBEBEB]"
+                            : "bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400 active:bg-[#EBEBEB]"
                         }`}
                       >
                         {b}
@@ -297,7 +297,7 @@ export function PetOnboarding({ onClose }: Props) {
               className={`flex-1 flex items-center justify-center gap-1 h-11 rounded-full text-[14px] font-bold transition-colors ${
                 canNext()
                   ? "bg-[#FF8C42] text-white active:bg-[#E67A35]"
-                  : "bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-500"
+                  : "bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-400"
               }`}
             >
               {t("petOnboarding.next")}
@@ -310,7 +310,7 @@ export function PetOnboarding({ onClose }: Props) {
               className={`flex-1 flex items-center justify-center gap-1 h-11 rounded-full text-[14px] font-bold transition-colors ${
                 canNext()
                   ? "bg-[#FF8C42] text-white active:bg-[#E67A35]"
-                  : "bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-500"
+                  : "bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-400"
               }`}
             >
               {t("petOnboarding.next")}
@@ -323,7 +323,7 @@ export function PetOnboarding({ onClose }: Props) {
               className={`flex-1 flex items-center justify-center h-11 rounded-full text-[14px] font-bold transition-colors ${
                 !saving
                   ? "bg-[#FF8C42] text-white active:bg-[#E67A35]"
-                  : "bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-500"
+                  : "bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-400"
               }`}
             >
               {saving ? (

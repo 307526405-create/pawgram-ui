@@ -216,7 +216,7 @@ export function ChatDetail() {
           const showTime = i === 0 || messages[i-1].time !== m.time;
           return (
             <div key={m.id}>
-              {showTime && <div className="text-center py-2"><span className="text-[11px] text-[#BBB] dark:text-gray-500">{m.time}</span></div>}
+              {showTime && <div className="text-center py-2"><span className="text-[11px] text-[#BBB] dark:text-gray-400">{m.time}</span></div>}
               <div className={`flex mb-3 items-end gap-2 ${m.from ? 'justify-start' : 'justify-end'}`}>
                 {m.from && <ImageWithFallback src={user.avatar} onClick={() => setOverlayUser(Number(id))} className="w-8 h-8 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/>}
                 <div className={`max-w-[70%] rounded-2xl text-[14px] leading-relaxed overflow-hidden shadow-sm ${m.from ? 'bg-white dark:bg-gray-800 text-[#333] dark:text-gray-100 rounded-bl-md border border-[#F0F0F0] dark:border-gray-700' : 'bg-[#E8E8E8] dark:bg-gray-700 text-[#333] dark:text-gray-100 rounded-br-md'}`}>

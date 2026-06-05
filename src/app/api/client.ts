@@ -76,3 +76,8 @@ export const discoverApi = {
   nearby: (lat: number, lon: number, limit?: number) =>
     apiGet(`/discover/nearby?lat=${lat}&lon=${lon}${limit ? `&limit=${limit}` : ''}`),
 };
+
+// Search
+export const searchApi = {
+  search: (q: string) => apiGet(`/posts/search?q=${encodeURIComponent(q)}`),
+};

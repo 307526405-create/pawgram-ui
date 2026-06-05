@@ -66,7 +66,7 @@ function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialDat
       </div>
 
       <button onClick={onDone} disabled={!isDone}
-        className={`w-full mt-6 h-12 rounded-xl text-[15px] font-bold ${isDone ? 'bg-[#FF8C42] text-white' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-500'}`}>
+        className={`w-full mt-6 h-12 rounded-xl text-[15px] font-bold ${isDone ? 'bg-[#FF8C42] text-white' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-400'}`}>
         {t('pet.createProfile')}
       </button>
 
@@ -87,7 +87,7 @@ function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialDat
                 <div className="py-[110px]"/>
                 {[t('pet.dog'),t('pet.cat')].map((c, idx) => (
                   <div key={c}
-                    className={`h-10 flex items-center justify-center text-[17px] snap-center ${(idx === 0 ? 'dog' : 'cat') === category ? 'text-[#333] dark:text-gray-100 font-semibold' : 'text-[#BBB] dark:text-gray-500'}`}>{c}</div>
+                    className={`h-10 flex items-center justify-center text-[17px] snap-center ${(idx === 0 ? 'dog' : 'cat') === category ? 'text-[#333] dark:text-gray-100 font-semibold' : 'text-[#BBB] dark:text-gray-400'}`}>{c}</div>
                 ))}
                 <div className="py-[110px]"/>
               </div>
@@ -96,9 +96,9 @@ function PetCreateForm({ onDone, initialData }: { onDone: () => void; initialDat
                 <div className="py-[110px]"/>
                 {category ? (category === 'dog' ? dogBreeds : catBreeds).map(b => (
                   <div key={b} onClick={() => { setBreed(b === breed ? '' : b); setCustomBreed(''); }}
-                    className={`h-10 flex items-center px-4 text-[17px] snap-center cursor-pointer ${b === breed ? 'text-[#333] dark:text-gray-100 font-semibold' : 'text-[#BBB] dark:text-gray-500'}`}>{getBreedDisplay(b)}</div>
+                    className={`h-10 flex items-center px-4 text-[17px] snap-center cursor-pointer ${b === breed ? 'text-[#333] dark:text-gray-100 font-semibold' : 'text-[#BBB] dark:text-gray-400'}`}>{getBreedDisplay(b)}</div>
                 )) : (
-                  <div className="h-10 flex items-center px-4 text-[#BBB] dark:text-gray-500 text-[15px]">{t('pet.selectCategoryFirst')}</div>
+                  <div className="h-10 flex items-center px-4 text-[#BBB] dark:text-gray-400 text-[15px]">{t('pet.selectCategoryFirst')}</div>
                 )}
                 <div className="py-[110px]"/>
               </div>
@@ -194,7 +194,7 @@ export function PetProfile() {
                   </div>
                 ))}
                 {vaccines.length === 0 && !showVaccineForm && (
-                  <p className="text-[13px] text-[#BBB] dark:text-gray-500 text-center py-2">{t('common.noData')}</p>
+                  <p className="text-[13px] text-[#BBB] dark:text-gray-400 text-center py-2">{t('common.noData')}</p>
                 )}
                 {showVaccineForm ? (
                   <div className="flex items-center gap-2 pt-1">
@@ -227,7 +227,7 @@ export function PetProfile() {
                   </div>
                 ))}
                 {dailyNotes.length === 0 && !showNoteForm && (
-                  <p className="text-[13px] text-[#BBB] dark:text-gray-500 text-center py-2">{t('common.noData')}</p>
+                  <p className="text-[13px] text-[#BBB] dark:text-gray-400 text-center py-2">{t('common.noData')}</p>
                 )}
                 {showNoteForm ? (
                   <div className="space-y-2 pt-1">

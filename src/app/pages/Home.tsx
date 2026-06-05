@@ -337,7 +337,7 @@ export function Home() {
         </div>
 
         {loadMoreLoading && <div className="text-center py-4 text-[12px] text-[#999] dark:text-gray-400">{t('common.loading')}</div>}
-        {!loadMoreLoading && hasMore && activeTab !== 'following' && <div className="text-center py-3 text-[12px] text-[#BBB] dark:text-gray-500">{t('common.loadMore')}</div>}
+        {!loadMoreLoading && hasMore && activeTab !== 'following' && <div className="text-center py-3 text-[12px] text-[#BBB] dark:text-gray-400">{t('common.loadMore')}</div>}
       </div>
 
       <BottomNav />

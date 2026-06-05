@@ -22,7 +22,7 @@ export function BottomNav() {
           <Link
             to="/"
             replace
-            className={`flex flex-col items-center justify-center w-[20%] h-full cursor-pointer active:opacity-70 ${location.pathname === '/' ? 'text-[#FF8C42]' : 'text-gray-400 dark:text-gray-500'}`}
+            className={`flex flex-col items-center justify-center w-[20%] h-full cursor-pointer active:opacity-70 ${location.pathname === '/' ? 'text-[#FF8C42]' : 'text-gray-400 dark:text-gray-400'}`}
           >
             <Home className="w-5 h-5 mb-0.5" strokeWidth={location.pathname === '/' ? 2.5 : 2} />
             <span className="text-[10px] font-medium leading-none">{t('bottomNav.home')}</span>
@@ -37,7 +37,7 @@ export function BottomNav() {
                 window.dispatchEvent(new CustomEvent('pawgram:discover-tab-click'));
               }
             }}
-            className={`flex flex-col items-center justify-center w-[20%] h-full cursor-pointer active:opacity-70 ${location.pathname === '/discover' ? 'text-[#FF8C42]' : 'text-gray-400 dark:text-gray-500'}`}
+            className={`flex flex-col items-center justify-center w-[20%] h-full cursor-pointer active:opacity-70 ${location.pathname === '/discover' ? 'text-[#FF8C42]' : 'text-gray-400 dark:text-gray-400'}`}
           >
             <Compass className="w-5 h-5 mb-0.5" strokeWidth={location.pathname === '/discover' ? 2.5 : 2} />
             <span className="text-[10px] font-medium leading-none">{t('bottomNav.discover')}</span>
@@ -56,7 +56,7 @@ export function BottomNav() {
           <Link
             to="/messages"
             replace
-            className={`flex flex-col items-center justify-center w-[20%] h-full cursor-pointer active:opacity-70 ${location.pathname === '/messages' ? 'text-[#FF8C42]' : 'text-gray-400 dark:text-gray-500'}`}
+            className={`flex flex-col items-center justify-center w-[20%] h-full cursor-pointer active:opacity-70 ${location.pathname === '/messages' ? 'text-[#FF8C42]' : 'text-gray-400 dark:text-gray-400'}`}
           >
             <div className="relative">
               <MessageSquare className="w-5 h-5 mb-0.5" strokeWidth={location.pathname === '/messages' ? 2.5 : 2} />
@@ -72,7 +72,7 @@ export function BottomNav() {
           <Link
             to="/profile"
             replace
-            className={`flex flex-col items-center justify-center w-[20%] h-full cursor-pointer active:opacity-70 ${location.pathname === '/profile' || location.pathname === '/pet' ? 'text-[#FF8C42]' : 'text-gray-400 dark:text-gray-500'}`}
+            className={`flex flex-col items-center justify-center w-[20%] h-full cursor-pointer active:opacity-70 ${location.pathname === '/profile' || location.pathname === '/pet' ? 'text-[#FF8C42]' : 'text-gray-400 dark:text-gray-400'}`}
           >
             <User className="w-5 h-5 mb-0.5" strokeWidth={location.pathname === '/profile' || location.pathname === '/pet' ? 2.5 : 2} />
             <span className="text-[10px] font-medium leading-none">{t('bottomNav.profile')}</span>

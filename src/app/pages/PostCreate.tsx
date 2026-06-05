@@ -191,7 +191,7 @@ export function PostCreate() {
         <button onClick={handleBack} className="p-1 -ml-1 cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100" /></button>
         <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('common.publish')}</h1>
         <button onClick={handlePublish} disabled={publishing || (!content.trim() && images.length === 0)}
-          className={`text-[14px] font-bold px-4 py-1.5 rounded-full ${content.trim() || images.length > 0 ? 'bg-[#FF8C42] text-white' : 'bg-[#F0F0F0] dark:bg-gray-700 text-[#BBB] dark:text-gray-500'}`}>
+          className={`text-[14px] font-bold px-4 py-1.5 rounded-full ${content.trim() || images.length > 0 ? 'bg-[#FF8C42] text-white' : 'bg-[#F0F0F0] dark:bg-gray-700 text-[#BBB] dark:text-gray-400'}`}>
           {publishing ? t('common.publishing') : t('common.publish')}
         </button>
       </div>
@@ -199,7 +199,7 @@ export function PostCreate() {
       <div className="flex-1 overflow-y-auto">
         <textarea value={content} onChange={e => setContent(e.target.value)}
           placeholder={t('post.thoughts')}
-          className="w-full px-4 py-4 text-[15px] leading-relaxed outline-none resize-none min-h-[120px] placeholder:text-[#CCC] dark:placeholder:text-gray-600 dark:text-gray-100 dark:bg-gray-900" />
+          className="w-full px-4 py-4 text-[15px] leading-relaxed outline-none resize-none min-h-[120px] placeholder:text-[#CCC] dark:placeholder:text-gray-400 dark:text-gray-100 dark:bg-gray-900" />
 
         {/* media type auto-detected from picked content */}
 

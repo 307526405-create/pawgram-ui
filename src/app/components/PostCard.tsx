@@ -51,18 +51,18 @@ export const PostCard = memo(function PostCard({ post, onLike, onFollow, onFavor
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{user.name}</h3>
               {onFollow && (
-                <button onClick={onFollow} className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${followed ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-500' : 'bg-[#FFF3E6] dark:bg-orange-900/30 text-[#FF8C42]'}`}>
+                <button onClick={onFollow} className={`text-[11px] font-bold px-2 py-0.5 rounded-full ${followed ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 dark:text-gray-400' : 'bg-[#FFF3E6] dark:bg-orange-900/30 text-[#FF8C42]'}`}>
                   {followed ? t('common.followed') : t('common.follow')}
                 </button>
               )}
             </div>
-            <p className="text-xs text-gray-400 dark:text-gray-500">{timeAgo(post.created_at)}{post.user_id === 1 ? ` · ${(post.view_count||0)+(post.id*7+3)%100}${t('home.views')}` : ''}</p>
+            <p className="text-xs text-gray-400 dark:text-gray-400">{timeAgo(post.created_at)}{post.user_id === 1 ? ` · ${(post.view_count||0)+(post.id*7+3)%100}${t('home.views')}` : ''}</p>
           </div>
         </div>
         <div className="flex flex-col items-end">
           <span onClick={(e) => { e.stopPropagation(); navigate(`/breed/${encodeURIComponent(post.breedDisplay || post.breed)}`); }} className="text-xs font-medium px-2 py-1 bg-orange-50 dark:bg-orange-900/20 text-[#FF8C42] rounded-md mb-1 cursor-pointer active:opacity-70">{post.breedDisplay || post.breed}</span>
           {post.location && (
-            <a href={`http://maps.apple.com/?q=${encodeURIComponent(post.location)}`} onClick={e => e.stopPropagation()} className="flex items-center text-xs text-gray-400 dark:text-gray-500 active:text-[#FF8C42]">
+            <a href={`http://maps.apple.com/?q=${encodeURIComponent(post.location)}`} onClick={e => e.stopPropagation()} className="flex items-center text-xs text-gray-400 dark:text-gray-400 active:text-[#FF8C42]">
               <MapPin className="w-3 h-3 mr-0.5" />{post.location}
             </a>
           )}

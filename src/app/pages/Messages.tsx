@@ -248,7 +248,7 @@ export function Messages() {
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
                       <span className="text-[14px] font-bold text-[#333] dark:text-gray-100 truncate">{c.name}</span>
-                      <span className="text-[10px] text-[#BBB] dark:text-gray-500 shrink-0 ml-2">{c.time}</span>
+                      <span className="text-[10px] text-[#BBB] dark:text-gray-400 shrink-0 ml-2">{c.time}</span>
                     </div>
                     <span className="text-[12px] text-[#999] dark:text-gray-400 block truncate mt-0.5">{c.lastMsg}</span>
                   </div>

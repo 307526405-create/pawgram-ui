@@ -36,7 +36,7 @@ export function Login() {
             <input
               type="tel"
               placeholder={t('login.enterPhone')}
-              className="w-full h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 pl-[52px] pr-3 text-[15px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] transition-colors"
+              className="w-full h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 pl-[52px] pr-3 text-[15px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] dark:placeholder:text-gray-400 transition-colors"
             />
           </div>
 
@@ -51,7 +51,7 @@ export function Login() {
         <div className="mt-12 flex flex-col items-center">
           <div className="flex items-center gap-4 w-full max-w-[320px] mb-6">
             <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"></div>
-            <span className="text-[12px] text-[#BBBBBB] dark:text-gray-500">{t('login.otherLogin')}</span>
+            <span className="text-[12px] text-[#BBBBBB] dark:text-gray-400">{t('login.otherLogin')}</span>
             <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"></div>
           </div>
 

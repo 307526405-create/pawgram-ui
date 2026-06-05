@@ -1,9 +1,9 @@
 import { ChevronLeft, Search as SearchIcon, X } from "lucide-react";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { usePageTransition } from "../hooks/usePageTransition";
-import { posts, users } from "../data/mockData";
+import { searchApi } from "../api/client";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 
 const hotSearches = ["金毛", "柯基", "布偶猫", "新手养宠", "自制猫饭", "哈士奇", "泰迪"];
@@ -32,7 +32,36 @@ export function Search() {
   const [history, setHistory] = useState(["柯基", "狗粮推荐", "宠物洗澡"]);
   const [activeTab, setActiveTab] = useState(0);
   const [followedIds, setFollowedIds] = useState<Set<number>>(new Set());
+  const [searchPosts, setSearchPosts] = useState<any[]>([]);
+  const [searchUsers, setSearchUsers] = useState<any[]>([]);
+  const [searchLoading, setSearchLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout>>();
+
+  const doSearch = useCallback(async (q: string) => {
+    if (!q.trim()) {
+      setSearchPosts([]);
+      setSearchUsers([]);
+      return;
+    }
+    setSearchLoading(true);
+    try {
+      const data = await searchApi.search(q);
+      setSearchPosts(data.posts || []);
+      setSearchUsers(data.users || []);
+    } catch {
+      setSearchPosts([]);
+      setSearchUsers([]);
+    } finally {
+      setSearchLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => doSearch(query), 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [query, doSearch]);
 
   const toggleFollow = (userId: number) => {
     setFollowedIds(prev => { const next = new Set(prev); if (next.has(userId)) next.delete(userId); else next.add(userId); return next; });
@@ -44,14 +73,8 @@ export function Search() {
     }
   }, []);
 
-  const filteredUsers = query
-    ? Object.values(users).filter(u => u.name.includes(query) || u.bio.includes(query))
-    : [];
-
-  const filteredPosts = query
-    ? posts.filter(p => p.description.includes(query) || p.breed.includes(query) || p.location?.includes(query))
-    : [];
-
+  const filteredUsers = searchUsers;
+  const filteredPosts = searchPosts;
   const filteredTopics = query
     ? mockTopics.filter(t => t.name.includes(query))
     : [];
@@ -136,8 +159,8 @@ export function Search() {
                   <div key={u.id} className="flex items-center gap-3 bg-white dark:bg-gray-900 rounded-2xl p-3 border border-[#EEEEEE] dark:border-gray-700">
                     <ImageWithFallback src={u.avatar} onClick={() => navigate(`/user/${u.id}`)} className="w-11 h-11 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70" />
                     <div className="flex-1 min-w-0">
-                      <div className="text-[14px] font-bold text-[#333] dark:text-gray-100">{u.name}</div>
-                      <div className="text-[11px] text-[#999] dark:text-gray-400">{t('common.followersCount', { count: u.followers })} · {u.bio}</div>
+                      <div className="text-[14px] font-bold text-[#333] dark:text-gray-100">{u.nickname || u.name}</div>
+                      <div className="text-[11px] text-[#999] dark:text-gray-400">{t('common.followersCount', { count: u.follower_count || u.followers })} · {u.bio}</div>
                     </div>
                     <button onClick={() => toggleFollow(u.id)} className={`shrink-0 px-4 py-1.5 rounded-full text-[12px] font-bold cursor-pointer active:opacity-80 ${followedIds.has(u.id) ? 'bg-[#F0F0F0] dark:bg-gray-800 text-[#999] dark:text-gray-400' : 'bg-[#FF8C42] text-white active:bg-[#E67A35]'}`}>{followedIds.has(u.id) ? t('common.followed') : t('common.follow')}</button>
                   </div>
@@ -175,15 +198,20 @@ export function Search() {
             </div>
 
             <div className="p-4 flex-1">
-              {activeTab === 0 && (
+              {searchLoading && (
+                <div className="flex items-center justify-center py-8 text-[14px] text-[#999] dark:text-gray-400">
+                  {t('common.loading') || '搜索中...'}
+                </div>
+              )}
+              {!searchLoading && activeTab === 0 && (
                 <div>
                   {filteredUsers.length > 0 ? (
                     filteredUsers.map(user => (
                       <div key={user.id} onClick={() => navigate(`/user/${user.id}`)} className="flex items-center gap-3 p-3 bg-white dark:bg-gray-900 rounded-[16px] mb-3 border border-[#EEEEEE] dark:border-gray-700 shadow-sm active:opacity-70 transition-opacity cursor-pointer">
-                        <ImageWithFallback src={user.avatar} alt={user.name} className="w-[48px] h-[48px] rounded-full object-cover shrink-0" />
+                        <ImageWithFallback src={user.avatar} alt={user.nickname} className="w-[48px] h-[48px] rounded-full object-cover shrink-0" />
                         <div className="flex-1 min-w-0">
-                          <h4 className="text-[15px] font-bold text-[#333] dark:text-gray-100 truncate">{user.name}</h4>
-                          <p className="text-[12px] text-[#999] dark:text-gray-400 mt-0.5 truncate">{t('common.followersCount', { count: user.followers })}</p>
+                          <h4 className="text-[15px] font-bold text-[#333] dark:text-gray-100 truncate">{user.nickname}</h4>
+                          <p className="text-[12px] text-[#999] dark:text-gray-400 mt-0.5 truncate">{t('common.followersCount', { count: user.follower_count })}</p>
                         </div>
                         <button onClick={(e) => { e.stopPropagation(); toggleFollow(user.id); }} className={`shrink-0 px-4 py-1.5 rounded-full text-[13px] font-bold cursor-pointer active:opacity-70 transition-opacity ${followedIds.has(user.id) ? 'bg-[#F0F0F0] dark:bg-gray-800 text-[#999] dark:text-gray-400 border-[#CCC] dark:border-gray-700' : 'bg-transparent border border-[#FF8C42] text-[#FF8C42]'}`}>
                           {followedIds.has(user.id) ? t('common.followed') : t('common.follow')}
@@ -194,33 +222,30 @@ export function Search() {
                 </div>
               )}
 
-              {activeTab === 1 && (
+              {!searchLoading && activeTab === 1 && (
                 <div>
                   {filteredPosts.length > 0 ? (
-                    filteredPosts.map(post => {
-                      const author = users[post.userId as keyof typeof users];
-                      return (
+                    filteredPosts.map(post => (
                         <div key={post.id} className="flex gap-3 p-3 bg-white dark:bg-gray-900 rounded-[16px] mb-3 border border-[#EEEEEE] dark:border-gray-700 shadow-sm active:opacity-70 transition-opacity cursor-pointer" onClick={() => navigate(`/post/${post.id}`)}>
                           {post.images && post.images.length > 0 && (
                             <ImageWithFallback src={getMediaUrl(post.images[0])} alt="帖子" className="w-[84px] h-[84px] rounded-[12px] object-cover shrink-0 bg-[#FAFAFA] dark:bg-gray-800" />
                           )}
                           <div className="flex-1 min-w-0 flex flex-col justify-between py-1">
                             <p className="text-[14px] text-[#333] dark:text-gray-100 font-medium line-clamp-2 leading-relaxed">
-                              {post.description}
+                              {post.description || post.content}
                             </p>
                             <div className="flex items-center justify-between mt-2">
-                              <span className="text-[12px] text-[#999] dark:text-gray-400 truncate flex-1">{author?.name || t('common.user')}</span>
-                              <span className="text-[12px] text-[#999] dark:text-gray-400 shrink-0 ml-2">{post.likes} 赞 · {post.comments} 评论</span>
+                              <span className="text-[12px] text-[#999] dark:text-gray-400 truncate flex-1">{post.user?.name || t('common.user')}</span>
+                              <span className="text-[12px] text-[#999] dark:text-gray-400 shrink-0 ml-2">{post.like_count ?? post.likes ?? 0} 赞 · {post.comment_count ?? post.comments ?? 0} 评论</span>
                             </div>
                           </div>
                         </div>
-                      )
-                    })
-                  ) : renderEmptyState()}
+                      ))
+                    ) : renderEmptyState()}
                 </div>
               )}
 
-              {activeTab === 2 && (
+              {!searchLoading && activeTab === 2 && (
                 <div>
                   {filteredTopics.length > 0 ? (
                     filteredTopics.map(topic => (

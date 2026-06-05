@@ -261,7 +261,7 @@ export function PostDetail() {
               onKeyDown={e => e.key === 'Enter' && handleSendReply(c.id)}
               placeholder={`${t('postDetail.reply')} ${c.user.name}...`}
               autoFocus
-              className="flex-1 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 h-8 outline-none text-[13px] placeholder:text-[#999]"
+              className="flex-1 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 h-8 outline-none text-[13px] placeholder:text-[#999] dark:placeholder:text-gray-400"
             />
             <button onClick={() => handleSendReply(c.id)}
               className="w-8 h-8 bg-[#FF8C42] text-white rounded-lg flex items-center justify-center active:bg-[#E67A35] shrink-0">
@@ -373,7 +373,7 @@ export function PostDetail() {
             {post.breed && <span className="bg-[#FFF3E6] dark:bg-orange-900/30 text-[#FF8C42] px-2.5 py-1 rounded-md text-[12px] font-medium">#{(t as any)('pet.breeds.' + post.breed, post.breed)}</span>}
             {post.location && <span className="bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400 px-2.5 py-1 rounded-md text-[12px]">📍{post.location}</span>}
           </div>
-          <div className="text-[11px] text-[#BBB] dark:text-gray-500 mb-3">
+          <div className="text-[11px] text-[#BBB] dark:text-gray-400 mb-3">
             {post.created_at ? new Date(post.created_at).toLocaleString(i18n.language === 'en' ? 'en-US' : 'zh-CN', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}
             · {(post.view_count||0)+(post.id*7+3)%1000} {t('postDetail.views')}
           </div>
@@ -408,7 +408,7 @@ export function PostDetail() {
       {!replyTarget && (
       <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 p-3 z-40 flex items-center gap-3" style={{paddingBottom: 'calc(12px + env(safe-area-inset-bottom))'}}>
         <input value={commentText} onChange={e => setCommentText(e.target.value)} onKeyDown={e => e.key==='Enter'&&handleSendComment()}
-          placeholder={t('common.saySomething')} className="flex-1 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 h-9 outline-none text-[14px] placeholder:text-[#999]"/>
+          placeholder={t('common.saySomething')} className="flex-1 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 h-9 outline-none text-[14px] placeholder:text-[#999] dark:placeholder:text-gray-400"/>
         <button onClick={handleSendComment} className="w-9 h-9 bg-[#FF8C42] text-white rounded-lg flex items-center justify-center active:bg-[#E67A35]">
           <Send className="w-4 h-4"/>
         </button>

@@ -22,7 +22,7 @@ function NoteExpanded({ note, onClose, likedNotes, onToggleLike }: any) {
             <img src={note.avatar} className="w-8 h-8 rounded-full object-cover" />
             <div>
               <div className="text-[14px] font-semibold text-[#333] dark:text-gray-100">{note.user}</div>
-              <div className="text-[11px] text-[#BBB] dark:text-gray-500">{note.time}</div>
+              <div className="text-[11px] text-[#BBB] dark:text-gray-400">{note.time}</div>
             </div>
           </div>
           <p className="text-[14px] text-[#555] dark:text-gray-300 leading-relaxed">{note.content}</p>
@@ -148,7 +148,7 @@ function PlaceDetail({ place, userLoc, isFavorite, wantCount, onToggleFavorite, 
                                 <img src={n.avatar} className="w-5 h-5 rounded-full object-cover" />
                                 <span className="text-[11px] text-[#999] dark:text-gray-400">{n.user}</span>
                               </div>
-                              <span className="text-[10px] text-[#BBB] dark:text-gray-500"><Heart className={`w-3 h-3 inline mr-0.5 cursor-pointer ${likedNotes.has(n.id) ? 'text-[#FF4D4F] fill-[#FF4D4F]' : 'text-[#999]'}`} onClick={(e) => { e.stopPropagation(); toggleNoteLike(n.id); }} />{n.likes + (likedNotes.has(n.id) ? 1 : 0)}</span>
+                              <span className="text-[10px] text-[#BBB] dark:text-gray-400"><Heart className={`w-3 h-3 inline mr-0.5 cursor-pointer ${likedNotes.has(n.id) ? 'text-[#FF4D4F] fill-[#FF4D4F]' : 'text-[#999]'}`} onClick={(e) => { e.stopPropagation(); toggleNoteLike(n.id); }} />{n.likes + (likedNotes.has(n.id) ? 1 : 0)}</span>
                             </div>
                           </div>
                           <div className="absolute top-1 right-1 bg-black/40 rounded-full p-0.5 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -233,7 +233,7 @@ function MarkPlaceForm({ lat, lng, onClose }: any) {
         <div className="flex flex-wrap gap-2 mb-3">{typeOptions.map(tp => (<button key={tp.value} onClick={() => setType(type === tp.value ? '' : tp.value)} className={`px-3 py-1.5 rounded-full text-[12px] font-medium ${type === tp.value ? 'bg-[#FF8C42] text-white' : 'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>{t(tp.key)}</button>))}</div>
         <textarea value={desc} onChange={e => setDesc(e.target.value)} placeholder={t('discover.describePlace')} rows={3} className="w-full bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 py-2 text-[14px] mb-3 outline-none resize-none" />
         <input value={phone} onChange={e => setPhone(e.target.value)} placeholder={t('discover.phoneOptional')} className="w-full h-11 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 text-[14px] mb-4 outline-none" />
-        <button onClick={handleSubmit} disabled={!name.trim()} className={`w-full h-12 rounded-xl text-[15px] font-bold ${name.trim() ? 'bg-[#FF8C42] text-white active:bg-[#E67A35]' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#999] dark:text-gray-500'}`}>{t('discover.submitReview')}</button>
+        <button onClick={handleSubmit} disabled={!name.trim()} className={`w-full h-12 rounded-xl text-[15px] font-bold ${name.trim() ? 'bg-[#FF8C42] text-white active:bg-[#E67A35]' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#999] dark:text-gray-400'}`}>{t('discover.submitReview')}</button>
         <button onClick={onClose} className="w-full h-10 mt-2 text-[#999] dark:text-gray-400 text-[13px]">{t('common.cancel')}</button>
       </div>
     </div>
@@ -631,7 +631,7 @@ export function Discover() {
             </div>
           )
         )}
-        {feed.length>0&&(<div className="mt-8 mb-6"><div className="flex items-center justify-between px-4 mb-3"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.nearbyHot')}</h2><div className="flex gap-1">{[{k:'hot',l:t('discover.hot')},{k:'nearby',l:t('discover.nearby')},{k:'newest',l:t('discover.newest')}].map(s=>(<button key={s.k} onClick={()=>setFeedSort(s.k as any)} className={`px-2.5 py-1 rounded-full text-[11px] font-medium ${feedSort===s.k?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400'}`}>{s.l}</button>))}</div></div>{(()=>{const left:any[]=[],right:any[]=[];sortedFeed.forEach((n:any,i:number)=>(i%2===0?left:right).push(n));return(<div className="flex gap-2 px-4">{[left,right].map((col,ci)=>(<div key={ci} className="flex-1 flex flex-col gap-2">{col.map((n:any)=>(<div key={n.id} onClick={()=>navigate(`/post/${n.postId}`)} className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80">{n.images&&n.images[0]&&(<img src={getMediaUrl(n.images[0])} className="w-full object-cover" style={{aspectRatio:'1/1.1'}}/>)}<div className="p-2.5"><p className="text-[12px] text-[#333] dark:text-gray-100 leading-snug line-clamp-2 mb-2">{n.content}</p><div className="flex items-center justify-between"><div className="flex items-center gap-1.5 min-w-0"><img src={n.avatar} onClick={(e) => { e.stopPropagation(); navigate(`/user/${n.userId || n.user?.id}`); }} className="w-4 h-4 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/><span className="text-[10px] text-[#999] dark:text-gray-400 truncate">{n.user}</span></div><span className="text-[10px] text-[#FF8C42] shrink-0"><Heart className={`w-3 h-3 inline mr-0.5 cursor-pointer ${likedNotes.has(n.id) ? 'text-[#FF4D4F] fill-[#FF4D4F]' : 'text-[#999]'}`} onClick={(e) => { e.stopPropagation(); toggleNoteLike(n.id); }} />{n.likes + (likedNotes.has(n.id) ? 1 : 0)}</span></div>{n.placeName&&(<div className="mt-1.5 flex items-center gap-1 text-[10px] text-[#BBB] dark:text-gray-500"><MapPin className="w-2.5 h-2.5"/><span className="truncate">{n.placeName}</span></div>)}</div></div>))}</div>))}</div>);})()}</div>)}
+        {feed.length>0&&(<div className="mt-8 mb-6"><div className="flex items-center justify-between px-4 mb-3"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.nearbyHot')}</h2><div className="flex gap-1">{[{k:'hot',l:t('discover.hot')},{k:'nearby',l:t('discover.nearby')},{k:'newest',l:t('discover.newest')}].map(s=>(<button key={s.k} onClick={()=>setFeedSort(s.k as any)} className={`px-2.5 py-1 rounded-full text-[11px] font-medium ${feedSort===s.k?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400'}`}>{s.l}</button>))}</div></div>{(()=>{const left:any[]=[],right:any[]=[];sortedFeed.forEach((n:any,i:number)=>(i%2===0?left:right).push(n));return(<div className="flex gap-2 px-4">{[left,right].map((col,ci)=>(<div key={ci} className="flex-1 flex flex-col gap-2">{col.map((n:any)=>(<div key={n.id} onClick={()=>navigate(`/post/${n.postId}`)} className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80">{n.images&&n.images[0]&&(<img src={getMediaUrl(n.images[0])} className="w-full object-cover" style={{aspectRatio:'1/1.1'}}/>)}<div className="p-2.5"><p className="text-[12px] text-[#333] dark:text-gray-100 leading-snug line-clamp-2 mb-2">{n.content}</p><div className="flex items-center justify-between"><div className="flex items-center gap-1.5 min-w-0"><img src={n.avatar} onClick={(e) => { e.stopPropagation(); navigate(`/user/${n.userId || n.user?.id}`); }} className="w-4 h-4 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/><span className="text-[10px] text-[#999] dark:text-gray-400 truncate">{n.user}</span></div><span className="text-[10px] text-[#FF8C42] shrink-0"><Heart className={`w-3 h-3 inline mr-0.5 cursor-pointer ${likedNotes.has(n.id) ? 'text-[#FF4D4F] fill-[#FF4D4F]' : 'text-[#999]'}`} onClick={(e) => { e.stopPropagation(); toggleNoteLike(n.id); }} />{n.likes + (likedNotes.has(n.id) ? 1 : 0)}</span></div>{n.placeName&&(<div className="mt-1.5 flex items-center gap-1 text-[10px] text-[#BBB] dark:text-gray-400"><MapPin className="w-2.5 h-2.5"/><span className="truncate">{n.placeName}</span></div>)}</div></div>))}</div>))}</div>);})()}</div>)}
         {initialLoading && (
           <div className="space-y-3 px-4 pt-2">
             {[1,2,3].map(i => (
@@ -654,11 +654,11 @@ export function Discover() {
               <MapPin className="w-8 h-8 text-[#FF8C42]" />
             </div>
             <p className="text-[14px] text-[#999] dark:text-gray-400 mb-1">附近暂无内容</p>
-            <p className="text-[12px] text-[#BBB] dark:text-gray-500">去发布第一条动态，让附近的宠友发现你</p>
+            <p className="text-[12px] text-[#BBB] dark:text-gray-400">去发布第一条动态，让附近的宠友发现你</p>
           </div>
         )}
         {!initialLoading && feedLoading && <div className="text-center py-4 text-[12px] text-[#999] dark:text-gray-400">{t('common.loading')}</div>}
-        {!initialLoading && !feedLoading && feedHasMore && <div className="text-center py-3 text-[12px] text-[#BBB] dark:text-gray-500">{t('common.loadMore')}</div>}
+        {!initialLoading && !feedLoading && feedHasMore && <div className="text-center py-3 text-[12px] text-[#BBB] dark:text-gray-400">{t('common.loadMore')}</div>}
       </div>
       <BottomNav/>
     </div>

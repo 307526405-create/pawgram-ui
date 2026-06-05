@@ -92,7 +92,7 @@ export function Profile() {
       <div className="mt-10 w-full max-w-[320px]">
         <div className="flex items-center gap-4 mb-6">
           <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"/>
-          <span className="text-[12px] text-[#BBB] dark:text-gray-500">{t('profile.otherLogin')}</span>
+          <span className="text-[12px] text-[#BBB] dark:text-gray-400">{t('profile.otherLogin')}</span>
           <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"/>
         </div>
         <div className="flex justify-center gap-8">
@@ -108,7 +108,7 @@ export function Profile() {
         </div>
       </div>
 
-      <p className="mt-12 text-center text-[11px] text-[#BBB] dark:text-gray-500">{t('profile.loginAgreement')}<span className="text-[#FF8C42]">{t('common.termsOfService')}</span>{t('common.and')}<span className="text-[#FF8C42]">{t('common.privacyPolicy')}</span></p>
+      <p className="mt-12 text-center text-[11px] text-[#BBB] dark:text-gray-400">{t('profile.loginAgreement')}<span className="text-[#FF8C42]">{t('common.termsOfService')}</span>{t('common.and')}<span className="text-[#FF8C42]">{t('common.privacyPolicy')}</span></p>
       <BottomNav />
     </div>
   );

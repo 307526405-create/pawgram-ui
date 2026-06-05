@@ -44,10 +44,10 @@ function FeedbackForm({ onDone }: { onDone: () => void }) {
         placeholder={t('settings.contactOptional')}
         className="w-full h-11 bg-[#F5F5F5] dark:bg-gray-800 rounded-xl px-4 text-[14px] dark:text-gray-100 outline-none"
       />
-      <p className="text-[11px] text-[#BBB] dark:text-gray-500">{t('settings.feedbackNotice')}</p>
+      <p className="text-[11px] text-[#BBB] dark:text-gray-400">{t('settings.feedbackNotice')}</p>
       <button onClick={() => { if (text.trim()) { setSent(true); setTimeout(onDone, 2000); } }}
         disabled={!text.trim()}
-        className={`w-full h-11 rounded-xl text-[15px] font-bold cursor-pointer active:opacity-80 ${text.trim() ? 'bg-[#FF8C42] text-white' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-500'}`}>
+        className={`w-full h-11 rounded-xl text-[15px] font-bold cursor-pointer active:opacity-80 ${text.trim() ? 'bg-[#FF8C42] text-white' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-400'}`}>
         {t('common.submitFeedback')}
       </button>
     </div>
@@ -138,7 +138,7 @@ export function Settings() {
               <label className="text-[12px] text-[#999] dark:text-gray-400 mb-1 block">{t('settings.bio')}</label>
               <textarea value={bio} onChange={e => setBio(e.target.value)} className="w-full h-20 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg px-3 py-2 text-[14px] dark:text-gray-100 outline-none resize-none"/>
             </div>
-            <button onClick={handleSaveProfile} disabled={!nickname.trim()} className={`w-full h-11 rounded-xl text-[15px] font-bold cursor-pointer active:opacity-80 ${nickname.trim() ? 'bg-[#FF8C42] text-white' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-500'}`}>
+            <button onClick={handleSaveProfile} disabled={!nickname.trim()} className={`w-full h-11 rounded-xl text-[15px] font-bold cursor-pointer active:opacity-80 ${nickname.trim() ? 'bg-[#FF8C42] text-white' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-400'}`}>
               {saved ? '✓ ' + t('common.save') : t('common.save')}
             </button>
           </div>
@@ -155,7 +155,7 @@ export function Settings() {
             ))}
           </div>
           <div className="px-4 py-6 text-center">
-            <p className="text-[12px] text-[#BBB] dark:text-gray-500">{t('settings.feedbackNotice')}</p>
+            <p className="text-[12px] text-[#BBB] dark:text-gray-400">{t('settings.feedbackNotice')}</p>
           </div>
         </SubPage>
       );
@@ -204,7 +204,7 @@ export function Settings() {
             <div className="w-16 h-16 rounded-2xl bg-[#FF8C42] mx-auto flex items-center justify-center"><span className="text-2xl">🐾</span></div>
             <div className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('settings.brandName')}</div>
             <div className="text-[13px] text-[#999] dark:text-gray-400">{t('common.version')} 1.0.0</div>
-            <div className="text-[12px] text-[#BBB] dark:text-gray-500 pt-4">{t('settings.copyright')}</div>
+            <div className="text-[12px] text-[#BBB] dark:text-gray-400 pt-4">{t('settings.copyright')}</div>
             <button onClick={() => { setPage(null); navigate('/privacy'); }} className="inline-flex items-center gap-1 text-[13px] text-[#FF8C42] cursor-pointer active:opacity-70 pt-2">
               {t('common.privacyPolicy')} <ExternalLink className="w-3 h-3" />
             </button>
