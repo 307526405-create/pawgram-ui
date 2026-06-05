@@ -30,10 +30,19 @@ export const postsApi = {
     apiPost(`/posts/${postId}/comments/${commentId}/like`, { userId: 1 }),
 };
 
+async function apiPut(path: string, body?: any) {
+  const res = await fetch(`${API_BASE}${path}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  const data = await res.json();
+  if (data.code !== 0) throw new Error(data.message);
+  return data.data;
+}
+
 // Users
 export const usersApi = {
+  get: (id: number) => apiGet(`/users/${id}`),
   follow: (id: number) => apiPost(`/users/${id}/follow`),
   unfollow: (id: number) => apiPost(`/users/${id}/unfollow`),
+  update: (id: number, data: any) => apiPut(`/users/${id}`, data),
 };
 
 // Places
@@ -51,6 +60,11 @@ export const notificationsApi = {
   unreadCount: (userId = 1) => apiGet(`/notifications/unread-count?userId=${userId}`),
   markRead: (id: number) => fetch(`${API_BASE}/notifications/${id}/read`, { method: 'PUT' }),
   markAllRead: (userId = 1) => apiPost('/notifications/read-all', { userId }),
+};
+
+// Pets
+export const petsApi = {
+  create: (data: any) => apiPost('/pets', data),
 };
 
 // Discover (LBS)

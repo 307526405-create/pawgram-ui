@@ -6,7 +6,8 @@ import { PostCard, PostCardSkeleton } from "../components/PostCard";
 import { BottomNav } from "../components/BottomNav";
 import { Toast, toast } from "../components/Toast";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { postsApi, usersApi, notificationsApi } from "../api/client";
+import { PetOnboarding } from "../components/PetOnboarding";
+import { postsApi, usersApi, notificationsApi, petsApi } from "../api/client";
 import { sendLikeNotification, sendFollowNotification } from "../utils/notifications";
 import { useScrollRestore } from "../hooks/useScrollRestore";
 
@@ -108,6 +109,18 @@ export function Home() {
   const [pullDist, setPullDist] = useState(0);
   const touchStartY = useRef(0);
   const pullRefreshing = useRef(false);
+  const scrollTopBeforeRefresh = useRef(0);
+  const [showPetOnboarding, setShowPetOnboarding] = useState(false);
+
+  // Check if user needs pet onboarding
+  useEffect(() => {
+    const alreadyOnboarded = localStorage.getItem('pawgram_pet_created') === '1';
+    if (alreadyOnboarded) return;
+    usersApi.get(1).then((data) => {
+      const user = data.user;
+      if (!user.pet_breed) setShowPetOnboarding(true);
+    }).catch(() => {});
+  }, []);
 
   const fetchingRef = useRef(false);
 
@@ -206,6 +219,7 @@ export function Home() {
     if(pullState==='ready'){
       setPullState('loading');setPullDist(40);
       pullRefreshing.current = true;
+      if (scrollRef.current) scrollTopBeforeRefresh.current = scrollRef.current.scrollTop;
       fetchPosts(1);
     } else {
       setPullState('idle');setPullDist(0);
@@ -217,6 +231,11 @@ export function Home() {
     if (!loading && pullRefreshing.current) {
       setPullState('idle');setPullDist(0);
       pullRefreshing.current = false;
+      if (scrollRef.current && scrollTopBeforeRefresh.current > 0) {
+        requestAnimationFrame(() => {
+          if (scrollRef.current) scrollRef.current.scrollTop = scrollTopBeforeRefresh.current;
+        });
+      }
     }
   }, [loading]);
   const handleScroll = () => {
@@ -411,6 +430,7 @@ export function Home() {
 
       <BottomNav />
       <Toast />
+      {showPetOnboarding && <PetOnboarding onClose={() => setShowPetOnboarding(false)} />}
     </div>
   );
 }

@@ -359,7 +359,7 @@ export function Discover() {
 
   const handleTouchStart = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop===0) touchStartY.current=e.touches[0].clientY; };
   const handleTouchMove = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop!==0||touchStartY.current===0) return; const d=e.touches[0].clientY-touchStartY.current; if(d>0){setPullDist(Math.min(d*.5,80));setPullState(d>60?'ready':'pulling');} };
-  const handleTouchEnd = async () => { if(pullState==='ready'){setPullState('loading');setPullDist(40);setFeedPage(1);await fetchFeed(1);setPullState('idle');setPullDist(0);}else{setPullState('idle');setPullDist(0);} touchStartY.current=0; };
+  const handleTouchEnd = async () => { if(pullState==='ready'){setPullState('loading');setPullDist(40);setFeedPage(1);const savedTop = scrollRef.current?.scrollTop || 0;await fetchFeed(1);setPullState('idle');setPullDist(0);requestAnimationFrame(() => { if (scrollRef.current && savedTop > 0) scrollRef.current.scrollTop = savedTop; });}else{setPullState('idle');setPullDist(0);} touchStartY.current=0; };
   const handleScroll = () => { saveScrollPos(); const el=scrollRef.current; if(!el)return; if(el.scrollHeight-el.scrollTop-el.clientHeight<200)loadMore(); };
   useEffect(() => {
     const timeout = setTimeout(() => setUserLoc({lat:23.1291,lng:113.2644}), 5000);
@@ -640,6 +640,15 @@ export function Discover() {
                 <div className="h-40 bg-gray-200 dark:bg-gray-700 rounded-lg" />
               </div>
             ))}
+          </div>
+        )}
+        {!initialLoading && !feedLoading && feed.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-16 text-center px-4">
+            <div className="w-16 h-16 rounded-full bg-[#FFF3E6] dark:bg-orange-900/30 flex items-center justify-center mb-4">
+              <MapPin className="w-8 h-8 text-[#FF8C42]" />
+            </div>
+            <p className="text-[14px] text-[#999] dark:text-gray-400 mb-1">附近暂无内容</p>
+            <p className="text-[12px] text-[#BBB] dark:text-gray-500">去发布第一条动态，让附近的宠友发现你</p>
           </div>
         )}
         {!initialLoading && feedLoading && <div className="text-center py-4 text-[12px] text-[#999] dark:text-gray-400">{t('common.loading')}</div>}

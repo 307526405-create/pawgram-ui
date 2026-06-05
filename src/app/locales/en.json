@@ -353,6 +353,30 @@
       "奶牛猫": "Tuxedo Cat"
     }
   },
+  "petOnboarding": {
+    "title": "Create Your Pet",
+    "stepBreed": "Choose Breed",
+    "stepAge": "Choose Age",
+    "stepPersonality": "Choose Personality",
+    "step": "Step {{current}} of {{total}}",
+    "prev": "Back",
+    "next": "Next",
+    "done": "Done",
+    "saving": "Saving...",
+    "agePuppy": "Puppy/Kitten (0-1 yr)",
+    "ageYoung": "Young (1-3 yrs)",
+    "ageAdult": "Adult (3-7 yrs)",
+    "ageSenior": "Senior (7+ yrs)",
+    "personalityEnergetic": "Energetic",
+    "personalityGentle": "Gentle & Cuddly",
+    "personalityIndependent": "Independent",
+    "personalityShy": "Shy & Timid",
+    "personalityCurious": "Curious & Smart",
+    "personalityLazy": "Foodie & Sleepy",
+    "petNameLabel": "Pet Name",
+    "petNamePlaceholder": "Give your pet a name",
+    "stepDone": "All Set! Welcome to PawGram!"
+  },
   "chat": {
     "viewProfile": "View Profile",
     "report": "Report",
