@@ -4,6 +4,7 @@ import { router } from "./routes";
 import { useDarkMode } from "./hooks/useDarkMode";
 import { SplashScreen } from "./components/SplashScreen";
 import { Onboarding } from "./components/Onboarding";
+import { initPushNotifications } from "./utils/pushService";
 
 function DarkModeInit() {
   const { theme, setTheme } = useDarkMode();
@@ -43,6 +44,21 @@ export default function App() {
   }, [showSplash, showOnboarding]);
 
   const appReady = !showSplash && !showOnboarding;
+
+  // Initialize push notifications when app is ready and user is logged in
+  useEffect(() => {
+    if (!appReady) return;
+    try {
+      const userStr = localStorage.getItem("user");
+      const authToken = localStorage.getItem("token");
+      if (userStr && authToken) {
+        const user = JSON.parse(userStr);
+        initPushNotifications(user.id, authToken);
+      }
+    } catch (e) {
+      console.error("[Push] Failed to init push from App:", e);
+    }
+  }, [appReady]);
 
   return (
     <>
