@@ -33,7 +33,8 @@ class PawgramViewController: CAPBridgeViewController, UIGestureRecognizerDelegat
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         let url = webView?.url?.absoluteString ?? ""
-        return !url.contains("discover")
+        if url.contains("discover") || url.contains("/post") { return false }
+        return true
     }
 }
 
