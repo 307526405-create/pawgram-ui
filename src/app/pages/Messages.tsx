@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { MoreHorizontal, ChevronRight, CheckCheck, Settings, Ban, Search, X } from "lucide-react";
+import { MoreHorizontal, ChevronRight, CheckCheck, Settings, Ban, Search, X, Heart, MessageCircle, UserPlus } from "lucide-react";
 import { useScrollRestore } from "../hooks/useScrollRestore";
 
 const newFriendBase = [
@@ -25,6 +25,12 @@ const conversationBase = [
   { id:3, name:"Bob Chen", avatar:"https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150", unread:0 },
   { id:4, name:"Diana Wu", avatar:"https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150", unread:1 },
 ];
+
+const NOTIF_ICON_MAP: Record<string, { icon: (cls: string) => React.ReactNode; showAvatar?: boolean }> = {
+  likes: { icon: (cls) => <Heart className={cls} fill="#FF4D4F" /> },
+  comments: { icon: (cls) => <MessageCircle className={cls} fill="#FF8C42" /> },
+  follows: { icon: (cls) => <UserPlus className={cls} fill="#FF8C42" />, showAvatar: true },
+};
 
 export function Messages() {
   const navigate = useNavigate();
@@ -104,9 +110,17 @@ export function Messages() {
     setShowMenu(false);
   };
 
+  const renderNotifIcon = (key: string) => {
+    const cfg = NOTIF_ICON_MAP[key];
+    const cls = "w-6 h-6 shrink-0";
+    if (cfg) return cfg.icon(cls);
+    return <MessageCircle className={cls + " text-[#FF8C42]"} />;
+  };
+
   return (
     <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
-      <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0">
+      {/* Header: centered title + search + more */}
+      <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center px-4 shrink-0">
         {showSearch ? (
           <div className="flex-1 flex items-center gap-2">
             <div className="flex-1 bg-[#F0F0F0] dark:bg-gray-800 rounded-full flex items-center px-3 h-8">
@@ -118,23 +132,18 @@ export function Messages() {
           </div>
         ) : (
           <>
-            <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('messages.title')}</h1>
-            <div className="flex items-center gap-1">
+            <div className="w-8 shrink-0" />
+            <h1 className="flex-1 text-center text-[17px] font-bold text-[#333] dark:text-gray-100">{t('messages.title')}</h1>
+            <div className="w-8 shrink-0 flex items-center justify-end gap-1">
               <button onClick={() => setShowSearch(true)} className="p-1.5 cursor-pointer active:opacity-70"><Search className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
               <div className="relative">
                 <button onClick={() => setShowMenu(!showMenu)} className="p-1 cursor-pointer active:opacity-70"><MoreHorizontal className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
                 {showMenu && (
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)}/>
-                    <div className="absolute right-0 top-10 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-[#F0F0F0] dark:border-gray-700 py-1 z-50 min-w-[150px]">
+                    <div className="absolute right-0 top-10 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-[#F0F0F0] dark:border-gray-700 py-1 z-50 min-w-[130px]">
                       <button onClick={markAllRead} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
                         <CheckCheck className="w-4 h-4"/>{t('messages.markAllRead')}
-                      </button>
-                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
-                        <Settings className="w-4 h-4"/>{t('messages.messageSettings')}
-                      </button>
-                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
-                        <Ban className="w-4 h-4"/>{t('messages.blockSettings')}
                       </button>
                     </div>
                   </>
@@ -146,10 +155,11 @@ export function Messages() {
       </div>
 
       <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden" ref={scrollRef} onScroll={onScroll}>
+        {/* 1. New Friends — horizontal scroll */}
         <div className="bg-white dark:bg-gray-900 mb-2">
           <div className="flex gap-3 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
             {newFriends.map(f => (
-              <div key={f.id} className="shrink-0 flex flex-col items-center gap-1.5 w-[64px]">
+              <div key={f.id} className="shrink-0 flex flex-col items-center gap-1.5 w-[52px]">
                 <ImageWithFallback src={f.avatar} onClick={() => navigate(`/user/${f.id}`)} className="w-[52px] h-[52px] rounded-full object-cover cursor-pointer active:opacity-70"/>
                 <span className="text-[11px] text-[#333] dark:text-gray-100 text-center leading-tight line-clamp-2">{f.name}</span>
               </div>
@@ -157,24 +167,27 @@ export function Messages() {
           </div>
         </div>
 
+        {/* 2. Notification Groups — white card */}
         <div className="bg-white dark:bg-gray-900 mb-2">
-          {notifs.map(g => (
-            <div key={g.key} onClick={() => navigate(`/notifications/${g.key}`)} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 active:bg-[#F9F9F9] dark:active:bg-gray-800 cursor-pointer">
-              <ImageWithFallback src={g.avatar} className="w-11 h-11 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/>
-              <div className="flex-1 min-w-0">
-                <div className="text-[14px] font-bold text-[#333] dark:text-gray-100">{g.label}</div>
-                <div className="text-[12px] text-[#999] dark:text-gray-400 truncate mt-0.5">{g.desc}</div>
+          {notifs.map(g => {
+            const cfg = NOTIF_ICON_MAP[g.key];
+            return (
+              <div key={g.key} onClick={() => navigate(`/notifications/${g.key}`)} className="flex items-center gap-2.5 px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 active:bg-[#F9F9F9] dark:active:bg-gray-800 cursor-pointer">
+                {renderNotifIcon(g.key)}
+                {g.count > 0 && (
+                  <span className="text-[14px] font-bold text-[#FF4D4F] shrink-0">{g.count > 99 ? '99+' : g.count}</span>
+                )}
+                {cfg?.showAvatar && (
+                  <ImageWithFallback src={g.avatar} className="w-6 h-6 rounded-full object-cover shrink-0" />
+                )}
+                <span className="flex-1 text-[12px] text-[#999] dark:text-gray-400 truncate min-w-0">{g.desc}</span>
+                <ChevronRight className="w-4 h-4 text-[#CCC] dark:text-gray-600 shrink-0"/>
               </div>
-              {g.count > 0 && (
-                <div className="min-w-[20px] h-5 bg-[#FF4D4F] rounded-full flex items-center justify-center px-1.5">
-                  <span className="text-[10px] text-white font-bold">{g.count > 99 ? '99+' : g.count}</span>
-                </div>
-              )}
-              <ChevronRight className="w-4 h-4 text-[#CCC] dark:text-gray-600 shrink-0"/>
-            </div>
-          ))}
+            );
+          })}
         </div>
 
+        {/* 3. Chat List — white card */}
         <div className="bg-white dark:bg-gray-900">
           <div className="px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700">
             <span className="text-[13px] font-bold text-[#333] dark:text-gray-100">{t('messages.privateMessages')}</span>
@@ -194,26 +207,27 @@ export function Messages() {
             convs.map(c => (
               <div key={c.id} className="relative group">
                 <div onClick={() => navigate(`/chat/${c.id}`)} className="flex items-center gap-3 px-4 py-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 active:bg-[#F9F9F9] dark:active:bg-gray-800 cursor-pointer">
-                  <div className="relative shrink-0">
-                    <ImageWithFallback src={c.avatar} className="w-12 h-12 rounded-full object-cover cursor-pointer active:opacity-70"/>
-                    {c.unread > 0 && <span className="absolute -top-0.5 -right-0.5 w-3 h-3 rounded-full bg-[#FF4D4F] border-2 border-white dark:border-gray-900"/>}
-                  </div>
+                  <ImageWithFallback
+                    src={c.avatar}
+                    onClick={(e) => { e.stopPropagation(); navigate(`/user/${c.id}`); }}
+                    className="w-12 h-12 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"
+                  />
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between">
-                      <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{c.name}</span>
+                      <span className="text-[14px] font-bold text-[#333] dark:text-gray-100 truncate">{c.name}</span>
                       <span className="text-[10px] text-[#BBB] dark:text-gray-500 shrink-0 ml-2">{c.time}</span>
                     </div>
                     <span className="text-[12px] text-[#999] dark:text-gray-400 block truncate mt-0.5">{c.lastMsg}</span>
                   </div>
                   {c.unread > 0 && (
-                    <div className="shrink-0 min-w-[20px] h-5 bg-[#FF4D4F] rounded-full flex items-center justify-center px-1.5">
-                      <span className="text-[10px] text-white font-bold">{c.unread > 99 ? '99+' : c.unread}</span>
+                    <div className="shrink-0 min-w-[18px] h-[18px] bg-[#FF4D4F] rounded-full flex items-center justify-center px-1">
+                      <span className="text-[10px] text-white font-bold leading-none">{c.unread > 99 ? '99+' : c.unread}</span>
                     </div>
                   )}
                 </div>
                 <button
                   onClick={(e) => { e.stopPropagation(); setConfirmDeleteId(c.id); }}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#F0F0F0] dark:bg-gray-700 flex items-center justify-center opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 w-7 h-7 rounded-full bg-[#F0F0F0] dark:bg-gray-700 flex items-center justify-center opacity-0 group-hover:opacity-100 active:opacity-100 transition-opacity cursor-pointer"
                 >
                   <X className="w-3.5 h-3.5 text-[#999] dark:text-gray-400" />
                 </button>
