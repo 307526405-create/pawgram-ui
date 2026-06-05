@@ -1,6 +1,6 @@
 import { ChevronLeft, MapPin, Hash, AtSign } from "lucide-react";
 import { useState, useMemo, useEffect, useRef } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useBlocker } from "react-router";
 import { useTranslation } from "react-i18next";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
@@ -49,27 +49,25 @@ export function PostCreate() {
     } catch {}
   }, []);
 
-  // Intercept swipe-back / popstate
   const draftRef = useRef({ content, images });
   useEffect(() => { draftRef.current = { content, images }; });
+
+  const publishingRef = useRef(false);
+  const blocker = useBlocker(() => {
+    if (publishingRef.current) return false;
+    const { content: c, images: imgs } = draftRef.current;
+    return !!(c || imgs.length);
+  });
+
   useEffect(() => {
-    history.pushState(null, '', window.location.href);
-    const onPop = (e: PopStateEvent) => {
-      const { content: c, images: imgs } = draftRef.current;
-      if (c || imgs.length) {
-        history.pushState(null, '', window.location.href);
-        setShowExitPrompt(true);
-      }
-    };
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, []);
+    if (blocker.state === 'blocked') setShowExitPrompt(true);
+  }, [blocker.state]);
 
   const [showExitPrompt, setShowExitPrompt] = useState(false);
 
   const saveDraft = () => {
     localStorage.setItem('pawgram_draft', JSON.stringify({content, images, tags, loc}));
-    navigate('/', { replace: true });
+    if (blocker.state === 'blocked') blocker.proceed();
   };
 
   const restoreDraft = () => {
@@ -151,7 +149,9 @@ export function PostCreate() {
         breed: selectedPet?.type || '',
         location: loc,
       });
-      localStorage.removeItem("pawgram_draft");navigate("/");
+      publishingRef.current = true;
+      localStorage.removeItem("pawgram_draft");
+      navigate("/");
     } catch {
       setPublishing(false);
     }
@@ -186,14 +186,14 @@ export function PostCreate() {
             <h3 className="text-[15px] font-bold text-center mb-4">是否保留草稿？</h3>
             <p className="text-[13px] text-[#999] text-center mb-4">退出后当前内容将被清除</p>
             <button onClick={saveDraft} className="w-full h-11 bg-[#FF8C42] text-white rounded-xl text-[14px] font-bold mb-2">保留</button>
-            <button onClick={() => navigate('/', { replace: true })} className="w-full h-11 text-[#FF8C42] text-[14px] mb-2">不保留</button>
-            <button onClick={() => setShowExitPrompt(false)} className="w-full h-11 text-[#999] text-[13px]">继续编辑</button>
+            <button onClick={() => blocker.proceed?.()} className="w-full h-11 text-[#FF8C42] text-[14px] mb-2">不保留</button>
+            <button onClick={() => blocker.reset?.()} className="w-full h-11 text-[#999] text-[13px]">继续编辑</button>
           </div>
         </div>
       )}
 
       <div className="flex items-center justify-between px-4 pt-[var(--app-safe-top)] h-[var(--app-header-height)] shrink-0 border-b border-[#F0F0F0] dark:border-gray-700">
-        <button onClick={() => (content || images.length) ? setShowExitPrompt(true) : handleBack(() => navigate(-1))} className="p-1 -ml-1 cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100" /></button>
+        <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1 cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100" /></button>
         <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('common.publish')}</h1>
         <button onClick={handlePublish} disabled={publishing || (!content.trim() && images.length === 0)}
           className={`text-[14px] font-bold px-4 py-1.5 rounded-full ${content.trim() || images.length > 0 ? 'bg-[#FF8C42] text-white' : 'bg-[#F0F0F0] dark:bg-gray-700 text-[#BBB] dark:text-gray-500'}`}>
