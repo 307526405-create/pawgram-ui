@@ -438,6 +438,8 @@
     "enterPhone": "请输入手机号",
     "enterCode": "请输入验证码",
     "getCode": "获取验证码",
+    "resend": "重新发送",
+    "invalidPhone": "请输入正确的手机号",
     "otherLogin": "—— 其他方式登录 ——",
     "register": "注册账号",
     "privacy": "隐私政策"

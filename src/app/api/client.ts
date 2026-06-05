@@ -86,3 +86,9 @@ export const discoverApi = {
 export const searchApi = {
   search: (q: string) => apiGet(`/posts/search?q=${encodeURIComponent(q)}`),
 };
+
+// Auth
+export const authApi = {
+  sendCode: (phone: string) => apiPost('/auth/send-code', { phone }),
+  login: (phone: string, code: string) => apiPost('/auth/login', { phone, code }),
+};

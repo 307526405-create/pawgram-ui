@@ -438,6 +438,8 @@
     "enterPhone": "Enter phone number",
     "enterCode": "Enter verification code",
     "getCode": "Get Code",
+    "resend": "Resend",
+    "invalidPhone": "Please enter a valid phone number",
     "otherLogin": "Other ways to sign in",
     "register": "Sign Up",
     "privacy": "Privacy Policy"
