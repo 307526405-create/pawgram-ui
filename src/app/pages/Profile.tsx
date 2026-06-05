@@ -43,6 +43,7 @@ export function Profile() {
     })),
   [mockData]);
   const [posts, setPosts] = useState<any[]>([]);
+  const [profileData, setProfileData] = useState<any>(null);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());
   const [showQR, setShowQR] = useState(false);
   const [showAvatar, setShowAvatar] = useState(false);
@@ -57,7 +58,7 @@ export function Profile() {
     return () => window.removeEventListener('pawgram:auth-change', h);
   }, []);
 
-  useEffect(() => { if (loggedIn) postsApi.list(1).then(d => setPosts(d.list)).catch(() => {}); }, [loggedIn]);
+  useEffect(() => { if (loggedIn) { postsApi.list(1).then(d => setPosts(d.list)).catch(() => {}); fetch('http://192.168.3.52:3000/api/posts/user/1').then(r=>r.json()).then(d=>setProfileData(d.data.user)).catch(()=>{}); } }, [loggedIn]);
 
   const handleShare = () => {
     const text = `${t('common.brandName')} — ${myUser.name}\n${myUser.bio}\n${t('profile.following')}/${t('profile.followers')} ${myUser.following}/${myUser.followers}\n${mockData.shareProfileSuffix || ''}`;
@@ -155,6 +156,14 @@ export function Profile() {
                 <input autoFocus value={bio} onChange={e => setBio(e.target.value)} onBlur={() => setEditingBio(false)} className="text-[13px] text-[#666] dark:text-gray-400 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg px-2 py-1 outline-none w-full"/>
               ) : (
                 <p className="text-[13px] text-[#666] dark:text-gray-400 leading-relaxed cursor-pointer active:opacity-70" onClick={() => setEditingBio(true)}>{bio || t('profile.addBio')}</p>
+              )}
+              {profileData && (
+                <div className="flex flex-wrap items-center gap-1.5 mt-1.5">
+                  <span className="text-[11px] px-2 py-0.5 rounded-full bg-[#FFF3E0] text-[#FF8C42]">📍 {profileData.city || '广州'}</span>
+                  {(typeof profileData.behavior_tags === 'string' ? JSON.parse(profileData.behavior_tags) : profileData.behavior_tags || []).map((t: string) => (
+                    <span key={t} className="text-[11px] px-2 py-0.5 rounded-full bg-[#F0F0F0] dark:bg-gray-700 text-[#666] dark:text-gray-300">{t}</span>
+                  ))}
+                </div>
               )}
             </div>
           </div>
