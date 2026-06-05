@@ -232,60 +232,34 @@ export function Login() {
           </button>
         </div>
 
-        <div className="mt-4 w-full max-w-[320px]">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"></div>
-            <span className="text-[12px] text-[#BBBBBB] dark:text-gray-400">{t('login.emailLogin') || '邮箱登录'}</span>
-            <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"></div>
-          </div>
-          <div className="space-y-3">
-            <input
-              type="email"
-              placeholder={t('login.enterEmail') || '请输入邮箱'}
-              value={email}
-              onChange={(e) => { setEmail(e.target.value); setError(''); }}
-              className="w-full h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 px-3 text-[15px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] dark:placeholder:text-gray-400 transition-colors"
-            />
-            <input
-              type="password"
-              placeholder={t('login.enterPassword') || '请输入密码'}
-              value={password}
-              onChange={(e) => { setPassword(e.target.value); setError(''); }}
-              className="w-full h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 px-3 text-[15px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] dark:placeholder:text-gray-400 transition-colors"
-            />
-            <button
-              onClick={handleEmailLogin}
-              disabled={loading || !email || !password}
-              className="w-full h-[50px] bg-[#FF8C42] rounded-[12px] text-white text-[16px] font-bold active:bg-[#F27E36] transition-colors flex items-center justify-center shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {loading ? (t('common.loading')) : (t('login.emailLogin') || '邮箱登录')}
-            </button>
-          </div>
-        </div>
-
         <div className="mt-4 flex flex-col items-center">
           <div className="flex items-center gap-4 w-full max-w-[320px] mb-6">
             <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"></div>
             <span className="text-[12px] text-[#BBBBBB] dark:text-gray-400">{t('login.otherLogin')}</span>
             <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"></div>
           </div>
-
           <div className="flex items-center gap-8">
             <button onClick={handleWechatLogin} className="w-[48px] h-[48px] rounded-full bg-[#07C160] flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-              <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white">
-                <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.004.142.04.198a.226.226 0 0 0 .321.045l2.126-1.364a.74.74 0 0 1 .497-.129 10.8 10.8 0 0 0 2.882.413c4.8 0 8.691-3.288 8.691-7.342 0-4.054-3.891-7.342-8.69-7.342zm-2.95 5.557a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42zm5.897 0a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42z"/>
-              </svg>
+              <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.004.142.04.198a.226.226 0 0 0 .321.045l2.126-1.364a.74.74 0 0 1 .497-.129 10.8 10.8 0 0 0 2.882.413c4.8 0 8.691-3.288 8.691-7.342 0-4.054-3.891-7.342-8.69-7.342zm-2.95 5.557a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42zm5.897 0a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42z"/></svg>
             </button>
             <button onClick={handleAppleLogin} className="w-[48px] h-[48px] rounded-full bg-black flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-              <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white">
-                <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.38 15.98 2.85 9.75 7.88 9.5c1.24.06 2.12.7 2.92.72.8.02 2.06-.86 3.6-.72 1.24.12 2.18.5 2.84 1.08-2.56 1.54-2.12 4.98.42 6-.5 1.1-1.1 2.2-2.1 3.2-.12.12-.26.26-.5.5zM14.52 7.6c.22-2.66 2.14-4.34 4.2-4.1.32 2.66-2.14 4.72-4.2 4.1z"/>
-              </svg>
+              <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.38 15.98 2.85 9.75 7.88 9.5c1.24.06 2.12.7 2.92.72.8.02 2.06-.86 3.6-.72 1.24.12 2.18.5 2.84 1.08-2.56 1.54-2.12 4.98.42 6-.5 1.1-1.1 2.2-2.1 3.2-.12.12-.26.26-.5.5zM14.52 7.6c.22-2.66 2.14-4.34 4.2-4.1.32 2.66-2.14 4.72-4.2 4.1z"/></svg>
             </button>
             <button onClick={handleGoogleLogin} className="w-[48px] h-[48px] rounded-full border-2 border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-              <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#333">
-                <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 12.5l-5-3-5 3v-7l5 3 5-3v7z"/>
-              </svg>
+              <svg viewBox="0 0 24 24" className="w-6 h-6"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
             </button>
+          </div>
+        </div>
+
+        <div className="mt-6 w-full max-w-[320px]">
+          <div className="space-y-2">
+            <input type="email" placeholder="Email" value={email} onChange={(e) => { setEmail(e.target.value); setError(''); }} className="w-full h-[44px] rounded-[10px] border border-[#E5E5E5] dark:border-gray-700 px-3 text-[14px] outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900" />
+            <div className="flex gap-2">
+              <input type="password" placeholder="Password" value={password} onChange={(e) => { setPassword(e.target.value); setError(''); }} className="flex-1 h-[44px] rounded-[10px] border border-[#E5E5E5] dark:border-gray-700 px-3 text-[14px] outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900" />
+              <button onClick={handleEmailLogin} disabled={loading || !email || !password} className="h-[44px] px-5 bg-[#FF8C42] text-white rounded-[10px] text-[14px] font-bold disabled:opacity-50">Sign in</button>
+            </div>
+          </div>
+        </div>
           </div>
         </div>
 
