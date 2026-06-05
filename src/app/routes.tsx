@@ -1,4 +1,5 @@
-import { createBrowserRouter, Outlet, useLocation } from "react-router";
+import { createBrowserRouter, Outlet, useLocation, useNavigationType } from "react-router";
+import { motion, AnimatePresence } from "motion/react";
 import { Home } from "./pages/Home";
 import { PostDetail } from "./pages/PostDetail";
 import { Profile } from "./pages/Profile";
@@ -24,10 +25,12 @@ const TAB_ROUTES = new Set(["/", "/discover", "/messages", "/profile"]);
 
 function Root() {
   const location = useLocation();
+  const navType = useNavigationType();
 
   if (location.pathname === "/export") return <Outlet />;
 
   const isTab = TAB_ROUTES.has(location.pathname);
+  const isPush = navType === 'PUSH';
 
   return (
     <div className="w-full h-full bg-gray-900 overflow-hidden">
@@ -37,9 +40,18 @@ function Root() {
             <Outlet />
           </div>
         ) : (
-          <div className="w-full h-full absolute inset-0">
-            <Outlet />
-          </div>
+          <AnimatePresence>
+            <motion.div
+              key={location.pathname}
+              initial={isPush ? { x: "100%" } : false}
+              animate={{ x: 0 }}
+              exit={isPush ? { x: "100%" } : { x: "100%", transition: { duration: 0 } }}
+              transition={{ duration: 0.3 }}
+              className="w-full h-full absolute inset-0"
+            >
+              <Outlet />
+            </motion.div>
+          </AnimatePresence>
         )}
       </div>
     </div>
