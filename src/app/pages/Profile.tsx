@@ -97,13 +97,13 @@ export function Profile() {
         </div>
         <div className="flex justify-center gap-8">
           <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-[#07C160] flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 12l-3-1.5v-1l3 1.5 7-3.5v1L10 14zm0-4l-3-1.5v-1l3 1.5 7-3.5v1L10 10z"/></svg>
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white"><path d="M2.5 11.5c0-1.1.2-2.2.6-3.2L7 11.5l-3.9 3.2c-.4-1-.6-2.1-.6-3.2zm5.8 2.5L4.4 17.2c.9 1.1 2.1 1.9 3.5 2.3L11 14.5l-2.7-.5zm1.7-5.2V4.2c1.4.1 2.7.8 3.7 1.9L16 8.3c-.8-.5-1.8-.8-2.8-.9l-3.2.4zM12 22c1.7 0 3.3-.6 4.5-1.6l-3.5-2.8c-.3.2-.6.4-1 .4-1.1 0-2.1-.6-2.5-1.5H6.2c.5 2.8 3 4.9 5.8 5.5zM14 14c.4-.9.6-1.9.6-3s-.2-2.1-.6-3h6c.3 1 .5 2 .5 3s-.2 2-.5 3H14z"/></svg>
           </button>
           <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-black dark:bg-white flex items-center justify-center active:scale-95 transition-transform shadow-sm">
             <svg viewBox="0 0 24 24" className="w-5 h-5" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
           </button>
-          <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full border-2 border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-            <Smartphone className="w-5 h-5 text-[#666] dark:text-gray-400" />
+          <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-white dark:bg-gray-800 border-2 border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:scale-95 transition-transform shadow-sm">
+            <span className="text-[18px] font-bold text-[#4285F4]">G</span>
           </button>
         </div>
       </div>
