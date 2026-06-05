@@ -322,13 +322,12 @@ export function PostDetail() {
         <button onClick={() => handleBack(() => navigate(-1))} className="text-[#333] dark:text-gray-100 p-1 -ml-1"><ChevronLeft className="w-6 h-6"/></button>
         <div className="w-6" />
         <div className="flex items-center gap-1">
-          {isOwner && (
           <div className="relative">
             <button onClick={() => setShowMenu(!showMenu)} className="p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70"><MoreHorizontal className="w-5 h-5" /></button>
             {showMenu && (
               <>
                 <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
-                <div className="absolute right-0 top-8 z-50 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-[#F0F0F0] dark:border-gray-700 py-1 min-w-[140px] animate-in fade-in slide-in-from-top-2">
+                <div className="absolute right-0 top-8 z-50 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-[#F0F0F0] dark:border-gray-700 py-1 min-w-[140px]">
                   <button onClick={() => { setShowMenu(false); handleShare(); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800"><Share2 className="w-4 h-4" />{t('postDetail.share')}</button>
                   {!isOwner && <button onClick={() => { setShowMenu(false); setShowReport(true); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800"><Flag className="w-4 h-4" />{t('postDetail.report')}</button>}
                   {isOwner && <button onClick={togglePrivacy} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">{isPrivate ? <><Eye className="w-4 h-4" />{t('postDetail.setPublic')}</> : <><Lock className="w-4 h-4" />{t('postDetail.setPrivate')}</>}</button>}
