@@ -1,5 +1,5 @@
 import { ChevronLeft, MapPin, Hash, AtSign } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { usePageTransition } from "../hooks/usePageTransition";
@@ -49,11 +49,27 @@ export function PostCreate() {
     } catch {}
   }, []);
 
+  // Intercept swipe-back / popstate
+  const draftRef = useRef({ content, images });
+  useEffect(() => { draftRef.current = { content, images }; });
+  useEffect(() => {
+    history.pushState(null, '', window.location.href);
+    const onPop = (e: PopStateEvent) => {
+      const { content: c, images: imgs } = draftRef.current;
+      if (c || imgs.length) {
+        history.pushState(null, '', window.location.href);
+        setShowExitPrompt(true);
+      }
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
+
   const [showExitPrompt, setShowExitPrompt] = useState(false);
 
   const saveDraft = () => {
     localStorage.setItem('pawgram_draft', JSON.stringify({content, images, tags, loc}));
-    navigate(-1);
+    navigate('/', { replace: true });
   };
 
   const restoreDraft = () => {
@@ -170,7 +186,7 @@ export function PostCreate() {
             <h3 className="text-[15px] font-bold text-center mb-4">是否保留草稿？</h3>
             <p className="text-[13px] text-[#999] text-center mb-4">退出后当前内容将被清除</p>
             <button onClick={saveDraft} className="w-full h-11 bg-[#FF8C42] text-white rounded-xl text-[14px] font-bold mb-2">保留</button>
-            <button onClick={() => navigate(-1)} className="w-full h-11 text-[#FF8C42] text-[14px] mb-2">不保留</button>
+            <button onClick={() => navigate('/', { replace: true })} className="w-full h-11 text-[#FF8C42] text-[14px] mb-2">不保留</button>
             <button onClick={() => setShowExitPrompt(false)} className="w-full h-11 text-[#999] text-[13px]">继续编辑</button>
           </div>
         </div>
