@@ -56,7 +56,7 @@ export function ChatDetail() {
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const [overlayUser, setOverlayUser] = useState<number | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
-  // Block WKWebView gesture on overlay
+
   useEffect(() => {
     if (!overlayUser) return;
     const el = overlayRef.current;
@@ -83,7 +83,6 @@ export function ChatDetail() {
   useEffect(() => {
     const convId = Number(id);
     window.dispatchEvent(new CustomEvent('pawgram:clear-conv-unread', { detail: convId }));
-    // persist so Messages can pick it up even after remount
     try {
       const key = 'pawgram_read_convs';
       const read: number[] = JSON.parse(localStorage.getItem(key) || '[]');
@@ -145,11 +144,10 @@ export function ChatDetail() {
       navigator.geolocation?.getCurrentPosition(
         (pos) => {
           const { latitude: lat, longitude: lng } = pos.coords;
-          const mapImg = `https://maps.apple.com/map?q=${lat},${lng}&z=16&w=280&h=160`;
           const text = t('chat.location');
           const now = new Date();
           const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
-          setSentMessages(prev => [...prev, { id: Date.now(), from: false, text, time: timeStr, type: 'location', lat, lng, mapImg }]);
+          setSentMessages(prev => [...prev, { id: Date.now(), from: false, text, time: timeStr, type: 'location', lat, lng }]);
           setLocating(false);
         },
         () => {
@@ -180,8 +178,7 @@ export function ChatDetail() {
             <button onClick={() => { setShowSearch(false); setSearchQuery(""); }} className="p-1 -ml-1"><ChevronLeft className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
             <div className="flex-1 bg-[#F5F5F5] dark:bg-gray-800 rounded-full flex items-center px-3 h-8">
               <Search className="w-4 h-4 text-[#999] dark:text-gray-400 mr-1.5"/>
-              <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
-                placeholder={t('messages.searchChats')} className="flex-1 bg-transparent text-[14px] dark:text-gray-100 outline-none"/>
+              <input autoFocus value={searchQuery} onChange={e => setSearchQuery(e.target.value)} placeholder={t('messages.searchChats')} className="flex-1 bg-transparent text-[14px] dark:text-gray-100 outline-none"/>
             </div>
           </div>
         ) : (
@@ -199,15 +196,9 @@ export function ChatDetail() {
                   <>
                     <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)}/>
                     <div className="absolute right-0 top-10 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-[#F0F0F0] dark:border-gray-700 py-1 z-50 min-w-[150px]">
-                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">
-                        <User className="w-4 h-4"/>{t('chat.viewProfile')}
-                      </button>
-                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">
-                        <AlertTriangle className="w-4 h-4"/>{t('chat.report')}
-                      </button>
-                      <button onClick={() => { setSentMessages([]); setShowMenu(false); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#FF4D4F] active:bg-[#F9F9F9] dark:active:bg-gray-800">
-                        <Trash2 className="w-4 h-4"/>{t('chat.clearChat')}
-                      </button>
+                      <button onClick={() => { setOverlayUser(Number(id)); setShowMenu(false); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800"><User className="w-4 h-4"/>{t('chat.viewProfile')}</button>
+                      <button onClick={() => setShowMenu(false)} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800"><AlertTriangle className="w-4 h-4"/>{t('chat.report')}</button>
+                      <button onClick={() => { setSentMessages([]); setShowMenu(false); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#FF4D4F] active:bg-[#F9F9F9] dark:active:bg-gray-800"><Trash2 className="w-4 h-4"/>{t('chat.clearChat')}</button>
                     </div>
                   </>
                 )}
@@ -230,7 +221,9 @@ export function ChatDetail() {
                     <img src={m.image} className="max-w-full max-h-[200px] object-cover" alt="" />
                   ) : m.type === 'location' ? (
                     <div className="w-[220px] overflow-hidden cursor-pointer" onClick={() => openMap(m.lat!, m.lng!)}>
-                      <img src={`https://maps.apple.com/map?q=${m.lat},${m.lng}&z=15&w=440&h=160`} className="w-full h-[100px] object-cover" alt="" />
+                      <div className="w-full h-[100px] bg-[#F0F0F0] dark:bg-gray-600 flex items-center justify-center">
+                        <MapPin className="w-8 h-8 text-[#FF8C42]" />
+                      </div>
                       <div className="px-3 py-2 flex items-center gap-2">
                         <MapPin className="w-4 h-4 text-[#FF8C42]" />
                         <span className="text-[12px] text-[#666] dark:text-gray-300">{m.text}</span>
@@ -247,10 +240,9 @@ export function ChatDetail() {
         })}
       </div>
 
-      {/* Bottom Sheet Plus Menu */}
       {menuVisible && (
         <>
-          <div className="fixed inset-0 z-[80] bg-black/40 transition-opacity duration-300" onClick={() => setMenuVisible(false)} />
+          <div className="fixed inset-0 z-[80] bg-black/40" onClick={() => setMenuVisible(false)} />
           <div className="fixed inset-x-0 bottom-0 z-[90] animate-slide-up bg-white dark:bg-gray-900 rounded-t-[20px] shadow-2xl" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
             <div className="flex justify-center py-3">
               <div className="w-10 h-1 rounded-full bg-[#DDD] dark:bg-gray-600" />
@@ -270,7 +262,7 @@ export function ChatDetail() {
             </button>
           </div>
         </>
-      </div>
+      )}
 
       <div className="bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 px-3 py-2 flex items-center gap-2 shrink-0" style={{paddingBottom: `calc(env(safe-area-inset-bottom) + 8px + ${keyboardOffset}px)`}}>
         <button onClick={() => setMenuVisible(!menuVisible)} className={`p-1.5 rounded-full cursor-pointer active:opacity-70 transition-colors ${menuVisible ? 'bg-[#FF8C42] text-white' : 'text-[#666] dark:text-gray-400'}`}>
