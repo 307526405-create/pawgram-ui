@@ -18,6 +18,7 @@ import { ChatDetail } from "./pages/ChatDetail";
 import { Scan } from "./pages/Scan";
 import { PrivacyPolicy } from "./pages/PrivacyPolicy";
 import { UserProfile } from "./pages/UserProfile";
+import { BreedPage } from "./pages/BreedPage";
 import { NotificationDetail } from "./pages/NotificationDetail";
 
 const TAB_ROUTES = new Set(["/", "/discover", "/messages", "/profile"]);
@@ -80,6 +81,7 @@ export const router = createBrowserRouter([
       { path: "post/edit/:id", Component: PostCreate },
       { path: "privacy", Component: PrivacyPolicy },
       { path: "user/:id", Component: UserProfile },
+      { path: "breed/:breed", Component: BreedPage },
       { path: "notifications/:type", Component: NotificationDetail },
     ],
   },
