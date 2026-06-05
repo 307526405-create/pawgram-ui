@@ -43,8 +43,8 @@ function Root() {
               initial={{ x: "100%" }}
               animate={{ x: 0 }}
               exit={{ x: "100%" }}
-              transition={{ type: "spring", stiffness: 350, damping: 35 }}
-              className="w-full h-full"
+              transition={{ duration: 0.3, ease: [0.32, 0.72, 0, 1] }}
+              className="w-full h-full absolute inset-0"
             >
               <Outlet />
             </motion.div>
