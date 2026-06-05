@@ -5,27 +5,23 @@ import WebKit
 class PawgramViewController: CAPBridgeViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Disable built-in back/forward gestures
+        // Disable built-in gestures, use custom one
         webView?.allowsBackForwardNavigationGestures = false
         webView?.isOpaque = false
         webView?.backgroundColor = UIColor(red: 1.0, green: 0.549, blue: 0.259, alpha: 1.0)
         webView?.scrollView.backgroundColor = UIColor(red: 1.0, green: 0.549, blue: 0.259, alpha: 1.0)
         
-        // Add custom left-edge swipe for back navigation only
+        // Custom left-edge back gesture (disabled on Discover)
         let edgeSwipe = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(handleSwipeBack(_:)))
         edgeSwipe.edges = .left
         webView?.addGestureRecognizer(edgeSwipe)
     }
     
     @objc func handleSwipeBack(_ gesture: UIScreenEdgePanGestureRecognizer) {
-        if gesture.state == .ended {
-            // Don't allow back swipe on Discover page
-            if webView?.url?.path == "/discover" { return }
-            let translation = gesture.translation(in: view)
-            let velocity = gesture.velocity(in: view)
-            if translation.x > 100 || velocity.x > 500 {
-                webView?.goBack()
-            }
+        if gesture.state == .recognized {
+            let url = webView?.url?.absoluteString ?? ""
+            if url.contains("discover") { return }
+            webView?.goBack()
         }
     }
 }
