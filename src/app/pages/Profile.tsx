@@ -4,7 +4,7 @@ import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { postsApi, usersApi } from "../api/client";
+import { postsApi } from "../api/client";
 import { isLoggedIn, login as doLogin } from "../api/auth";
 import { useScrollRestore } from "../hooks/useScrollRestore";
 
@@ -45,7 +45,6 @@ export function Profile() {
   const [posts, setPosts] = useState<any[]>([]);
   const [favPosts, setFavPosts] = useState<any[]>([]);
   const [profileData, setProfileData] = useState<any>(null);
-  const [levelData, setLevelData] = useState<any>(null);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());
   const [showQR, setShowQR] = useState(false);
   const [showAvatar, setShowAvatar] = useState(false);
@@ -60,7 +59,7 @@ export function Profile() {
     return () => window.removeEventListener('pawgram:auth-change', h);
   }, []);
 
-  useEffect(() => { if (loggedIn) { postsApi.list(1).then(d => setPosts(d.list)).catch(() => {}); fetch('http://192.168.3.52:3000/api/posts/user/1').then(r=>r.json()).then(d=>setProfileData(d.data.user)).catch(()=>{}); usersApi.level(1).then(d => setLevelData(d)).catch(() => {}); } }, [loggedIn]);
+  useEffect(() => { if (loggedIn) { postsApi.list(1).then(d => setPosts(d.list)).catch(() => {}); fetch('http://192.168.3.52:3000/api/posts/user/1').then(r=>r.json()).then(d=>setProfileData(d.data.user)).catch(()=>{}); } }, [loggedIn]);
 
   useEffect(() => { if (tab === 'favs' && loggedIn) { postsApi.favorites(1).then(d => setFavPosts(d.list)).catch(() => {}); } }, [tab, loggedIn]);
 
@@ -167,9 +166,6 @@ export function Profile() {
           <div className="flex items-start gap-4 mb-4">
             <div className="relative shrink-0">
               <ImageWithFallback src={myUser.avatar} className="w-16 h-16 rounded-full object-cover shrink-0 shadow-sm cursor-pointer" onClick={() => setShowAvatar(true)}/>
-              {levelData && (
-                <span className={`absolute -bottom-1 -right-1 text-[10px] px-1.5 py-0 rounded-full font-bold border-2 border-white dark:border-gray-900 ${levelData.level === 'KOL' ? 'bg-purple-500 text-white' : levelData.level === '达人' ? 'bg-[#FF8C42] text-white' : 'bg-teal-400 text-white'}`}>{levelData.level}</span>
-              )}
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-[17px] font-bold text-[#333] dark:text-gray-100 mb-0.5">{myUser.name}</h2>
@@ -184,17 +180,6 @@ export function Profile() {
                   {(typeof profileData.behavior_tags === 'string' ? JSON.parse(profileData.behavior_tags) : profileData.behavior_tags || []).map((t: string) => (
                     <span key={t} className="text-[11px] px-2 py-0.5 rounded-full bg-[#F0F0F0] dark:bg-gray-700 text-[#666] dark:text-gray-300">{t}</span>
                   ))}
-                </div>
-              )}
-              {levelData && levelData.next_level && (
-                <div className="mt-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-[11px] text-[#999] dark:text-gray-400">距离{levelData.next_level}还需{levelData.posts_needed}帖</span>
-                    <span className="text-[10px] text-[#FF8C42] font-medium">{levelData.post_count}/{levelData.post_count + levelData.posts_needed}</span>
-                  </div>
-                  <div className="w-full h-1.5 bg-[#F0F0F0] dark:bg-gray-700 rounded-full overflow-hidden">
-                    <div className="h-full bg-[#FF8C42] rounded-full transition-all" style={{ width: `${Math.min(100, (levelData.post_count / (levelData.post_count + levelData.posts_needed)) * 100)}%` }} />
-                  </div>
                 </div>
               )}
             </div>

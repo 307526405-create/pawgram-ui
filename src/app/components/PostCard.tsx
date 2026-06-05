@@ -56,9 +56,6 @@ export const PostCard = memo(function PostCard({ post, onLike, onFollow, onFavor
         <div className="flex items-center gap-2">
           <div className="relative">
             <ImageWithFallback src={user.avatar} alt={user.name} onClick={(e) => { e.stopPropagation(); navigate(`/user/${post.user_id}`); }} className="w-10 h-10 rounded-full object-cover border border-gray-100 dark:border-gray-700 cursor-pointer active:opacity-70" />
-            {user.level && (
-              <span className={`absolute -bottom-0.5 -right-0.5 text-[9px] px-1 py-0 rounded-full font-bold border border-white dark:border-gray-900 ${user.level === 'KOL' ? 'bg-purple-500 text-white' : user.level === '达人' ? 'bg-[#FF8C42] text-white' : 'bg-teal-400 text-white'}`}>{user.level}</span>
-            )}
           </div>
           <div>
             <div className="flex items-center gap-2">
