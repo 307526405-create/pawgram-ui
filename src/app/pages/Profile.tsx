@@ -1,5 +1,5 @@
 import { Settings, QrCode, Share2, Scan, Heart, MessageCircle, Eye, Smartphone } from "lucide-react";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { BottomNav } from "../components/BottomNav";
@@ -23,7 +23,34 @@ const getMediaUrl = (item: any) => typeof item === 'string' ? item : item?.poste
 export function Profile() {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
-  const [tab, setTab] = useState<'posts'|'liked'|'favs'|'drafts'>('posts');
+  const [phone, setPhone] = useState('');
+  const [code, setCode] = useState('');
+  const [countdown, setCountdown] = useState(0);
+  const [smsLoading, setSmsLoading] = useState(false);
+  const countdownRef = useRef<NodeJS.Timeout>();
+
+  const handleSendCode = async () => {
+    if (!phone || countdown > 0) return;
+    setSmsLoading(true);
+    try {
+      await authApi.sendCode(phone);
+      setCountdown(60);
+      countdownRef.current = setInterval(() => {
+        setCountdown(prev => { if (prev <= 1) { clearInterval(countdownRef.current); return 0; } return prev - 1; });
+      }, 1000);
+    } catch {}
+    setSmsLoading(false);
+  };
+
+  const handlePhoneLogin = async () => {
+    if (code.length !== 6) return;
+    try {
+      const result = await authApi.login(phone, code);
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      doLogin();
+    } catch {}
+  };
 
   const mockData = useMemo(() => {
     const bundle = i18n.getResourceBundle(i18n.language, 'translation');
@@ -55,6 +82,12 @@ export function Profile() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
+  const [phone, setPhone] = useState('');
+  const [code, setCode] = useState('');
+  const [countdown, setCountdown] = useState(0);
+  const [error, setError] = useState('');
+  const timerRef = useRef<number | null>(null);
+  const hasAutoLoggedIn = useRef(false);
 
   useEffect(() => {
     const h = () => setLoggedIn(isLoggedIn());
@@ -132,15 +165,20 @@ export function Profile() {
       </div>
 
       <div className="w-full max-w-[320px] space-y-3">
-        <div className="bg-[#F5F5F5] dark:bg-gray-800 rounded-xl h-[50px] flex items-center px-4">
-          <span className="text-[14px] text-[#999] dark:text-gray-400 mr-2">+86</span>
-          <div className="w-px h-5 bg-[#DDD] dark:bg-gray-600 mr-3"/>
-          <input placeholder={t('profile.enterPhone')} className="flex-1 bg-transparent text-[15px] dark:text-gray-100 outline-none"/>
+        <div className="relative">
+          <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-[#333] dark:text-gray-100 font-medium border-r border-[#E5E5E5] dark:border-gray-700 pr-2">+86</span>
+          <input type="tel" placeholder={t('profile.enterPhone')} value={phone} onChange={(e) => setPhone(e.target.value)}
+            className="w-full h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 pl-[52px] pr-3 text-[15px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] dark:placeholder:text-gray-400 transition-colors" />
         </div>
-        <button onClick={doLogin} className="w-full h-[50px] bg-[#FF8C42] text-white rounded-xl text-[16px] font-bold active:bg-[#E67A35] shadow-md flex items-center justify-center gap-2">
-          <Smartphone className="w-5 h-5" />
-          {t('profile.login')}
-        </button>
+        <div className="flex gap-2">
+          <input type="tel" maxLength={6} pattern="[0-9]*" inputMode="numeric" placeholder="验证码" value={code}
+            onChange={(e) => { const v = e.target.value.replace(/\\D/g, ''); setCode(v); if (v.length === 6) handlePhoneLogin(); }}
+            className="flex-1 h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 px-3 text-[15px] text-center tracking-[8px] font-bold text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] dark:placeholder:text-gray-400 transition-colors" />
+          <button onClick={handleSendCode} disabled={countdown > 0 || smsLoading || !phone}
+            className="h-[50px] px-5 bg-[#FF8C42] rounded-[12px] text-white text-[14px] font-bold active:bg-[#F27E36] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed shrink-0">
+            {countdown > 0 ? `${countdown}s` : '获取验证码'}
+          </button>
+        </div>
       </div>
 
       <div className="mt-10 w-full max-w-[320px]">
