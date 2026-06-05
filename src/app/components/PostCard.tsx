@@ -1,4 +1,4 @@
-import { Heart, MessageCircle, MapPin, Play } from "lucide-react";
+import { Heart, MessageCircle, MapPin, Play, Footprints } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -10,6 +10,7 @@ export function PostCard({ post, onLike, onFollow }: { post: any; onLike?: (e: a
   const user = post.user || { name: t('common.user'), avatar: '' };
   const followed = user.followed || false;
   const [showHeart, setShowHeart] = useState(false);
+  const [showMeetup, setShowMeetup] = useState(false);
   const lastTap = useRef(0);
 
   const timeAgo = (dateStr: string) => {
@@ -102,6 +103,9 @@ export function PostCard({ post, onLike, onFollow }: { post: any; onLike?: (e: a
           <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.id}`); }} className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 cursor-pointer">
             <MessageCircle className="w-6 h-6"/><span className="text-sm font-medium">{post.comment_count}</span>
           </div>
+          <button onClick={(e) => { e.stopPropagation(); setShowMeetup(true); setTimeout(()=>setShowMeetup(false),2000); }} className={`flex items-center gap-1.5 cursor-pointer active:opacity-70 ${showMeetup?'text-[#FF8C42]':'text-gray-600 dark:text-gray-400'}`}>
+            <Footprints className="w-6 h-6"/><span className="text-xs">{showMeetup?'已发送':'约遛'}</span>
+          </button>
         </div>
       </div>
 
