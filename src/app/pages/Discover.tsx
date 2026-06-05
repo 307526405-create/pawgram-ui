@@ -359,7 +359,7 @@ export function Discover() {
 
   const handleTouchStart = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop===0) touchStartY.current=e.touches[0].clientY; };
   const handleTouchMove = (e: React.TouchEvent) => { if (scrollRef.current?.scrollTop!==0||touchStartY.current===0) return; const d=e.touches[0].clientY-touchStartY.current; if(d>0){setPullDist(Math.min(d*.5,80));setPullState(d>60?'ready':'pulling');} };
-  const handleTouchEnd = async () => { if(pullState==='ready'){setPullState('loading');setPullDist(40);setFeedPage(1);const savedTop = scrollRef.current?.scrollTop || 0;await fetchFeed(1);setPullState('idle');setPullDist(0);requestAnimationFrame(() => { if (scrollRef.current && savedTop > 0) scrollRef.current.scrollTop = savedTop; });}else{setPullState('idle');setPullDist(0);} touchStartY.current=0; };
+  const handleTouchEnd = async () => { if(pullState==='ready'){setPullState('loading');setPullDist(40);setFeedPage(1);const savedTop = scrollRef.current?.scrollTop || 0;sessionStorage.setItem('pawgram_scroll_' + window.location.pathname, '0');await fetchFeed(1);setPullState('idle');setPullDist(0);requestAnimationFrame(() => { requestAnimationFrame(() => { if (scrollRef.current) scrollRef.current.scrollTop = savedTop; }); });}else{setPullState('idle');setPullDist(0);} touchStartY.current=0; };
   const handleScroll = () => { saveScrollPos(); const el=scrollRef.current; if(!el)return; if(el.scrollHeight-el.scrollTop-el.clientHeight<200)loadMore(); };
   useEffect(() => {
     const timeout = setTimeout(() => setUserLoc({lat:23.1291,lng:113.2644}), 5000);
@@ -610,7 +610,7 @@ export function Discover() {
         )}
         </div>
         {favPlaces.length>0&&(<div className="mt-8"><h2 className="px-4 text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">{t('discover.myWishlist')} ({favPlaces.length})</h2><div className="flex gap-3 px-4 overflow-x-auto pb-2">{favPlaces.map(p=>(<div key={p.id} onClick={()=>setSelectedPlace(p)} className="shrink-0 w-[130px] bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80"><div className="h-[70px] flex items-center justify-center" style={{backgroundColor:getTypeColor(p.type)+'20'}}><MapPin className="w-6 h-6" style={{color:getTypeColor(p.type)}}/></div><div className="p-2.5"><div className="text-[13px] font-semibold text-[#333] dark:text-gray-100 truncate">{getPlaceName(p)}</div><div className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{p.type} · ★{p.rating}</div></div></div>))}</div></div>)}
-        {nearbyUsers.length > 0 && (
+        {nearbyUsers.length > 0 ? (
           <div className="mt-6 px-4">
             <div className="flex gap-3 overflow-x-auto pb-2">
               {nearbyUsers.map((u: any) => (
@@ -624,6 +624,12 @@ export function Discover() {
               ))}
             </div>
           </div>
+        ) : (
+          userLoc && (
+            <div className="flex flex-col items-center justify-center py-10 text-center">
+              <p className="text-[14px] text-[#999] dark:text-gray-400">附近暂无遛友</p>
+            </div>
+          )
         )}
         {feed.length>0&&(<div className="mt-8 mb-6"><div className="flex items-center justify-between px-4 mb-3"><h2 className="text-[14px] font-bold text-[#333] dark:text-gray-100">{t('discover.nearbyHot')}</h2><div className="flex gap-1">{[{k:'hot',l:t('discover.hot')},{k:'nearby',l:t('discover.nearby')},{k:'newest',l:t('discover.newest')}].map(s=>(<button key={s.k} onClick={()=>setFeedSort(s.k as any)} className={`px-2.5 py-1 rounded-full text-[11px] font-medium ${feedSort===s.k?'bg-[#FF8C42] text-white':'bg-[#F5F5F5] dark:bg-gray-800 text-[#999] dark:text-gray-400'}`}>{s.l}</button>))}</div></div>{(()=>{const left:any[]=[],right:any[]=[];sortedFeed.forEach((n:any,i:number)=>(i%2===0?left:right).push(n));return(<div className="flex gap-2 px-4">{[left,right].map((col,ci)=>(<div key={ci} className="flex-1 flex flex-col gap-2">{col.map((n:any)=>(<div key={n.id} onClick={()=>navigate(`/post/${n.postId}`)} className="bg-white dark:bg-gray-900 rounded-xl overflow-hidden shadow-sm border border-[#F0F0F0] dark:border-gray-700 cursor-pointer active:opacity-80">{n.images&&n.images[0]&&(<img src={getMediaUrl(n.images[0])} className="w-full object-cover" style={{aspectRatio:'1/1.1'}}/>)}<div className="p-2.5"><p className="text-[12px] text-[#333] dark:text-gray-100 leading-snug line-clamp-2 mb-2">{n.content}</p><div className="flex items-center justify-between"><div className="flex items-center gap-1.5 min-w-0"><img src={n.avatar} onClick={(e) => { e.stopPropagation(); navigate(`/user/${n.userId || n.user?.id}`); }} className="w-4 h-4 rounded-full object-cover shrink-0 cursor-pointer active:opacity-70"/><span className="text-[10px] text-[#999] dark:text-gray-400 truncate">{n.user}</span></div><span className="text-[10px] text-[#FF8C42] shrink-0"><Heart className={`w-3 h-3 inline mr-0.5 cursor-pointer ${likedNotes.has(n.id) ? 'text-[#FF4D4F] fill-[#FF4D4F]' : 'text-[#999]'}`} onClick={(e) => { e.stopPropagation(); toggleNoteLike(n.id); }} />{n.likes + (likedNotes.has(n.id) ? 1 : 0)}</span></div>{n.placeName&&(<div className="mt-1.5 flex items-center gap-1 text-[10px] text-[#BBB] dark:text-gray-500"><MapPin className="w-2.5 h-2.5"/><span className="truncate">{n.placeName}</span></div>)}</div></div>))}</div>))}</div>);})()}</div>)}
         {initialLoading && (

@@ -220,6 +220,7 @@ export function Home() {
       setPullState('loading');setPullDist(40);
       pullRefreshing.current = true;
       if (scrollRef.current) scrollTopBeforeRefresh.current = scrollRef.current.scrollTop;
+      sessionStorage.setItem('pawgram_scroll_' + window.location.pathname, '0');
       fetchPosts(1);
     } else {
       setPullState('idle');setPullDist(0);
@@ -231,11 +232,11 @@ export function Home() {
     if (!loading && pullRefreshing.current) {
       setPullState('idle');setPullDist(0);
       pullRefreshing.current = false;
-      if (scrollRef.current && scrollTopBeforeRefresh.current > 0) {
+      requestAnimationFrame(() => {
         requestAnimationFrame(() => {
           if (scrollRef.current) scrollRef.current.scrollTop = scrollTopBeforeRefresh.current;
         });
-      }
+      });
     }
   }, [loading]);
   const handleScroll = () => {
@@ -409,10 +410,7 @@ export function Home() {
             if (posts.length === 0 && loading) return <>{[1,2,3].map(i => <PostCardSkeleton key={i} />)}</>;
             if (posts.length === 0 && !loading) return (
               <div className="flex flex-col items-center justify-center py-16 text-center">
-                <div className="w-16 h-16 rounded-full bg-[#FFF3E6] dark:bg-orange-900/30 flex items-center justify-center mb-4"><span className="text-2xl">🐾</span></div>
-                <p className="text-[14px] text-[#999] dark:text-gray-400 mb-1">{t('home.noPostsYet')}</p>
-                <p className="text-[12px] text-[#BBB] dark:text-gray-500 mb-4">{t('home.goExplore')}</p>
-                <Link to="/discover" className="bg-[#FF8C42] text-white px-6 py-2 rounded-full text-[13px] font-bold active:bg-[#E67A35]">{t('home.goDiscover')}</Link>
+                <p className="text-[14px] text-[#999] dark:text-gray-400">还没有帖子，去发现有趣的毛孩子吧</p>
               </div>
             );
             return postsWithLike.map(post => (

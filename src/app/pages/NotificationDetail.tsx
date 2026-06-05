@@ -12,12 +12,6 @@ const labellKeys: Record<string, string> = {
   comment_like: 'messages.commentLikes',
 };
 
-const emptyKeys: Record<string, { text: string; emoji: string }> = {
-  likes: { text: '还没有收到赞', emoji: '❤️' },
-  follows: { text: '还没有新增关注', emoji: '👋' },
-  comments: { text: '还没有收到评论', emoji: '💬' },
-};
-
 const typeMap: Record<string, string> = {
   likes: 'likes',
   follows: 'follows',
@@ -71,7 +65,6 @@ export function NotificationDetail() {
   };
 
   const title = t(labellKeys[type || ''] || 'messages.title');
-  const emptyInfo = emptyKeys[type || ''] || { text: t('messages.noMessagesTitle'), emoji: '🔔' };
 
   return (
     <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
@@ -97,10 +90,7 @@ export function NotificationDetail() {
           </div>
         ) : items.length === 0 ? (
           <div className="flex flex-col items-center justify-center py-20">
-            <div className="w-16 h-16 rounded-full bg-[#FFF3E6] dark:bg-orange-900/30 flex items-center justify-center mb-4">
-              <span className="text-2xl">{emptyInfo.emoji}</span>
-            </div>
-            <p className="text-[14px] text-[#999] dark:text-gray-400">{emptyInfo.text}</p>
+            <p className="text-[14px] text-[#999] dark:text-gray-400">暂无通知</p>
           </div>
         ) : (
           <div className="p-4 space-y-2">
