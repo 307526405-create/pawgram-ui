@@ -1,5 +1,5 @@
 import { ChevronLeft, MapPin, Hash, AtSign } from "lucide-react";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
 import { useNavigate, useBlocker } from "react-router";
 import { useTranslation } from "react-i18next";
 import { usePageTransition } from "../hooks/usePageTransition";
@@ -53,11 +53,12 @@ export function PostCreate() {
   useEffect(() => { draftRef.current = { content, images }; });
 
   const publishingRef = useRef(false);
-  const blocker = useBlocker(() => {
+  const hasContent = !!(content || images.length);
+  const shouldBlock = useCallback(() => {
     if (publishingRef.current) return false;
-    const { content: c, images: imgs } = draftRef.current;
-    return !!(c || imgs.length);
-  });
+    return hasContent;
+  }, [hasContent]);
+  const blocker = useBlocker(shouldBlock);
 
   useEffect(() => {
     if (blocker.state === 'blocked') setShowExitPrompt(true);
