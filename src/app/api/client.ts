@@ -32,6 +32,7 @@ export const postsApi = {
   pawShake: (id: number) => apiPost(`/posts/${id}/pawshake`),
   favorite: (id: number) => apiPost(`/posts/${id}/favorite`),
   favorites: (userId = 1) => apiGet(`/posts?favorites=1&userId=${userId}`),
+  report: (id: number, reason: string) => apiPost(`/posts/${id}/report`, { reason }),
 };
 
 async function apiPut(path: string, body?: any) {
@@ -46,6 +47,9 @@ export const usersApi = {
   get: (id: number) => apiGet(`/users/${id}`),
   follow: (id: number) => apiPost(`/users/${id}/follow`),
   unfollow: (id: number) => apiPost(`/users/${id}/unfollow`),
+  block: (id: number) => apiPost(`/users/${id}/block`),
+  unblock: (id: number) => apiPost(`/users/${id}/unblock`),
+  blockedList: (userId = 1) => apiGet(`/users/blocked/list?userId=${userId}`),
   update: (id: number, data: any) => apiPut(`/users/${id}`, data),
   privacy: (id: number, data: { hide_favorites?: number; hide_likes?: number }) => apiPut(`/users/${id}/privacy`, data),
 };

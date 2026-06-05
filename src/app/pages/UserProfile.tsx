@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { ChevronLeft, MapPin, Heart, MessageCircle, Plus, UserPlus, Send, Bookmark } from "lucide-react";
+import { ChevronLeft, MapPin, Heart, MessageCircle, Plus, UserPlus, Send, Bookmark, Ban } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -19,6 +19,7 @@ export function UserProfile({ userId: propId, onBack }: { userId?: number; onBac
   useSwipeBack(swipeRef, onBack);
   const isOwnProfile = userId === 1;
   const [isFollowing, setIsFollowing] = useState(false);
+  const [isBlocked, setIsBlocked] = useState(false);
   const [tab, setTab] = useState<'posts'|'favs'>('posts');
   const [favPosts, setFavPosts] = useState<any[]>([]);
   const [userPrivacy, setUserPrivacy] = useState<{ hide_favorites: number; hide_likes: number } | null>(null);
@@ -28,6 +29,9 @@ export function UserProfile({ userId: propId, onBack }: { userId?: number; onBac
     if (!isOwnProfile) {
       usersApi.get(userId).then(d => setUserPrivacy(d.user)).catch(() => {});
       postsApi.favorites(userId).then(d => setFavPosts(d.list || [])).catch(() => {});
+      usersApi.blockedList().then(d => {
+        setBlocked(d.list?.some((u: any) => u.id === userId) || false);
+      }).catch(() => {});
     }
   }, [userId, isOwnProfile]);
 
@@ -125,6 +129,21 @@ export function UserProfile({ userId: propId, onBack }: { userId?: number; onBac
               >
                 <Send className="w-4 h-4" />
                 {t('profile.message')}
+              </button>
+              <button
+                onClick={async () => {
+                  const wasBlocked = isBlocked;
+                  setIsBlocked(!wasBlocked);
+                  try {
+                    if (wasBlocked) await usersApi.unblock(userId);
+                    else await usersApi.block(userId);
+                  } catch {
+                    setIsBlocked(wasBlocked);
+                  }
+                }}
+                className={`w-10 h-10 rounded-xl flex items-center justify-center active:opacity-70 ${isBlocked ? 'bg-[#FF4D4F] text-white' : 'border border-[#DDD] dark:border-gray-600 text-[#999] dark:text-gray-400'}`}
+              >
+                <Ban className="w-4 h-4" />
               </button>
             </>
           )}

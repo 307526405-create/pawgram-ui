@@ -1,4 +1,4 @@
-import { ChevronLeft, Heart, Share2, Send, MoreHorizontal, Trash2, Lock, Eye, Edit3, Star, Footprints } from "lucide-react";
+import { ChevronLeft, Heart, Share2, Send, MoreHorizontal, Trash2, Lock, Eye, Edit3, Star, Footprints, Flag } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
@@ -86,6 +86,9 @@ export function PostDetail() {
   const [pawShakeCount, setPawShakeCount] = useState(0);
   const [pawShakeBounce, setPawShakeBounce] = useState(false);
   const [showShareCard, setShowShareCard] = useState(false);
+  const [showReport, setShowReport] = useState(false);
+  const [reportReason, setReportReason] = useState('');
+  const [reportSent, setReportSent] = useState(false);
   const lastTap = useRef(0);
   const heartIdRef = useRef(0);
 
@@ -340,7 +343,10 @@ export function PostDetail() {
               )}
             </div>
           )}
-          <button onClick={handleShare} className="p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70"><Share2 className="w-5 h-5"/></button>
+          <button onClick={handleShare} className=\"p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70\"><Share2 className=\"w-5 h-5\"/></button>
+          {!isOwner && (
+            <button onClick={() => setShowReport(true)} className=\"p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70\"><Flag className=\"w-5 h-5\"/></button>
+          )}
           <button onClick={handleFavorite} className={`p-1 cursor-pointer active:opacity-70 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}><Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/></button>
         </div>
       </div>
@@ -465,6 +471,61 @@ export function PostDetail() {
         onClose={() => setShowShareCard(false)}
         post={post}
       />
+
+      {/* Report Modal */}
+      {showReport && (
+        <div className="fixed inset-0 z-[100] bg-black/40 flex items-center justify-center p-8">
+          <div className="bg-white dark:bg-gray-900 rounded-2xl p-6 w-full max-w-[300px]">
+            {reportSent ? (
+              <div className="text-center py-4">
+                <div className="w-14 h-14 bg-[#FFF3E6] dark:bg-orange-900/30 rounded-full flex items-center justify-center mx-auto mb-3">
+                  <Flag className="w-6 h-6 text-[#FF8C42]" />
+                </div>
+                <p className="text-[15px] font-bold text-[#333] dark:text-gray-100 mb-1">{t('postDetail.reportSent')}</p>
+                <p className="text-[12px] text-[#999] dark:text-gray-400 mb-4">{t('postDetail.reportThanks')}</p>
+                <button onClick={() => { setShowReport(false); setReportSent(false); }} className="w-full h-10 bg-[#FF8C42] text-white rounded-lg text-[14px] font-bold">{t('common.confirm')}</button>
+              </div>
+            ) : (
+              <>
+                <p className="text-[15px] font-bold text-[#333] dark:text-gray-100 mb-1">{t('postDetail.report')}</p>
+                <p className="text-[12px] text-[#999] dark:text-gray-400 mb-4">{t('postDetail.reportReason')}</p>
+                <div className="space-y-2 mb-4">
+                  {[
+                    { key: 'porn', label: t('postDetail.reportPorn') },
+                    { key: 'harass', label: t('postDetail.reportHarass') },
+                    { key: 'fake', label: t('postDetail.reportFake') },
+                    { key: 'other', label: t('postDetail.reportOther') },
+                  ].map(r => (
+                    <button
+                      key={r.key}
+                      onClick={() => setReportReason(r.key)}
+                      className={`w-full h-10 rounded-lg text-[14px] font-medium border ${reportReason === r.key ? 'bg-[#FFF3E6] dark:bg-orange-900/30 border-[#FF8C42] text-[#FF8C42]' : 'bg-[#F5F5F5] dark:bg-gray-800 border-[#EEE] dark:border-gray-700 text-[#333] dark:text-gray-100'}`}
+                    >
+                      {r.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="flex gap-3">
+                  <button onClick={() => setShowReport(false)} className="flex-1 h-10 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg text-[14px] text-[#666] dark:text-gray-400">{t('common.cancel')}</button>
+                  <button
+                    onClick={async () => {
+                      if (!reportReason || !id) return;
+                      try {
+                        await postsApi.report(Number(id), reportReason);
+                        setReportSent(true);
+                      } catch { setShowReport(false); }
+                    }}
+                    disabled={!reportReason}
+                    className={`flex-1 h-10 rounded-lg text-[14px] font-bold ${reportReason ? 'bg-[#FF8C42] text-white' : 'bg-[#E5E5E5] dark:bg-gray-700 text-[#BBB] dark:text-gray-400'}`}
+                  >
+                    {t('common.submit')}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   );

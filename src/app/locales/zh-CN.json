@@ -156,7 +156,15 @@
     "private": "私密",
     "views": "次浏览",
     "edit": "编辑",
-    "loadMoreComments": "加载更多评论"
+    "loadMoreComments": "加载更多评论",
+    "report": "举报",
+    "reportReason": "请选择举报理由",
+    "reportPorn": "色情内容",
+    "reportHarass": "骚扰信息",
+    "reportFake": "虚假信息",
+    "reportOther": "其他",
+    "reportSent": "举报已提交",
+    "reportThanks": "我们会尽快审核处理，感谢你的反馈"
   },
   "shareCard": {
     "title": "分享到",
@@ -236,6 +244,8 @@
     "bound": "已绑定",
     "blockList": "黑名单",
     "blockListCount": "{{count}}人",
+    "unblock": "解除拉黑",
+    "emptyBlockList": "暂无拉黑用户",
     "whoCanSee": "谁可以看我的帖子",
     "everyone": "所有人",
     "hideLocation": "隐藏我的位置",

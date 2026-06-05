@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
-import { ChevronLeft, UserPen, Shield, Lock, Bell, Info, Trash2, ChevronRight, X, MessageSquare, Moon, Sun, Monitor, Globe, ExternalLink } from "lucide-react";
-import { useState, useRef } from "react";
+import { ChevronLeft, UserPen, Shield, Lock, Bell, Info, Trash2, ChevronRight, X, MessageSquare, Moon, Sun, Monitor, Globe, ExternalLink, Ban } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { logout } from "../api/auth";
@@ -92,7 +92,14 @@ export function Settings() {
   const [saved, setSaved] = useState(false);
   const [notifToggles, setNotifToggles] = useState({ push: true, interaction: true, system: true, sound: false });
   const [privacyItems, setPrivacyItems] = useState({ whoCanSee: 'everyone', hideLocation: false, hideFavorites: false, hideLikes: false });
+  const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
   const avatarInputRef = useRef<HTMLInputElement>(null);
+
+  const loadBlockedList = () => {
+    usersApi.blockedList().then(d => setBlockedUsers(d.list || [])).catch(() => {});
+  };
+
+  useEffect(() => { loadBlockedList(); }, []);
 
   const languages = [
     { code: 'zh-CN', label: t('settings.languageZh') },
@@ -163,8 +170,8 @@ export function Settings() {
       case 'privacy': return (
         <SubPage title={t('settings.privacySettings')} onClose={() => setPage(null)}>
           <div className="divide-y divide-[#F5F5F5] dark:divide-gray-700">
-            <div className="px-4 py-4 flex items-center justify-between cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
-              <div><div className="text-[14px] text-[#333] dark:text-gray-100">{t('settings.blockList')}</div><div className="text-[12px] text-[#999] dark:text-gray-400">{t('settings.blockListCount', { count: 0 })}</div></div>
+            <div onClick={() => setPage('blockList')} className="px-4 py-4 flex items-center justify-between cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
+              <div><div className="text-[14px] text-[#333] dark:text-gray-100">{t('settings.blockList')}</div><div className="text-[12px] text-[#999] dark:text-gray-400">{t('settings.blockListCount', { count: blockedUsers.length })}</div></div>
               <ChevronRight className="w-4 h-4 text-[#CCC] dark:text-gray-600"/>
             </div>
             <div onClick={() => { const opts = ['everyone','friends','private']; const idx = opts.indexOf(privacyItems.whoCanSee); setPrivacyItems(prev => ({...prev, whoCanSee: opts[(idx+1)%3]})); }} className="px-4 py-4 flex items-center justify-between cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
@@ -189,6 +196,42 @@ export function Settings() {
                 <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${privacyItems.hideLikes ? 'left-[22px]' : 'left-0.5'}`}/>
               </div>
             </div>
+          </div>
+        </SubPage>
+      );
+      case 'blockList': return (
+        <SubPage title={t('settings.blockList')} onClose={() => setPage(null)}>
+          <div className="divide-y divide-[#F5F5F5] dark:divide-gray-700">
+            {blockedUsers.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-16 text-center">
+                <div className="w-16 h-16 rounded-full bg-[#F5F5F5] dark:bg-gray-800 flex items-center justify-center mb-4">
+                  <Ban className="w-8 h-8 text-[#CCC] dark:text-gray-600" />
+                </div>
+                <p className="text-[14px] text-[#999] dark:text-gray-400">{t('settings.emptyBlockList')}</p>
+              </div>
+            ) : (
+              blockedUsers.map((u: any) => (
+                <div key={u.id} className="px-4 py-3 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-[#F0F0F0] dark:bg-gray-800 overflow-hidden">
+                      <img src={u.avatar} alt={u.nickname} className="w-full h-full object-cover" />
+                    </div>
+                    <span className="text-[14px] text-[#333] dark:text-gray-100">{u.nickname || u.username}</span>
+                  </div>
+                  <button
+                    onClick={async () => {
+                      try {
+                        await usersApi.unblock(u.id);
+                        setBlockedUsers(prev => prev.filter(b => b.id !== u.id));
+                      } catch {}
+                    }}
+                    className="text-[12px] font-medium text-[#FF4D4F] border border-[#FF4D4F] rounded-full px-3 py-1 active:bg-[#FFF0F0]"
+                  >
+                    {t('settings.unblock')}
+                  </button>
+                </div>
+              ))
+            )}
           </div>
         </SubPage>
       );

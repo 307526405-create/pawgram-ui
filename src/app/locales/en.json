@@ -156,7 +156,15 @@
     "private": "Private",
     "views": "views",
     "edit": "Edit",
-    "loadMoreComments": "Load More Comments"
+    "loadMoreComments": "Load More Comments",
+    "report": "Report",
+    "reportReason": "Select a reason",
+    "reportPorn": "Adult Content",
+    "reportHarass": "Harassment",
+    "reportFake": "Misinformation",
+    "reportOther": "Other",
+    "reportSent": "Report Submitted",
+    "reportThanks": "We'll review it shortly. Thank you for your report."
   },
   "shareCard": {
     "title": "Share",
@@ -236,6 +244,8 @@
     "bound": "Linked",
     "blockList": "Block List",
     "blockListCount": "{{count}} people",
+    "unblock": "Unblock",
+    "emptyBlockList": "No blocked users",
     "whoCanSee": "Who can see my posts",
     "everyone": "Everyone",
     "hideLocation": "Hide My Location",
