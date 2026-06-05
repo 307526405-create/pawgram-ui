@@ -1,5 +1,6 @@
 import { ChevronLeft, Search, MoreHorizontal, Send, Plus, Image, Camera, MapPin, Star, User, AlertTriangle, Trash2 } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
+import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
@@ -251,10 +252,11 @@ export function ChatDetail() {
           <Send className="w-4 h-4 text-white"/>
         </button>
       </div>
-      {overlayUser !== null && (
+      {overlayUser !== null && createPortal(
         <div className="fixed inset-0 z-[2000]">
           <UserProfile userId={overlayUser} onBack={() => setOverlayUser(null)} />
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
