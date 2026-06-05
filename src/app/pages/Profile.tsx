@@ -70,32 +70,42 @@ export function Profile() {
   };
 
   if (!loggedIn) return (
-    <div className="h-full bg-white dark:bg-gray-900 flex flex-col px-6">
-      <div className="flex-1 flex flex-col items-center justify-center">
-        <img src="/app-icon.png" className="w-20 h-20 rounded-2xl mb-5 shadow-lg" alt={t('common.brandName')}/>
-        <h1 className="text-[24px] font-bold text-[#333] dark:text-gray-100 mb-1">{t('common.brandName')}</h1>
-        <p className="text-[13px] text-[#666] dark:text-gray-400">{t('profile.tagline')}</p>
+    <div className="h-full bg-white dark:bg-gray-900 flex flex-col items-center justify-center px-8">
+      <div className="flex flex-col items-center mb-10">
+        <img src="/app-icon.png" className="w-[72px] h-[72px] rounded-2xl mb-4 shadow-lg shadow-[#FF8C42]/30" alt={t('common.brandName')}/>
+        <h1 className="text-[22px] font-bold text-[#FF8C42] mb-1">{t('common.brandName')}</h1>
+        <p className="text-[13px] text-[#999] dark:text-gray-400">{t('profile.tagline')}</p>
       </div>
-      <div className="pb-3">
-        <div className="bg-[#F5F5F5] dark:bg-gray-800 rounded-xl h-12 flex items-center px-4 mb-3">
-          <span className="text-[14px] text-[#999] dark:text-gray-400 mr-2">+86</span><div className="w-px h-5 bg-[#DDD] dark:bg-gray-600 mr-3"/>
+
+      <div className="w-full max-w-[320px] space-y-3">
+        <div className="bg-[#F5F5F5] dark:bg-gray-800 rounded-xl h-[50px] flex items-center px-4">
+          <span className="text-[14px] text-[#999] dark:text-gray-400 mr-2">+86</span>
+          <div className="w-px h-5 bg-[#DDD] dark:bg-gray-600 mr-3"/>
           <input placeholder={t('profile.enterPhone')} className="flex-1 bg-transparent text-[15px] dark:text-gray-100 outline-none"/>
         </div>
-        <button onClick={doLogin} className="w-full h-12 bg-[#FF8C42] text-white rounded-xl text-[16px] font-bold active:bg-[#E67A35]">{t('profile.login')}</button>
+        <button onClick={doLogin} className="w-full h-[50px] bg-[#FF8C42] text-white rounded-xl text-[16px] font-bold active:bg-[#E67A35] shadow-md">{t('profile.login')}</button>
       </div>
-      <div className="flex items-center gap-3 pb-4"><div className="flex-1 h-px bg-[#EEE] dark:bg-gray-700"/><span className="text-[12px] text-[#CCC] dark:text-gray-600">{t('profile.otherLogin')}</span><div className="flex-1 h-px bg-[#EEE] dark:bg-gray-700"/></div>
-      <div className="flex justify-center gap-8 pb-10">
-        <button onClick={doLogin} className="w-12 h-12 rounded-full bg-[#09BB07] flex items-center justify-center active:opacity-70 shadow-sm">
-          <svg className="w-6 h-6 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18zm5.34 2.867c-1.797-.052-3.746.512-5.28 1.786-1.72 1.428-2.687 3.72-1.78 6.22.942 2.453 3.666 4.229 6.884 4.229.826 0 1.622-.12 2.361-.336a.722.722 0 0 1 .598.082l1.584.926a.272.272 0 0 0 .14.045c.133 0 .241-.108.241-.245 0-.06-.024-.12-.04-.178l-.325-1.233a.49.49 0 0 1 .178-.554C23.028 18.48 24 16.82 24 14.98c0-3.21-2.931-5.952-7.062-6.122z"/></svg>
-        </button>
-        <button onClick={doLogin} className="w-12 h-12 rounded-full bg-black flex items-center justify-center active:opacity-70 shadow-sm">
-          <svg className="w-5 h-5 text-white" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-        </button>
-        <button onClick={doLogin} className="w-12 h-12 rounded-full bg-white dark:bg-gray-800 border border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:opacity-70 shadow-sm">
-          <span className="text-[15px] font-bold text-[#4285F4]">G</span>
-        </button>
+
+      <div className="mt-12 w-full max-w-[320px]">
+        <div className="flex items-center gap-4 mb-6">
+          <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"/>
+          <span className="text-[12px] text-[#BBB] dark:text-gray-500">{t('profile.otherLogin')}</span>
+          <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"/>
+        </div>
+        <div className="flex justify-center gap-8">
+          <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-[#07C160] flex items-center justify-center active:scale-95 transition-transform shadow-sm">
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.004.142.04.198a.226.226 0 0 0 .321.045l2.126-1.364a.74.74 0 0 1 .497-.129 10.8 10.8 0 0 0 2.882.413c4.8 0 8.691-3.288 8.691-7.342 0-4.054-3.891-7.342-8.69-7.342zm-2.95 5.557a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42zm5.897 0a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42z"/></svg>
+          </button>
+          <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-black dark:bg-white flex items-center justify-center active:scale-95 transition-transform shadow-sm">
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.38 15.98 2.85 9.75 7.88 9.5c1.24.06 2.12.7 2.92.72.8.02 2.06-.86 3.6-.72 1.24.12 2.18.5 2.84 1.08-2.56 1.54-2.12 4.98.42 6-.5 1.1-1.1 2.2-2.1 3.2-.12.12-.26.26-.5.5zM14.52 7.6c.22-2.66 2.14-4.34 4.2-4.1.32 2.66-2.14 4.72-4.2 4.1z"/></svg>
+          </button>
+          <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full border-2 border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:scale-95 transition-transform shadow-sm">
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#333"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 12.5l-5-3-5 3v-7l5 3 5-3v7z"/></svg>
+          </button>
+        </div>
       </div>
-      <p className="text-center text-[11px] text-[#BBB] dark:text-gray-500 pb-8">{t('profile.loginAgreement')}<span className="text-[#FF8C42]">{t('common.termsOfService')}</span>{t('common.and')}<span className="text-[#FF8C42]">{t('common.privacyPolicy')}</span></p>
+
+      <p className="mt-12 text-center text-[11px] text-[#BBB] dark:text-gray-500">{t('profile.loginAgreement')}<span className="text-[#FF8C42]">{t('common.termsOfService')}</span>{t('common.and')}<span className="text-[#FF8C42]">{t('common.privacyPolicy')}</span></p>
       <BottomNav />
     </div>
   );
