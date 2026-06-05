@@ -30,12 +30,13 @@ function Root() {
   if (location.pathname === "/export") return <Outlet />;
 
   const isTab = TAB_ROUTES.has(location.pathname);
+  const isPostCreate = location.pathname === '/post';
   const isPush = navType === 'PUSH';
 
   return (
     <div className="w-full h-full bg-gray-900 overflow-hidden">
       <div className="w-full h-full bg-white dark:bg-gray-900 relative">
-        {isTab ? (
+        {(isTab || isPostCreate) ? (
           <div className="w-full h-full">
             <Outlet />
           </div>
