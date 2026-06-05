@@ -15,6 +15,8 @@ export function Login() {
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [countdown, setCountdown] = useState(0);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const timerRef = useRef<number | null>(null);
@@ -133,6 +135,22 @@ export function Login() {
     }
   };
 
+  const handleEmailLogin = async () => {
+    if (!email || !password) return;
+    setError('');
+    setLoading(true);
+    try {
+      const result = await authApi.emailLogin(email, password);
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || '邮箱登录失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Auto login when code reaches 6 digits
   useEffect(() => {
     if (code.length === 6 && !hasAutoLoggedIn.current) {
@@ -236,6 +254,37 @@ export function Login() {
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#333">
                 <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 12.5l-5-3-5 3v-7l5 3 5-3v7z"/>
               </svg>
+            </button>
+          </div>
+        </div>
+
+        <div className="mt-8 w-full max-w-[320px]">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"></div>
+            <span className="text-[12px] text-[#BBBBBB] dark:text-gray-400">{t('login.emailLogin') || '邮箱登录'}</span>
+            <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"></div>
+          </div>
+          <div className="space-y-3">
+            <input
+              type="email"
+              placeholder={t('login.enterEmail') || '请输入邮箱'}
+              value={email}
+              onChange={(e) => { setEmail(e.target.value); setError(''); }}
+              className="w-full h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 px-3 text-[15px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] dark:placeholder:text-gray-400 transition-colors"
+            />
+            <input
+              type="password"
+              placeholder={t('login.enterPassword') || '请输入密码'}
+              value={password}
+              onChange={(e) => { setPassword(e.target.value); setError(''); }}
+              className="w-full h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 px-3 text-[15px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] dark:placeholder:text-gray-400 transition-colors"
+            />
+            <button
+              onClick={handleEmailLogin}
+              disabled={loading || !email || !password}
+              className="w-full h-[50px] bg-[#FF8C42] rounded-[12px] text-white text-[16px] font-bold active:bg-[#F27E36] transition-colors flex items-center justify-center shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {loading ? (t('common.loading')) : (t('login.emailLogin') || '邮箱登录')}
             </button>
           </div>
         </div>

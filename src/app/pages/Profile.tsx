@@ -52,6 +52,9 @@ export function Profile() {
   const [bio, setBio] = useState(myUser.bio);
   const { containerRef: scrollRef, onScroll } = useScrollRestore();
   const [showAddPet, setShowAddPet] = useState(false);
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
 
   useEffect(() => {
     const h = () => setLoggedIn(isLoggedIn());
@@ -96,6 +99,21 @@ export function Profile() {
       doLogin();
     } catch (err: any) {
       console.error('Google login failed:', err);
+    }
+  };
+
+  const handleEmailLogin = async () => {
+    if (!email || !password) return;
+    setLoginLoading(true);
+    try {
+      const result = await authApi.emailLogin(email, password);
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      doLogin();
+    } catch (err: any) {
+      console.error('Email login failed:', err);
+    } finally {
+      setLoginLoading(false);
     }
   };
 

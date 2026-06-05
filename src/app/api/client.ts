@@ -94,6 +94,7 @@ export const authApi = {
   wechatLogin: (code: string) => apiPost('/auth/wechat-login', { code }),
   appleLogin: (identityToken: string) => apiPost('/auth/apple-login', { identityToken }),
   googleLogin: (idToken: string) => apiPost('/auth/google-login', { idToken }),
+  emailLogin: (email: string, password: string) => apiPost('/auth/email-login', { email, password }),
 };
 
 // Upload
