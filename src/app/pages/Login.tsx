@@ -260,10 +260,9 @@ export function Login() {
             </div>
           </div>
         </div>
-          </div>
-        </div>
+      </div>
 
-        <div className="mt-12 flex items-center gap-4">
+      <div className="mt-12 flex items-center gap-4">
           <button
             onClick={() => navigate('/register')}
             className="text-[13px] text-[#FF8C42] font-medium active:opacity-70"
@@ -278,6 +277,5 @@ export function Login() {
           </button>
         </div>
       </div>
-    </div>
   );
 }
