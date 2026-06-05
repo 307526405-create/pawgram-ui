@@ -357,12 +357,24 @@ export function Home() {
                 <Link to="/discover" className="bg-[#FF8C42] text-white px-6 py-2 rounded-full text-[13px] font-bold active:bg-[#E67A35]">{t('home.goDiscover')}</Link>
               </div>
             );
-            return postsWithLike.map(post => (
-              <PostCard key={post.id} post={post}
-                onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id, post.user?.name); }}
-                onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id, post.user?.name); }}
-              />
-            ));
+            const left: any[] = [], right: any[] = [];
+            postsWithLike.forEach((p: any, i: number) => (i % 2 === 0 ? left : right).push(p));
+            return (
+              <div className="flex gap-2 px-2">
+                <div className="flex-1 flex flex-col gap-2">{left.map((post: any) => (
+                  <PostCard key={post.id} post={post}
+                    onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id, post.user?.name); }}
+                    onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id, post.user?.name); }}
+                  />
+                ))}</div>
+                <div className="flex-1 flex flex-col gap-2">{right.map((post: any) => (
+                  <PostCard key={post.id} post={post}
+                    onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id, post.user?.name); }}
+                    onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id, post.user?.name); }}
+                  />
+                ))}</div>
+              </div>
+            );
           })()}
         </div>
 
