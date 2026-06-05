@@ -88,16 +88,6 @@ export function Home() {
   const [storyProgress, setStoryProgress] = useState(0);
   const storyTimer = useRef<any>(null);
   const [showNotifications, setShowNotifications] = useState(false);
-  const [streak, setStreak] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('pawgram_streak')||'{"count":0,"date":""}'); } catch { return {count:0,date:''}; }
-  });
-  const checkIn = () => {
-    const today = new Date().toDateString();
-    if (streak.date === today) return;
-    const newStreak = { count: streak.date === new Date(Date.now()-86400000).toDateString() ? streak.count+1 : 1, date: today };
-    setStreak(newStreak);
-    localStorage.setItem('pawgram_streak', JSON.stringify(newStreak));
-  };
   const { containerRef: scrollRef, onScroll: saveScrollPos } = useScrollRestore(!loading);
   const [pullState, setPullState] = useState<'idle'|'pulling'|'ready'|'loading'>('idle');
   const [pullDist, setPullDist] = useState(0);
@@ -305,14 +295,6 @@ export function Home() {
             </button>
           </div>
 
-          <div onClick={checkIn} className="mx-4 mt-2 mb-1 bg-gradient-to-r from-[#FFF3E0] to-[#FFE0B2] dark:from-gray-800 dark:to-gray-800 rounded-xl px-4 py-2.5 flex items-center justify-between cursor-pointer active:opacity-80">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">🔥</span>
-              <span className="text-[13px] font-bold text-[#FF8C42]">连续打卡 {streak.count} 天</span>
-            </div>
-            <span className="text-[12px] text-[#999]">{streak.date === new Date().toDateString() ? '今日已打卡' : '点击打卡'}</span>
-          </div>
-
           <div className="flex items-center gap-3 overflow-x-auto pt-2 pb-1 [&::-webkit-scrollbar]:hidden">
             <div onClick={() => navigate('/post')} className="shrink-0 flex flex-col items-center gap-1 cursor-pointer active:opacity-70">
               <div className="w-[62px] h-[62px] rounded-full bg-gradient-to-br from-[#FF8C42] to-[#FFB380] p-[2px]">
@@ -375,24 +357,12 @@ export function Home() {
                 <Link to="/discover" className="bg-[#FF8C42] text-white px-6 py-2 rounded-full text-[13px] font-bold active:bg-[#E67A35]">{t('home.goDiscover')}</Link>
               </div>
             );
-            const left: any[] = [], right: any[] = [];
-            postsWithLike.forEach((p: any, i: number) => (i % 2 === 0 ? left : right).push(p));
-            return (
-              <div className="flex gap-2 px-2">
-                <div className="flex-1 flex flex-col gap-2">{left.map((post: any) => (
-                  <PostCard key={post.id} post={post}
-                    onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id, post.user?.name); }}
-                    onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id, post.user?.name); }}
-                  />
-                ))}</div>
-                <div className="flex-1 flex flex-col gap-2">{right.map((post: any) => (
-                  <PostCard key={post.id} post={post}
-                    onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id, post.user?.name); }}
-                    onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id, post.user?.name); }}
-                  />
-                ))}</div>
-              </div>
-            );
+            return postsWithLike.map(post => (
+              <PostCard key={post.id} post={post}
+                onLike={(e: any) => { e?.stopPropagation(); toggleLike(post.id, post.user?.name); }}
+                onFollow={(e: any) => { e?.stopPropagation(); toggleFollow(post.user_id||post.user?.id, post.user?.name); }}
+              />
+            ));
           })()}
         </div>
 
