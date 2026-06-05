@@ -1,5 +1,7 @@
 import { createBrowserRouter, Outlet, useLocation, useNavigationType } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
+import { NetworkStatus } from "./components/NetworkStatus";
+import { ErrorBoundary } from "./components/ErrorBoundary";
 import { Home } from "./pages/Home";
 import { PostDetail } from "./pages/PostDetail";
 import { Profile } from "./pages/Profile";
@@ -35,10 +37,13 @@ function Root() {
 
   return (
     <div className="w-full h-full bg-gray-900 overflow-hidden">
+      <NetworkStatus />
       <div className="w-full h-full bg-white dark:bg-gray-900 relative">
         {(isTab || isPostCreate) ? (
           <div className="w-full h-full">
-            <Outlet />
+            <ErrorBoundary>
+              <Outlet />
+            </ErrorBoundary>
           </div>
         ) : (
           <AnimatePresence>
@@ -50,7 +55,9 @@ function Root() {
               transition={{ duration: 0.3 }}
               className="w-full h-full absolute inset-0"
             >
-              <Outlet />
+              <ErrorBoundary>
+                <Outlet />
+              </ErrorBoundary>
             </motion.div>
           </AnimatePresence>
         )}
