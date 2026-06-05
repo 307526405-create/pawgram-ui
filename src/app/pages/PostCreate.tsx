@@ -39,6 +39,37 @@ export function PostCreate() {
   const [showTags, setShowTags] = useState(false);
   const [showLocation, setShowLocation] = useState(false);
   const [showPicker, setShowPicker] = useState(false);
+  const [showDraftPrompt, setShowDraftPrompt] = useState(false);
+
+  // Draft restore
+  useEffect(() => {
+    try {
+      const draft = JSON.parse(localStorage.getItem('pawgram_draft') || 'null');
+      if (draft && (draft.content || draft.images?.length)) setShowDraftPrompt(true);
+    } catch {}
+  }, []);
+
+  // Draft auto-save on unmount
+  useEffect(() => {
+    return () => {
+      if (content || images.length) {
+        localStorage.setItem('pawgram_draft', JSON.stringify({content, images, tags, loc}));
+      }
+    };
+  }, [content, images, tags, loc]);
+
+  const restoreDraft = () => {
+    try {
+      const d = JSON.parse(localStorage.getItem('pawgram_draft') || '{}');
+      if (d.content) setContent(d.content);
+      if (d.images) setImages(d.images);
+      if (d.tags) setTags(d.tags);
+      if (d.loc) setLoc(d.loc);
+    } catch {}
+    localStorage.removeItem('pawgram_draft');
+    setShowDraftPrompt(false);
+  };
+  const discardDraft = () => { localStorage.removeItem('pawgram_draft'); setShowDraftPrompt(false); };
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const [publishing, setPublishing] = useState(false);
 
@@ -106,7 +137,7 @@ export function PostCreate() {
         breed: selectedPet?.type || '',
         location: loc,
       });
-      navigate("/");
+      localStorage.removeItem("pawgram_draft");navigate("/");
     } catch {
       setPublishing(false);
     }
@@ -120,6 +151,17 @@ export function PostCreate() {
             <button onClick={takePhoto} className="w-full py-4 text-[15px] text-[#333] dark:text-gray-100 border-b border-[#F0F0F0] dark:border-gray-700 active:bg-[#F9F9F9] dark:active:bg-gray-800">{t('post.takePhoto')}</button>
             <button onClick={pickFromAlbum} className="w-full py-4 text-[15px] text-[#333] dark:text-gray-100 border-b border-[#F0F0F0] dark:border-gray-700 active:bg-[#F9F9F9] dark:active:bg-gray-800">{t('post.chooseFromAlbum')}</button>
             <button onClick={() => setShowPicker(false)} className="w-full py-4 text-[15px] text-[#999] dark:text-gray-400 active:bg-[#F9F9F9] dark:active:bg-gray-800">{t('common.cancel')}</button>
+          </div>
+        </div>
+      )}
+
+      {showDraftPrompt && (
+        <div className="fixed inset-0 z-[200] bg-black/40 flex items-end" onClick={discardDraft}>
+          <div className="w-full bg-white dark:bg-gray-900 rounded-t-[16px] p-5" onClick={e=>e.stopPropagation()}>
+            <h3 className="text-[15px] font-bold text-center mb-4">恢复草稿？</h3>
+            <p className="text-[13px] text-[#999] text-center mb-4">检测到上次未发布的内容</p>
+            <button onClick={restoreDraft} className="w-full h-11 bg-[#FF8C42] text-white rounded-xl text-[14px] font-bold mb-2">恢复</button>
+            <button onClick={discardDraft} className="w-full h-11 text-[#999] text-[13px]">丢弃</button>
           </div>
         </div>
       )}
