@@ -11,24 +11,6 @@ import { postsApi, usersApi, notificationsApi, petsApi } from "../api/client";
 import { sendLikeNotification, sendFollowNotification } from "../utils/notifications";
 import { useScrollRestore } from "../hooks/useScrollRestore";
 
-const storyAvatars = [
-  "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=120",
-  "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=120",
-  "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120",
-  "https://images.unsplash.com/photo-1608744882201-52a7f7f3dd60?w=120",
-  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=120",
-  "https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=120",
-];
-
-const storyImages = [
-  ["https://images.unsplash.com/photo-1601758228041-f3b2795255f1?w=600"],
-  ["https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=600"],
-  ["https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=600"],
-  ["https://images.unsplash.com/photo-1601758124510-52d02ddb7cbd?w=600"],
-  ["https://images.unsplash.com/photo-1583511655857-d19b40a7a54e?w=600"],
-  ["https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=600"],
-];
-
 const recommendUserAvatars = [
   "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=150",
   "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150",
@@ -45,14 +27,6 @@ export function Home() {
     const bundle = i18n.getResourceBundle(i18n.language, 'translation');
     return bundle?.mock || {};
   }, [i18n.language]);
-
-  const stories = useMemo(() =>
-    (mockData.stories || []).map((s: any, i: number) => ({
-      ...s,
-      avatar: storyAvatars[i],
-      images: storyImages[i],
-    })),
-  [mockData]);
 
   const recommendUsers = useMemo(() =>
     (mockData.recommendUsers || []).map((u: any, i: number) => ({
@@ -98,11 +72,7 @@ export function Home() {
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
   const [favedPosts, setBookmarkedPosts] = useState<Set<number>>(new Set());
   const [followedUsers, setFollowedUsers] = useState<Set<number>>(new Set());
-  const [viewedStories, setViewedStories] = useState<Set<number>>(new Set());
   const [notifViewed, setNotifViewed] = useState(false);
-  const [activeStory, setActiveStory] = useState<any>(null);
-  const [storyProgress, setStoryProgress] = useState(0);
-  const storyTimer = useRef<any>(null);
   const [showNotifications, setShowNotifications] = useState(false);
   const { containerRef: scrollRef, onScroll: saveScrollPos } = useScrollRestore(!loading);
   const [pullState, setPullState] = useState<'idle'|'pulling'|'ready'|'loading'>('idle');
@@ -111,7 +81,6 @@ export function Home() {
   const pullRefreshing = useRef(false);
   const scrollTopBeforeRefresh = useRef(0);
   const [showPetOnboarding, setShowPetOnboarding] = useState(false);
-  const [featuredPosts, setFeaturedPosts] = useState<any[]>([]);
 
   // Check if user needs pet onboarding
   useEffect(() => {
@@ -121,11 +90,6 @@ export function Home() {
       const user = data.user;
       if (!user.pet_breed) setShowPetOnboarding(true);
     }).catch(() => {});
-  }, []);
-
-  // Fetch featured posts
-  useEffect(() => {
-    postsApi.featured().then(data => setFeaturedPosts(data.list || [])).catch(() => {});
   }, []);
 
   const fetchingRef = useRef(false);
@@ -146,24 +110,6 @@ export function Home() {
   };
   useEffect(() => { fetchPosts(1); }, []);
 
-  useEffect(() => {
-    if (!activeStory) { setStoryProgress(0); return; }
-    setStoryProgress(0);
-    const duration = 3000;
-    const interval = 30;
-    storyTimer.current = setInterval(() => {
-      setStoryProgress(prev => {
-        if (prev >= 100) { clearInterval(storyTimer.current); setActiveStory(null); return 0; }
-        return prev + (interval / duration) * 100;
-      });
-    }, interval);
-    return () => clearInterval(storyTimer.current);
-  }, [activeStory]);
-
-  const handleOpenStory = (s: any) => {
-    setActiveStory(s);
-    setViewedStories(prev => new Set([...prev, s.id]));
-  };
   const handleOpenNotifications = () => {
     fetchNotifications();
     setShowNotifications(true);
@@ -261,23 +207,6 @@ export function Home() {
 
   return (
     <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
-      {activeStory && (
-        <div className="fixed inset-0 z-[90] bg-black flex flex-col" onClick={() => setActiveStory(null)}>
-          <div className="absolute top-2 left-4 right-4 z-10 h-0.5 bg-white/30 rounded-full" style={{top: 'calc(env(safe-area-inset-top) + 60px)'}}>
-            <div className="h-full bg-white rounded-full transition-all duration-30 ease-linear" style={{width: `${storyProgress}%`}}/>
-          </div>
-          <div className="absolute top-0 left-0 right-0 z-10 flex items-center gap-3 px-4 pb-2" style={{paddingTop:'calc(env(safe-area-inset-top) + 8px)'}}>
-            <ImageWithFallback src={activeStory.avatar} className="w-8 h-8 rounded-full object-cover border border-white/30" />
-            <span className="text-white text-[14px] font-semibold flex-1">{activeStory.name}</span>
-            <span className="text-white/60 text-[12px]">{activeStory.pet}</span>
-            <button onClick={() => setActiveStory(null)} className="p-1"><X className="w-5 h-5 text-white" /></button>
-          </div>
-          <div className="flex-1 flex items-center justify-center" onClick={e => e.stopPropagation()}>
-            <ImageWithFallback src={activeStory.images[0]} className="w-full h-full object-contain max-h-[80vh]" />
-          </div>
-        </div>
-      )}
-
       {showNotifications && (
         <div className="fixed inset-0 z-[90] bg-black/40 flex items-end" onClick={() => setShowNotifications(false)}>
           <div className="w-full bg-white dark:bg-gray-900 rounded-t-[20px] px-5 pt-4 pb-8 max-h-[60vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
@@ -351,24 +280,6 @@ export function Home() {
             </div>
           </div>
 
-          {featuredPosts.length > 0 && (
-            <div className="flex gap-2.5 overflow-x-auto pt-2 pb-1 [&::-webkit-scrollbar]:hidden">
-              {featuredPosts.slice(0, 5).map((post: any) => {
-                const coverImg = typeof post.images?.[0] === 'string' ? post.images[0] : post.images?.[0]?.poster || '';
-                return (
-                  <div key={post.id} onClick={() => navigate(`/post/${post.id}`)} className="shrink-0 w-[140px] rounded-xl overflow-hidden border-2 border-[#FF8C42] relative cursor-pointer active:opacity-80 bg-white dark:bg-gray-900">
-                    <div className="absolute top-1.5 left-1.5 z-10 bg-[#FF8C42] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{t('home.featured')}</div>
-                    <ImageWithFallback src={coverImg} className="w-full h-[90px] object-cover" />
-                    <div className="p-2 flex items-center gap-1.5">
-                      <ImageWithFallback src={post.user?.avatar || ''} className="w-5 h-5 rounded-full object-cover shrink-0 border border-white/50" />
-                      <span className="text-[12px] text-[#333] dark:text-gray-100 truncate leading-tight">{post.content?.slice(0, 16) || ''}</span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
           <div className="flex items-center gap-6 mt-1">
             <button onClick={()=>setActiveTab('hot')} className={`text-[17px] font-bold relative pb-2 cursor-pointer active:opacity-70 ${activeTab==='hot'?'text-[#333] dark:text-gray-100':'text-[#999] dark:text-gray-400'}`}>
               {t('home.hot')}{activeTab==='hot'&&<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"/>}
@@ -376,27 +287,6 @@ export function Home() {
             <button onClick={()=>setActiveTab('following')} className={`text-[17px] font-bold relative pb-2 cursor-pointer active:opacity-70 ${activeTab==='following'?'text-[#333] dark:text-gray-100':'text-[#999] dark:text-gray-400'}`}>
               {t('home.following')}{activeTab==='following'&&<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"/>}
             </button>
-          </div>
-
-          <div className="flex items-center gap-3 overflow-x-auto pt-2 pb-1 [&::-webkit-scrollbar]:hidden">
-            <div onClick={() => navigate('/post')} className="shrink-0 flex flex-col items-center gap-1 cursor-pointer active:opacity-70">
-              <div className="w-[62px] h-[62px] rounded-full bg-gradient-to-br from-[#FF8C42] to-[#FFB380] p-[2px]">
-                <div className="w-full h-full rounded-full bg-[#FAFAFA] dark:bg-gray-950 flex items-center justify-center">
-                  <span className="text-xl dark:text-gray-100">+</span>
-                </div>
-              </div>
-              <span className="text-[10px] text-[#999] dark:text-gray-400">{t('home.yourStory')}</span>
-            </div>
-            {stories.map(s => {
-              const viewed = viewedStories.has(s.id);
-              return (
-              <div key={s.id} onClick={() => handleOpenStory(s)} className="shrink-0 flex flex-col items-center gap-1 cursor-pointer active:opacity-70">
-                <div className={`w-[62px] h-[62px] rounded-full p-[2px] ${viewed ? 'bg-gray-300 dark:bg-gray-600' : 'bg-gradient-to-br from-[#FF8C42] to-[#FFB380]'}`}>
-                  <ImageWithFallback src={s.avatar} className="w-full h-full rounded-full object-cover border-2 border-white dark:border-gray-900 cursor-pointer active:opacity-70" />
-                </div>
-                <span className="text-[10px] text-[#666] dark:text-gray-400 w-[62px] text-center truncate">{s.name}</span>
-              </div>
-            )})}
           </div>
         </div>
 
