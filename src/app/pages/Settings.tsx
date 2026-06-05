@@ -378,7 +378,7 @@ export function Settings() {
             <p className="text-[15px] text-[#333] dark:text-gray-100 mb-2">{t('settings.confirmLogout')}</p><p className="text-[12px] text-[#999] dark:text-gray-400 mb-6">{t('settings.logoutTip')}</p>
             <div className="flex gap-3">
               <button onClick={() => setShowLogout(false)} className="flex-1 h-10 bg-[#F5F5F5] dark:bg-gray-800 rounded-lg text-[14px] text-[#666] dark:text-gray-400">{t('common.cancel')}</button>
-              <button onClick={() => { setShowLogout(false); logout(); }} className="flex-1 h-10 bg-[#FF4D4F] text-white rounded-lg text-[14px] font-bold">{t('settings.logout')}</button>
+              <button onClick={() => { setShowLogout(false); logout(); navigate('/login'); }} className="flex-1 h-10 bg-[#FF4D4F] text-white rounded-lg text-[14px] font-bold">{t('settings.logout')}</button>
             </div>
           </div>
         </div>

@@ -82,9 +82,6 @@ export function Profile() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
-  const [phone, setPhone] = useState('');
-  const [code, setCode] = useState('');
-  const [countdown, setCountdown] = useState(0);
   const [error, setError] = useState('');
   const timerRef = useRef<number | null>(null);
   const hasAutoLoggedIn = useRef(false);
