@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { ChevronLeft, MapPin, Heart, MessageCircle, Plus, UserPlus, Send } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { usePageTransition } from "../hooks/usePageTransition";
+import { useSwipeBack } from "../hooks/useSwipeBack";
 import { users, posts } from "../data/mockData";
 
 export function UserProfile() {
@@ -13,6 +14,8 @@ export function UserProfile() {
   const { handleBack } = usePageTransition();
   const userId = Number(id);
   const user = users[userId as keyof typeof users];
+  const swipeRef = useRef<HTMLDivElement>(null);
+  useSwipeBack(swipeRef);
   const isOwnProfile = userId === 1;
   const [isFollowing, setIsFollowing] = useState(false);
 
@@ -42,7 +45,7 @@ export function UserProfile() {
   const pets = (user as any).pets || [];
 
   return (
-    <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
+    <div ref={swipeRef} className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center px-4 shrink-0 z-10">
         <button onClick={() => handleBack(() => navigate(-1))} className="text-[#333] dark:text-gray-100 p-1 -ml-1">
           <ChevronLeft className="w-6 h-6" />
