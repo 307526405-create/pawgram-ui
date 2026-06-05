@@ -1,4 +1,4 @@
-import { ChevronLeft, Search, MoreHorizontal, Send, Plus, Image, Camera, MapPin, Star, User, AlertTriangle, Trash2, X, Check } from "lucide-react";
+import { ChevronLeft, Search, MoreHorizontal, Send, Plus, Image, Camera, MapPin, User, AlertTriangle, Trash2 } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router";
@@ -7,8 +7,6 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { UserProfile } from "./UserProfile";
 import { Camera as CapacitorCamera, CameraResultType, CameraSource } from "@capacitor/camera";
-
-const FAVORITES_KEY = 'pawgram_chat_favorites';
 
 const mockMessageBase = [
   { id:1, from:true, time:"10:30" },
@@ -47,17 +45,13 @@ export function ChatDetail() {
     })),
   [mockData]);
 
-  const [sentMessages, setSentMessages] = useState<{id:number; from:boolean; text:string; time:string; image?:string}[]>([]);
+  const [sentMessages, setSentMessages] = useState<{id:number; from:boolean; text:string; time:string; image?:string; type?:string; lat?:number; lng?:number}[]>([]);
   const [input, setInput] = useState("");
   const [showMenu, setShowMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [locating, setLocating] = useState(false);
-  const [favorites, setFavorites] = useState<string[]>(() => {
-    try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); } catch { return []; }
-  });
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [favoritesFeedback, setFavoritesFeedback] = useState<'added' | 'exists' | null>(null);
   const [menuVisible, setMenuVisible] = useState(false);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const [overlayUser, setOverlayUser] = useState<number | null>(null);
@@ -145,70 +139,37 @@ export function ChatDetail() {
   };
 
   const sendLocation = () => {
+    setMenuVisible(false);
     setLocating(true);
-    const sendLocMsg = (lat: number, lng: number) => {
-      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=${i18n.language}`)
-        .then(r => r.json())
-        .then(data => {
-          const addr = data?.address;
-          let label = '';
-          if (addr) {
-            const city = addr.city || addr.town || addr.county || '';
-            const district = addr.suburb || addr.district || '';
-            label = city + (district ? district : '');
-          }
-          const text = label
-            ? `📍 ${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`
-            : `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-          const now = new Date();
-          setSentMessages(prev => [...prev, { id: Date.now(), from: false, text, time: `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}` }]);
-          setLocating(false);
-          setMenuVisible(false);
-        })
-        .catch(() => {
-          const text = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
-          const now = new Date();
-          setSentMessages(prev => [...prev, { id: Date.now(), from: false, text, time: `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}` }]);
-          setLocating(false);
-          setMenuVisible(false);
-        });
-    };
-    const fallback = () => {
+    const tryLocate = (highAccuracy: boolean) => {
       navigator.geolocation?.getCurrentPosition(
-        (pos) => sendLocMsg(pos.coords.latitude, pos.coords.longitude),
-        () => { setLocating(false); },
-        { enableHighAccuracy: false, timeout: 15000 }
+        (pos) => {
+          const { latitude: lat, longitude: lng } = pos.coords;
+          const mapImg = `https://maps.apple.com/map?q=${lat},${lng}&z=16&w=280&h=160`;
+          const text = t('chat.location');
+          const now = new Date();
+          const timeStr = `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}`;
+          setSentMessages(prev => [...prev, { id: Date.now(), from: false, text, time: timeStr, type: 'location', lat, lng, mapImg }]);
+          setLocating(false);
+        },
+        () => {
+          if (highAccuracy) tryLocate(false);
+          else setLocating(false);
+        },
+        { enableHighAccuracy: highAccuracy, timeout: 8000 }
       );
     };
-    navigator.geolocation?.getCurrentPosition(
-      (pos) => sendLocMsg(pos.coords.latitude, pos.coords.longitude),
-      fallback,
-      { enableHighAccuracy: true, timeout: 8000 }
-    );
+    tryLocate(true);
   };
 
-  const addToFavorites = () => {
-    const convKey = `chat_${id}`;
-    const already = favorites.includes(convKey);
-    if (already) {
-      setFavoritesFeedback('exists');
-      setTimeout(() => setFavoritesFeedback(null), 2000);
-      return;
-    }
-    setFavorites(prev => {
-      const next = [...prev, convKey];
-      localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
-      return next;
-    });
-    setFavoritesFeedback('added');
-    setTimeout(() => setFavoritesFeedback(null), 2000);
+  const openMap = (lat: number, lng: number) => {
+    window.open(`https://maps.apple.com/?ll=${lat},${lng}&q=${lat},${lng}`, '_blank');
   };
 
   const moreActions = [
     { icon:Image, label:t('chat.photo'), onClick:pickFromAlbum },
     { icon:Camera, label:t('chat.takePhoto'), onClick:takePhoto },
     { icon:MapPin, label:t('chat.location'), onClick:sendLocation },
-    { icon:Star, label:t('chat.favorites'), onClick:addToFavorites },
   ];
 
   return (
@@ -267,6 +228,14 @@ export function ChatDetail() {
                 <div className={`max-w-[70%] rounded-2xl text-[14px] leading-relaxed overflow-hidden shadow-sm ${m.from ? 'bg-white dark:bg-gray-800 text-[#333] dark:text-gray-100 rounded-bl-md border border-[#F0F0F0] dark:border-gray-700' : 'bg-[#E8E8E8] dark:bg-gray-700 text-[#333] dark:text-gray-100 rounded-br-md'}`}>
                   {m.image ? (
                     <img src={m.image} className="max-w-full max-h-[200px] object-cover" alt="" />
+                  ) : m.type === 'location' ? (
+                    <div className="w-[220px] overflow-hidden cursor-pointer" onClick={() => openMap(m.lat!, m.lng!)}>
+                      <img src={`https://maps.apple.com/map?q=${m.lat},${m.lng}&z=15&w=440&h=160`} className="w-full h-[100px] object-cover" alt="" />
+                      <div className="px-3 py-2 flex items-center gap-2">
+                        <MapPin className="w-4 h-4 text-[#FF8C42]" />
+                        <span className="text-[12px] text-[#666] dark:text-gray-300">{m.text}</span>
+                      </div>
+                    </div>
                   ) : m.text ? (
                     <div className="px-3 py-2">{m.text}</div>
                   ) : null}
@@ -301,15 +270,7 @@ export function ChatDetail() {
             </button>
           </div>
         </>
-      )}
-
-      {/* Favorites Feedback Toast */}
-      {favoritesFeedback && (
-        <div className="fixed top-[var(--app-safe-top)] left-1/2 -translate-x-1/2 z-[100] mt-16 px-4 py-2.5 rounded-full bg-[#333] dark:bg-gray-700 text-white text-[13px] shadow-lg flex items-center gap-2 animate-fade-in">
-          {favoritesFeedback === 'added' ? <Check className="w-4 h-4 text-green-400" /> : <X className="w-4 h-4 text-yellow-400" />}
-          {favoritesFeedback === 'added' ? (t('chat.favorited') || '已收藏') : (t('chat.alreadyFavorited') || '已收藏过')}
-        </div>
-      )}
+      </div>
 
       <div className="bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 px-3 py-2 flex items-center gap-2 shrink-0" style={{paddingBottom: `calc(env(safe-area-inset-bottom) + 8px + ${keyboardOffset}px)`}}>
         <button onClick={() => setMenuVisible(!menuVisible)} className={`p-1.5 rounded-full cursor-pointer active:opacity-70 transition-colors ${menuVisible ? 'bg-[#FF8C42] text-white' : 'text-[#666] dark:text-gray-400'}`}>
