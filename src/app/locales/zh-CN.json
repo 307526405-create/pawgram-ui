@@ -410,7 +410,9 @@
     "photo": "照片",
     "takePhoto": "拍摄",
     "location": "位置",
-    "favorites": "收藏"
+    "favorites": "收藏",
+    "favorited": "已收藏",
+    "alreadyFavorited": "已收藏过"
   },
   "scan": {
     "title": "扫一扫",

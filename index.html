@@ -6,8 +6,15 @@
 <title>PAWGRAM</title>
 <meta name="description" content="Connect with fellow pet lovers through a vibrant feed of pet photos, updates, and community interactions." />
 <meta name="robots" content="noindex, nofollow" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.map.qq.com https://*.gtimg.com; img-src 'self' data: blob: https: http:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:; style-src 'self' 'unsafe-inline' https: http:; connect-src 'self' https: http: ws: wss:; worker-src 'self' blob: https: http:;" />
-<style>html, body { height: 100%; margin: 0; background: #FF8C42; } #root { height: 100%; }</style>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' https://*.map.qq.com https://*.gtimg.com; img-src 'self' data: blob: https: http:; script-src 'self' 'unsafe-inline' 'unsafe-eval' https: http:; style-src 'self' 'unsafe-inline' https: http:; connect-src 'self' https: http: ws: wss: https://nominatim.openstreetmap.org; worker-src 'self' blob: https: http:;" />
+<style>
+  html, body { height: 100%; margin: 0; background: #FF8C42; }
+  #root { height: 100%; }
+  @keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  @keyframes fade-in { from { opacity: 0; transform: translate(-50%, 8px); } to { opacity: 1; transform: translate(-50%, 0); } }
+  .animate-slide-up { animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+  .animate-fade-in { animation: fade-in 0.3s ease-out; }
+</style>
 <script src="https://map.qq.com/api/gljs?v=1.exp&key=XFFBZ-QKEKG-CWRQH-Q6HBS-WBWYE-HRF6J"></script>
 </head>
 <body>

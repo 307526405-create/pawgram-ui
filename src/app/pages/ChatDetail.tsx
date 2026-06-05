@@ -1,4 +1,4 @@
-import { ChevronLeft, Search, MoreHorizontal, Send, Plus, Image, Camera, MapPin, Star, User, AlertTriangle, Trash2 } from "lucide-react";
+import { ChevronLeft, Search, MoreHorizontal, Send, Plus, Image, Camera, MapPin, Star, User, AlertTriangle, Trash2, X, Check } from "lucide-react";
 import { useState, useRef, useEffect, useMemo } from "react";
 import { createPortal } from "react-dom";
 import { useNavigate, useParams } from "react-router";
@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { UserProfile } from "./UserProfile";
+import { Camera as CapacitorCamera, CameraResultType, CameraSource } from "@capacitor/camera";
 
 const FAVORITES_KEY = 'pawgram_chat_favorites';
 
@@ -48,7 +49,6 @@ export function ChatDetail() {
 
   const [sentMessages, setSentMessages] = useState<{id:number; from:boolean; text:string; time:string; image?:string}[]>([]);
   const [input, setInput] = useState("");
-  const [showMore, setShowMore] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
@@ -57,8 +57,8 @@ export function ChatDetail() {
     try { return JSON.parse(localStorage.getItem(FAVORITES_KEY) || '[]'); } catch { return []; }
   });
   const scrollRef = useRef<HTMLDivElement>(null);
-  const photoInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const [favoritesFeedback, setFavoritesFeedback] = useState<'added' | 'exists' | null>(null);
+  const [menuVisible, setMenuVisible] = useState(false);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const [overlayUser, setOverlayUser] = useState<number | null>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -107,61 +107,106 @@ export function ChatDetail() {
     const now = new Date();
     setSentMessages(prev => [...prev, { id:Date.now(), from:false, text, time:`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}` }]);
     setInput("");
-    setShowMore(false);
   };
 
   const sendImage = (src: string) => {
     const now = new Date();
     setSentMessages(prev => [...prev, { id:Date.now(), from:false, text:'', time:`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}`, image:src }]);
-    setShowMore(false);
   };
 
-  const handlePhotoPick = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => { if (reader.result) sendImage(reader.result as string); };
-    reader.readAsDataURL(file);
-    e.target.value = '';
+  const pickFromAlbum = async () => {
+    setMenuVisible(false);
+    try {
+      const result = await CapacitorCamera.pickImages({ quality: 90, limit: 9 });
+      for (const photo of result.photos) {
+        if (photo.webPath) {
+          const response = await fetch(photo.webPath);
+          const blob = await response.blob();
+          const dataUrl = await new Promise<string>(resolve => {
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.readAsDataURL(blob);
+          });
+          sendImage(dataUrl);
+        }
+      }
+    } catch {}
   };
 
-  const handleCameraCapture = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => { if (reader.result) sendImage(reader.result as string); };
-    reader.readAsDataURL(file);
-    e.target.value = '';
+  const takePhoto = async () => {
+    setMenuVisible(false);
+    try {
+      const photo = await CapacitorCamera.getPhoto({ resultType: CameraResultType.Base64, source: CameraSource.Camera, quality: 90 });
+      if (photo.base64String) {
+        const url = `data:image/jpeg;base64,${photo.base64String}`;
+        sendImage(url);
+      }
+    } catch {}
   };
 
   const sendLocation = () => {
     setLocating(true);
+    const sendLocMsg = (lat: number, lng: number) => {
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=${i18n.language}`)
+        .then(r => r.json())
+        .then(data => {
+          const addr = data?.address;
+          let label = '';
+          if (addr) {
+            const city = addr.city || addr.town || addr.county || '';
+            const district = addr.suburb || addr.district || '';
+            label = city + (district ? district : '');
+          }
+          const text = label
+            ? `📍 ${label} (${lat.toFixed(4)}, ${lng.toFixed(4)})`
+            : `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          const now = new Date();
+          setSentMessages(prev => [...prev, { id: Date.now(), from: false, text, time: `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}` }]);
+          setLocating(false);
+          setMenuVisible(false);
+        })
+        .catch(() => {
+          const text = `📍 ${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+          const now = new Date();
+          setSentMessages(prev => [...prev, { id: Date.now(), from: false, text, time: `${now.getHours()}:${String(now.getMinutes()).padStart(2, '0')}` }]);
+          setLocating(false);
+          setMenuVisible(false);
+        });
+    };
+    const fallback = () => {
+      navigator.geolocation?.getCurrentPosition(
+        (pos) => sendLocMsg(pos.coords.latitude, pos.coords.longitude),
+        () => { setLocating(false); },
+        { enableHighAccuracy: false, timeout: 15000 }
+      );
+    };
     navigator.geolocation?.getCurrentPosition(
-      (pos) => {
-        const text = `📍 ${t('chat.location')}: ${pos.coords.latitude.toFixed(5)}, ${pos.coords.longitude.toFixed(5)}`;
-        const now = new Date();
-        setSentMessages(prev => [...prev, { id:Date.now(), from:false, text, time:`${now.getHours()}:${String(now.getMinutes()).padStart(2,'0')}` }]);
-        setLocating(false);
-        setShowMore(false);
-      },
-      () => { setLocating(false); },
-      { enableHighAccuracy: true, timeout: 10000 }
+      (pos) => sendLocMsg(pos.coords.latitude, pos.coords.longitude),
+      fallback,
+      { enableHighAccuracy: true, timeout: 8000 }
     );
   };
 
   const addToFavorites = () => {
     const convKey = `chat_${id}`;
+    const already = favorites.includes(convKey);
+    if (already) {
+      setFavoritesFeedback('exists');
+      setTimeout(() => setFavoritesFeedback(null), 2000);
+      return;
+    }
     setFavorites(prev => {
-      const next = prev.includes(convKey) ? prev : [...prev, convKey];
+      const next = [...prev, convKey];
       localStorage.setItem(FAVORITES_KEY, JSON.stringify(next));
       return next;
     });
-    setShowMore(false);
+    setFavoritesFeedback('added');
+    setTimeout(() => setFavoritesFeedback(null), 2000);
   };
 
   const moreActions = [
-    { icon:Image, label:t('chat.photo'), onClick:() => photoInputRef.current?.click() },
-    { icon:Camera, label:t('chat.takePhoto'), onClick:() => cameraInputRef.current?.click() },
+    { icon:Image, label:t('chat.photo'), onClick:pickFromAlbum },
+    { icon:Camera, label:t('chat.takePhoto'), onClick:takePhoto },
     { icon:MapPin, label:t('chat.location'), onClick:sendLocation },
     { icon:Star, label:t('chat.favorites'), onClick:addToFavorites },
   ];
@@ -233,27 +278,42 @@ export function ChatDetail() {
         })}
       </div>
 
-      <input ref={photoInputRef} type="file" accept="image/*" className="hidden" onChange={handlePhotoPick} />
-      <input ref={cameraInputRef} type="file" accept="image/*" capture="environment" className="hidden" onChange={handleCameraCapture} />
-
-      {showMore && (
-        <div className="bg-[#F5F5F5] dark:bg-gray-800 border-t border-[#EEE] dark:border-gray-700 px-4 py-3">
-          <div className="flex justify-around">
-            {moreActions.map((a, i) => (
-              <button key={i} onClick={(e) => { e.stopPropagation(); a.onClick(); }} className="flex flex-col items-center gap-1.5 cursor-pointer active:opacity-70">
-                <div className="w-14 h-14 rounded-2xl bg-white dark:bg-gray-900 flex items-center justify-center shadow-sm">
-                  {locating && a.icon === MapPin ? <span className="w-5 h-5 border-2 border-[#FF8C42] border-t-transparent rounded-full animate-spin"/> : <a.icon className="w-6 h-6 text-[#333] dark:text-gray-100"/>}
-                </div>
-                <span className="text-[10px] text-[#666] dark:text-gray-400">{a.label}</span>
-              </button>
-            ))}
+      {/* Bottom Sheet Plus Menu */}
+      {menuVisible && (
+        <>
+          <div className="fixed inset-0 z-[80] bg-black/40 transition-opacity duration-300" onClick={() => setMenuVisible(false)} />
+          <div className="fixed inset-x-0 bottom-0 z-[90] animate-slide-up bg-white dark:bg-gray-900 rounded-t-[20px] shadow-2xl" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 16px)' }}>
+            <div className="flex justify-center py-3">
+              <div className="w-10 h-1 rounded-full bg-[#DDD] dark:bg-gray-600" />
+            </div>
+            <div className="flex justify-around px-6 pb-6">
+              {moreActions.map((a, i) => (
+                <button key={i} onClick={a.onClick} className="flex flex-col items-center gap-2 cursor-pointer active:opacity-70 w-16">
+                  <div className="w-14 h-14 rounded-2xl bg-[#F5F5F5] dark:bg-gray-800 flex items-center justify-center">
+                    {locating && a.icon === MapPin ? <span className="w-5 h-5 border-2 border-[#FF8C42] border-t-transparent rounded-full animate-spin"/> : <a.icon className="w-6 h-6 text-[#333] dark:text-gray-100"/>}
+                  </div>
+                  <span className="text-[11px] text-[#666] dark:text-gray-400 whitespace-nowrap">{a.label}</span>
+                </button>
+              ))}
+            </div>
+            <button onClick={() => setMenuVisible(false)} className="w-full h-12 flex items-center justify-center text-[14px] text-[#999] dark:text-gray-400 border-t border-[#F0F0F0] dark:border-gray-700 active:bg-[#F9F9F9] dark:active:bg-gray-800">
+              {t('common.cancel')}
+            </button>
           </div>
+        </>
+      )}
+
+      {/* Favorites Feedback Toast */}
+      {favoritesFeedback && (
+        <div className="fixed top-[var(--app-safe-top)] left-1/2 -translate-x-1/2 z-[100] mt-16 px-4 py-2.5 rounded-full bg-[#333] dark:bg-gray-700 text-white text-[13px] shadow-lg flex items-center gap-2 animate-fade-in">
+          {favoritesFeedback === 'added' ? <Check className="w-4 h-4 text-green-400" /> : <X className="w-4 h-4 text-yellow-400" />}
+          {favoritesFeedback === 'added' ? (t('chat.favorited') || '已收藏') : (t('chat.alreadyFavorited') || '已收藏过')}
         </div>
       )}
 
       <div className="bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 px-3 py-2 flex items-center gap-2 shrink-0" style={{paddingBottom: `calc(env(safe-area-inset-bottom) + 8px + ${keyboardOffset}px)`}}>
-        <button onClick={() => setShowMore(!showMore)} className={`p-1.5 rounded-full cursor-pointer active:opacity-70 ${showMore ? 'bg-[#FF8C42] text-white' : 'text-[#666] dark:text-gray-400'}`}>
-          <Plus className="w-5 h-5"/>
+        <button onClick={() => setMenuVisible(!menuVisible)} className={`p-1.5 rounded-full cursor-pointer active:opacity-70 transition-colors ${menuVisible ? 'bg-[#FF8C42] text-white' : 'text-[#666] dark:text-gray-400'}`}>
+          <Plus className={`w-5 h-5 transition-transform duration-300 ${menuVisible ? 'rotate-45' : ''}`} />
         </button>
         <input value={input} onChange={e => setInput(e.target.value)} onKeyDown={e => e.key==='Enter' && send()}
           placeholder={t('common.sendMessage')}
