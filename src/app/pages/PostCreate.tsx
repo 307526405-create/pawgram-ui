@@ -1,6 +1,6 @@
 import { ChevronLeft, MapPin, Hash, AtSign } from "lucide-react";
-import { useState, useMemo, useEffect, useRef, useCallback } from "react";
-import { useNavigate, useBlocker } from "react-router";
+import { useState, useMemo, useEffect, useRef } from "react";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
@@ -52,23 +52,20 @@ export function PostCreate() {
   const draftRef = useRef({ content, images });
   useEffect(() => { draftRef.current = { content, images }; });
 
-  const publishingRef = useRef(false);
-  const hasContent = !!(content || images.length);
-  const shouldBlock = useCallback(() => {
-    if (publishingRef.current) return false;
-    return hasContent;
-  }, [hasContent]);
-  const blocker = useBlocker(shouldBlock);
-
-  useEffect(() => {
-    if (blocker.state === 'blocked') setShowExitPrompt(true);
-  }, [blocker.state]);
-
   const [showExitPrompt, setShowExitPrompt] = useState(false);
+  const hasContent = !!(content || images.length);
+
+  const handleBack = () => {
+    if (hasContent) {
+      setShowExitPrompt(true);
+    } else {
+      navigate('/', { replace: true });
+    }
+  };
 
   const saveDraft = () => {
     localStorage.setItem('pawgram_draft', JSON.stringify({content, images, tags, loc}));
-    if (blocker.state === 'blocked') blocker.proceed();
+    navigate('/', { replace: true });
   };
 
   const restoreDraft = () => {
@@ -150,9 +147,8 @@ export function PostCreate() {
         breed: selectedPet?.type || '',
         location: loc,
       });
-      publishingRef.current = true;
       localStorage.removeItem("pawgram_draft");
-      navigate("/");
+      navigate("/", { replace: true });
     } catch {
       setPublishing(false);
     }
@@ -160,6 +156,8 @@ export function PostCreate() {
 
   return (
     <div className={`h-full bg-white dark:bg-gray-900 relative flex flex-col ${className}`}>
+      {/* 阻止 WKWebView 原生右滑返回/前进手势 */}
+      <div className="fixed left-0 top-0 w-6 h-full z-[1500]" onTouchStart={e => e.preventDefault()} onTouchMove={e => e.preventDefault()} />
       {showPicker && (
         <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/40" onClick={() => setShowPicker(false)}>
           <div className="bg-white dark:bg-gray-900 rounded-t-[16px]" onClick={e => e.stopPropagation()}>
@@ -187,14 +185,14 @@ export function PostCreate() {
             <h3 className="text-[15px] font-bold text-center mb-4">是否保留草稿？</h3>
             <p className="text-[13px] text-[#999] text-center mb-4">退出后当前内容将被清除</p>
             <button onClick={saveDraft} className="w-full h-11 bg-[#FF8C42] text-white rounded-xl text-[14px] font-bold mb-2">保留</button>
-            <button onClick={() => blocker.proceed?.()} className="w-full h-11 text-[#FF8C42] text-[14px] mb-2">不保留</button>
-            <button onClick={() => blocker.reset?.()} className="w-full h-11 text-[#999] text-[13px]">继续编辑</button>
+            <button onClick={() => navigate('/', { replace: true })} className="w-full h-11 text-[#FF8C42] text-[14px] mb-2">不保留</button>
+            <button onClick={() => setShowExitPrompt(false)} className="w-full h-11 text-[#999] text-[13px]">继续编辑</button>
           </div>
         </div>
       )}
 
       <div className="flex items-center justify-between px-4 pt-[var(--app-safe-top)] h-[var(--app-header-height)] shrink-0 border-b border-[#F0F0F0] dark:border-gray-700">
-        <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1 cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100" /></button>
+        <button onClick={handleBack} className="p-1 -ml-1 cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100" /></button>
         <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('common.publish')}</h1>
         <button onClick={handlePublish} disabled={publishing || (!content.trim() && images.length === 0)}
           className={`text-[14px] font-bold px-4 py-1.5 rounded-full ${content.trim() || images.length > 0 ? 'bg-[#FF8C42] text-white' : 'bg-[#F0F0F0] dark:bg-gray-700 text-[#BBB] dark:text-gray-500'}`}>
