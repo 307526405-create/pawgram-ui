@@ -88,6 +88,16 @@ export function Home() {
   const [storyProgress, setStoryProgress] = useState(0);
   const storyTimer = useRef<any>(null);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [streak, setStreak] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('pawgram_streak')||'{"count":0,"date":""}'); } catch { return {count:0,date:''}; }
+  });
+  const checkIn = () => {
+    const today = new Date().toDateString();
+    if (streak.date === today) return;
+    const newStreak = { count: streak.date === new Date(Date.now()-86400000).toDateString() ? streak.count+1 : 1, date: today };
+    setStreak(newStreak);
+    localStorage.setItem('pawgram_streak', JSON.stringify(newStreak));
+  };
   const { containerRef: scrollRef, onScroll: saveScrollPos } = useScrollRestore(!loading);
   const [pullState, setPullState] = useState<'idle'|'pulling'|'ready'|'loading'>('idle');
   const [pullDist, setPullDist] = useState(0);
@@ -293,6 +303,14 @@ export function Home() {
             <button onClick={()=>setActiveTab('following')} className={`text-[17px] font-bold relative pb-2 cursor-pointer active:opacity-70 ${activeTab==='following'?'text-[#333] dark:text-gray-100':'text-[#999] dark:text-gray-400'}`}>
               {t('home.following')}{activeTab==='following'&&<span className="absolute bottom-0 left-1/2 -translate-x-1/2 w-4 h-1 bg-[#FF8C42] rounded-full"/>}
             </button>
+          </div>
+
+          <div onClick={checkIn} className="mx-4 mt-2 mb-1 bg-gradient-to-r from-[#FFF3E0] to-[#FFE0B2] dark:from-gray-800 dark:to-gray-800 rounded-xl px-4 py-2.5 flex items-center justify-between cursor-pointer active:opacity-80">
+            <div className="flex items-center gap-2">
+              <span className="text-lg">🔥</span>
+              <span className="text-[13px] font-bold text-[#FF8C42]">连续打卡 {streak.count} 天</span>
+            </div>
+            <span className="text-[12px] text-[#999]">{streak.date === new Date().toDateString() ? '今日已打卡' : '点击打卡'}</span>
           </div>
 
           <div className="flex items-center gap-3 overflow-x-auto pt-2 pb-1 [&::-webkit-scrollbar]:hidden">
