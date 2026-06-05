@@ -164,7 +164,8 @@
     "reportFake": "Misinformation",
     "reportOther": "Other",
     "reportSent": "Report Submitted",
-    "reportThanks": "We'll review it shortly. Thank you for your report."
+    "reportThanks": "We'll review it shortly. Thank you for your report.",
+    "share": "Share"
   },
   "shareCard": {
     "title": "Share",
@@ -301,7 +302,7 @@
     "exampleBirthday": "March 15, 2024",
     "breeds": {
       "金毛": "Golden Retriever",
-    "猫咪": "Cat",
+      "猫咪": "Cat",
       "柯基": "Corgi",
       "泰迪": "Teddy",
       "萨摩耶": "Samoyed",
@@ -484,75 +485,247 @@
   },
   "mock": {
     "stories": [
-      { "id": 1, "name": "Afu the Golden", "pet": "Golden Retriever" },
-      { "id": 2, "name": "Short Legs Corgi", "pet": "Corgi" },
-      { "id": 3, "name": "Tangyuan Ragdoll", "pet": "Ragdoll" },
-      { "id": 4, "name": "Snowball Samoyed", "pet": "Samoyed" },
-      { "id": 5, "name": "Doudou Teddy", "pet": "Teddy" },
-      { "id": 6, "name": "Gungun Orange", "pet": "Orange Tabby" }
+      {
+        "id": 1,
+        "name": "Afu the Golden",
+        "pet": "Golden Retriever"
+      },
+      {
+        "id": 2,
+        "name": "Short Legs Corgi",
+        "pet": "Corgi"
+      },
+      {
+        "id": 3,
+        "name": "Tangyuan Ragdoll",
+        "pet": "Ragdoll"
+      },
+      {
+        "id": 4,
+        "name": "Snowball Samoyed",
+        "pet": "Samoyed"
+      },
+      {
+        "id": 5,
+        "name": "Doudou Teddy",
+        "pet": "Teddy"
+      },
+      {
+        "id": 6,
+        "name": "Gungun Orange",
+        "pet": "Orange Tabby"
+      }
     ],
     "recommendUsers": [
-      { "id": 1, "name": "Dahuang's Human", "bio": "Happy life with Golden & Corgi", "followers": "2.3k" },
-      { "id": 2, "name": "Orange Cat Diary", "bio": "Daily life of 3 cats", "followers": "5.1k" },
-      { "id": 3, "name": "Adai the Doggo", "bio": "Samoyed's happiness", "followers": "8.7k" }
+      {
+        "id": 1,
+        "name": "Dahuang's Human",
+        "bio": "Happy life with Golden & Corgi",
+        "followers": "2.3k"
+      },
+      {
+        "id": 2,
+        "name": "Orange Cat Diary",
+        "bio": "Daily life of 3 cats",
+        "followers": "5.1k"
+      },
+      {
+        "id": 3,
+        "name": "Adai the Doggo",
+        "bio": "Samoyed's happiness",
+        "followers": "8.7k"
+      }
     ],
     "notifications": [
-      { "id": 1, "text": "Dahuang's Human liked your post", "time": "3 min ago" },
-      { "id": 2, "text": "Orange Cat Diary followed you", "time": "15 min ago" },
-      { "id": 3, "text": "PawGram Official posted a new event", "time": "1h ago" }
+      {
+        "id": 1,
+        "text": "Dahuang's Human liked your post",
+        "time": "3 min ago"
+      },
+      {
+        "id": 2,
+        "text": "Orange Cat Diary followed you",
+        "time": "15 min ago"
+      },
+      {
+        "id": 3,
+        "text": "PawGram Official posted a new event",
+        "time": "1h ago"
+      }
     ],
     "newFriends": [
-      { "id": 1, "bio": "Golden Retriever lover" },
-      { "id": 2, "bio": "Cat person" },
-      { "id": 3, "bio": "Corgi & Teddy" },
-      { "id": 4, "bio": "Ragdoll owner" }
+      {
+        "id": 1,
+        "bio": "Golden Retriever lover"
+      },
+      {
+        "id": 2,
+        "bio": "Cat person"
+      },
+      {
+        "id": 3,
+        "bio": "Corgi & Teddy"
+      },
+      {
+        "id": 4,
+        "bio": "Ragdoll owner"
+      }
     ],
     "notifGroups": [
-      { "key": "likes", "label": "Likes & Favorites", "desc": "Dahuang's Human and 3 others liked your post" },
-      { "key": "follows", "label": "New Followers", "desc": "Orange Cat Diary and 2 others followed you" },
-      { "key": "comments", "label": "Comments & @Mentions", "desc": "Short Legs Corgi commented on your post" }
+      {
+        "key": "likes",
+        "label": "Likes & Favorites",
+        "desc": "Dahuang's Human and 3 others liked your post"
+      },
+      {
+        "key": "follows",
+        "label": "New Followers",
+        "desc": "Orange Cat Diary and 2 others followed you"
+      },
+      {
+        "key": "comments",
+        "label": "Comments & @Mentions",
+        "desc": "Short Legs Corgi commented on your post"
+      }
     ],
     "conversations": [
-      { "id": 1, "lastMsg": "Let's walk the dog this weekend?", "time": "5 min ago" },
-      { "id": 2, "lastMsg": "Ok, see you next time!", "time": "Yesterday" },
-      { "id": 3, "lastMsg": "Your cat is so cute!", "time": "2 days ago" },
-      { "id": 4, "lastMsg": "Any dog food recommendations?", "time": "3 days ago" }
+      {
+        "id": 1,
+        "lastMsg": "Let's walk the dog this weekend?",
+        "time": "5 min ago"
+      },
+      {
+        "id": 2,
+        "lastMsg": "Ok, see you next time!",
+        "time": "Yesterday"
+      },
+      {
+        "id": 3,
+        "lastMsg": "Your cat is so cute!",
+        "time": "2 days ago"
+      },
+      {
+        "id": 4,
+        "lastMsg": "Any dog food recommendations?",
+        "time": "3 days ago"
+      }
     ],
     "notificationDetails": {
       "likes": [
-        { "name": "Dahuang's Human", "text": "liked your post", "time": "3 min ago" },
-        { "name": "Orange Cat Diary", "text": "favorited your post", "time": "15 min ago" },
-        { "name": "Short Legs Corgi", "text": "liked your post", "time": "1h ago" }
+        {
+          "name": "Dahuang's Human",
+          "text": "liked your post",
+          "time": "3 min ago"
+        },
+        {
+          "name": "Orange Cat Diary",
+          "text": "favorited your post",
+          "time": "15 min ago"
+        },
+        {
+          "name": "Short Legs Corgi",
+          "text": "liked your post",
+          "time": "1h ago"
+        }
       ],
       "follows": [
-        { "name": "Orange Cat Diary", "text": "followed you", "time": "15 min ago" },
-        { "name": "Adai the Doggo", "text": "followed you", "time": "2h ago" }
+        {
+          "name": "Orange Cat Diary",
+          "text": "followed you",
+          "time": "15 min ago"
+        },
+        {
+          "name": "Adai the Doggo",
+          "text": "followed you",
+          "time": "2h ago"
+        }
       ],
       "comments": [
-        { "name": "Short Legs Corgi", "text": "commented: So cute!", "time": "30 min ago" },
-        { "name": "Dahuang's Human", "text": "@mentioned you", "time": "1h ago" },
-        { "name": "Snowball Samoyed", "text": "commented: Where was this?", "time": "2h ago" },
-        { "name": "Orange Cat Diary", "text": "commented: What a cute pup!", "time": "3h ago" },
-        { "name": "Tangyuan Ragdoll", "text": "@mentioned you", "time": "Yesterday" }
+        {
+          "name": "Short Legs Corgi",
+          "text": "commented: So cute!",
+          "time": "30 min ago"
+        },
+        {
+          "name": "Dahuang's Human",
+          "text": "@mentioned you",
+          "time": "1h ago"
+        },
+        {
+          "name": "Snowball Samoyed",
+          "text": "commented: Where was this?",
+          "time": "2h ago"
+        },
+        {
+          "name": "Orange Cat Diary",
+          "text": "commented: What a cute pup!",
+          "time": "3h ago"
+        },
+        {
+          "name": "Tangyuan Ragdoll",
+          "text": "@mentioned you",
+          "time": "Yesterday"
+        }
       ]
     },
     "chatMessages": [
-      { "id": 1, "text": "Let's walk the dog this weekend?" },
-      { "id": 2, "text": "Sure! What time?" },
-      { "id": 3, "text": "How about 3pm? Bring your Golden Retriever" },
-      { "id": 4, "text": "Sounds good! They had so much fun last time" },
-      { "id": 5, "text": "Haha yeah, I'll bring some snacks this time" },
-      { "id": 6, "text": "Great, see you at the usual spot! 🐶" }
+      {
+        "id": 1,
+        "text": "Let's walk the dog this weekend?"
+      },
+      {
+        "id": 2,
+        "text": "Sure! What time?"
+      },
+      {
+        "id": 3,
+        "text": "How about 3pm? Bring your Golden Retriever"
+      },
+      {
+        "id": 4,
+        "text": "Sounds good! They had so much fun last time"
+      },
+      {
+        "id": 5,
+        "text": "Haha yeah, I'll bring some snacks this time"
+      },
+      {
+        "id": 6,
+        "text": "Great, see you at the usual spot! 🐶"
+      }
     ],
-    "myUser": { "name": "Lili Wang", "bio": "Golden & Ragdoll owner | Love pets, love life" },
+    "myUser": {
+      "name": "Lili Wang",
+      "bio": "Golden & Ragdoll owner | Love pets, love life"
+    },
     "myPetsProfile": [
-      { "id": 1, "name": "Bailey", "type": "Golden Retriever" },
-      { "id": 2, "name": "Mimi", "type": "Ragdoll" }
+      {
+        "id": 1,
+        "name": "Bailey",
+        "type": "Golden Retriever"
+      },
+      {
+        "id": 2,
+        "name": "Mimi",
+        "type": "Ragdoll"
+      }
     ],
     "myPetsPost": [
-      { "id": 1, "name": "Wangcai", "type": "Golden Retriever" },
-      { "id": 2, "name": "Mimi", "type": "Ragdoll" },
-      { "id": 3, "name": "Dahei", "type": "Teddy" }
+      {
+        "id": 1,
+        "name": "Wangcai",
+        "type": "Golden Retriever"
+      },
+      {
+        "id": 2,
+        "name": "Mimi",
+        "type": "Ragdoll"
+      },
+      {
+        "id": 3,
+        "name": "Dahei",
+        "type": "Teddy"
+      }
     ],
     "shareTitle": "PawGram",
     "shareProfileSuffix": "See my pets on PawGram",

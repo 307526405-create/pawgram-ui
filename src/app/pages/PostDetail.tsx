@@ -403,7 +403,7 @@ export function PostDetail() {
           </div>
           <div className="text-[11px] text-[#BBB] dark:text-gray-400 mb-3">
             {post.created_at ? new Date(post.created_at).toLocaleString(i18n.language === 'en' ? 'en-US' : 'zh-CN', {month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'}) : ''}
-            · {(post.view_count||0)+(post.id*7+3)%1000} {t('postDetail.views')}
+            {isOwner && <span className="ml-1">· {(post.view_count||0)+(post.id*7+3)%1000} {t('postDetail.views')}</span>}
           </div>
           <div className="flex items-center justify-between py-2 mb-2">
             <div className="flex items-center gap-6">
