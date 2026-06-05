@@ -57,19 +57,15 @@ export function Login() {
           </button>
         </div>
 
-        <div className="mt-6 flex flex-col items-center shrink-0">
-          <p className="text-[12px] text-[#999999] dark:text-gray-400 mb-4">{t('login.otherLogin')}</p>
+        <div className="mt-4 flex flex-col items-center shrink-0">
+          <p className="text-[12px] text-[#999999] dark:text-gray-400 mb-2.5">{t('login.otherLogin')}</p>
 
-          <button className="w-[52px] h-[52px] rounded-full bg-[#07C160] flex items-center justify-center active:scale-95 transition-transform shadow-md">
-            <svg viewBox="0 0 40 40" className="w-7 h-7" fill="white">
-              <path d="M28.2 16.2c-1.2-3-4.5-5-8.2-5-5 0-9 3.6-9 8 0 2 .8 3.8 2.2 5.2l-1 3.2 3.5-1.8c1.3.6 2.8 1 4.3 1 .6 0 1.2 0 1.8-.2-1.2-1.5-1.8-3.3-1.8-5.2 0-2.8 1.6-5.3 4-6.7-.7-.3-1.5-.5-2.3-.5-2.7 0-4.8 1.8-4.8 4s2.1 4 4.8 4c.3 0 .7 0 1-.1-.5.6-.9 1.4-.9 2.2 0 .8.4 1.5.9 2H20c-1.8 0-3.4-.5-4.8-1.3l-4 2 1.1-3.8C10.7 24 9.3 22 9.3 19.7c0-5.2 4.8-9.5 10.7-9.5 5.5 0 10 3.8 10 8.5 0 .5 0 1-.1 1.5-.5-.3-1.1-.5-1.7-.7z"/>
-              <circle cx="16.5" cy="18" r="1.2"/>
-              <circle cx="21.5" cy="18" r="1.2"/>
+          <button className="w-[48px] h-[48px] rounded-full bg-[#07C160] flex items-center justify-center active:scale-95 transition-transform shadow-md">
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="white">
+              <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.004.142.04.198a.226.226 0 0 0 .321.045l2.126-1.364a.74.74 0 0 1 .497-.129 10.8 10.8 0 0 0 2.882.413c4.8 0 8.691-3.288 8.691-7.342 0-4.054-3.891-7.342-8.69-7.342zm-2.95 5.557a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42zm5.897 0a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42z"/>
             </svg>
           </button>
         </div>
-
-        <div className="flex-1"></div>
 
         <div className="mb-6 mt-8 shrink-0 flex items-center gap-4">
           <button
