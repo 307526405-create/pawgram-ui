@@ -95,15 +95,17 @@ export function Profile() {
           <span className="text-[12px] text-[#BBB] dark:text-gray-500">{t('profile.otherLogin')}</span>
           <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"/>
         </div>
-        <div className="flex justify-center gap-8">
-          <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-[#07C160] flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="white"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.048.141-.048.213 0 .163.13.295.29.295a.326.326 0 0 0 .167-.054l1.903-1.114a.864.864 0 0 1 .717-.098 10.16 10.16 0 0 0 2.837.403c.276 0 .543-.027.811-.05-.857-2.578.157-4.972 1.932-6.446 1.703-1.415 3.882-1.98 5.853-1.838-.576-3.583-4.196-6.348-8.596-6.348zM5.785 5.991c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178A1.17 1.17 0 0 1 4.623 7.17c0-.651.52-1.18 1.162-1.18zm5.813 0c.642 0 1.162.529 1.162 1.18a1.17 1.17 0 0 1-1.162 1.178 1.17 1.17 0 0 1-1.162-1.178c0-.651.52-1.18 1.162-1.18z"/></svg>
+        <div className="flex justify-center gap-6">
+          <button onClick={doLogin} className="w-[56px] h-[56px] rounded-2xl bg-[#07C160] flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform shadow-sm">
+            <MessageCircle className="w-6 h-6 text-white" />
+            <span className="text-[9px] text-white/90 font-medium">微信</span>
           </button>
-          <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-black dark:bg-white flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+          <button onClick={doLogin} className="w-[56px] h-[56px] rounded-2xl bg-black dark:bg-white flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform shadow-sm">
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
           </button>
-          <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-white dark:bg-gray-800 border-2 border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-            <span className="text-[18px] font-bold text-[#4285F4]">G</span>
+          <button onClick={doLogin} className="w-[56px] h-[56px] rounded-2xl bg-white dark:bg-gray-800 border-2 border-[#E5E5E5] dark:border-gray-600 flex flex-col items-center justify-center gap-0.5 active:scale-95 transition-transform shadow-sm">
+            <span className="text-[20px] font-bold text-[#4285F4] leading-none">G</span>
+            <span className="text-[9px] text-[#999] font-medium">谷歌</span>
           </button>
         </div>
       </div>
