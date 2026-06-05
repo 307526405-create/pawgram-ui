@@ -1,4 +1,4 @@
-import { createHashRouter, Outlet, useLocation } from "react-router";
+import { createBrowserRouter, Outlet, useLocation } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { Home } from "./pages/Home";
 import { PostDetail } from "./pages/PostDetail";
@@ -55,7 +55,7 @@ function Root() {
   );
 }
 
-export const router = createHashRouter([
+export const router = createBrowserRouter([
   {
     path: "/",
     Component: Root,

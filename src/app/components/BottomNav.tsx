@@ -21,6 +21,7 @@ export function BottomNav() {
         <div className="flex justify-around items-center h-[50px] relative px-2">
           <Link
             to="/"
+            replace
             className={`flex flex-col items-center justify-center w-[20%] h-full cursor-pointer active:opacity-70 ${location.pathname === '/' ? 'text-[#FF8C42]' : 'text-gray-400 dark:text-gray-500'}`}
           >
             <Home className="w-5 h-5 mb-0.5" strokeWidth={location.pathname === '/' ? 2.5 : 2} />
@@ -29,6 +30,7 @@ export function BottomNav() {
 
           <Link
             to="/discover"
+            replace
             onClick={(e) => {
               if (location.pathname === '/discover') {
                 e.preventDefault();
@@ -53,6 +55,7 @@ export function BottomNav() {
 
           <Link
             to="/messages"
+            replace
             className={`flex flex-col items-center justify-center w-[20%] h-full cursor-pointer active:opacity-70 ${location.pathname === '/messages' ? 'text-[#FF8C42]' : 'text-gray-400 dark:text-gray-500'}`}
           >
             <div className="relative">
@@ -68,6 +71,7 @@ export function BottomNav() {
 
           <Link
             to="/profile"
+            replace
             className={`flex flex-col items-center justify-center w-[20%] h-full cursor-pointer active:opacity-70 ${location.pathname === '/profile' || location.pathname === '/pet' ? 'text-[#FF8C42]' : 'text-gray-400 dark:text-gray-500'}`}
           >
             <User className="w-5 h-5 mb-0.5" strokeWidth={location.pathname === '/profile' || location.pathname === '/pet' ? 2.5 : 2} />
