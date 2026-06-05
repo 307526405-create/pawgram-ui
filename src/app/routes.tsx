@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { createBrowserRouter, Outlet, useLocation, useNavigationType } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { Home } from "./pages/Home";
@@ -26,6 +27,15 @@ const TAB_ROUTES = new Set(["/", "/discover", "/messages", "/profile"]);
 function Root() {
   const location = useLocation();
   const navType = useNavigationType();
+
+  // Clear forward history on tab pages to prevent forward gesture
+  useEffect(() => {
+    if (!TAB_ROUTES.has(location.pathname)) return;
+    // Push + back + replace: clears forward entries while staying on same page
+    history.pushState(null, '', location.href);
+    history.back();
+    history.replaceState(null, '', location.href);
+  }, [location.pathname]);
 
   if (location.pathname === "/export") return <Outlet />;
 
