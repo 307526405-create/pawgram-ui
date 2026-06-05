@@ -5,6 +5,7 @@ import { BottomNav } from "../components/BottomNav";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { MoreHorizontal, ChevronRight, CheckCheck, Settings, Ban, Search, X, Heart, MessageCircle, UserPlus } from "lucide-react";
 import { useScrollRestore } from "../hooks/useScrollRestore";
+import { notificationsApi } from "../api/client";
 
 const newFriendBase = [
   { id:1, name:"Alice Wang", avatar:"https://images.unsplash.com/photo-1527980965255-d3b416303d12?w=120" },
@@ -48,13 +49,19 @@ export function Messages() {
     })),
   [mockData]);
 
-  const notifGroups = useMemo(() =>
-    notifGroupBase.map((g, i) => ({
-      ...g,
-      label: mockData.notifGroups?.[i]?.label || '',
-      desc: mockData.notifGroups?.[i]?.desc || '',
-    })),
-  [mockData]);
+  const notifGroups = useMemo(() => {
+    const defaults: Record<string, { label: string; desc: string }> = {
+      likes: { label: t('messages.receivedLikes'), desc: '' },
+      follows: { label: t('messages.newFollowers'), desc: '' },
+      comments: { label: t('messages.commentsAndAt'), desc: '' },
+      comment_like: { label: t('messages.commentLikes'), desc: '' },
+    };
+    return [
+      { key: 'likes', count: 0, avatar: 'https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w=80', label: defaults.likes.label, desc: defaults.likes.desc },
+      { key: 'follows', count: 0, avatar: 'https://images.unsplash.com/photo-1536548665027-b96d34a005ae?w=80', label: defaults.follows.label, desc: defaults.follows.desc },
+      { key: 'comments', count: 0, avatar: 'https://images.unsplash.com/photo-1615464670798-6e92fafa2a89?w=80', label: defaults.comments.label, desc: defaults.comments.desc },
+    ];
+  }, [t]);
 
   const conversations = useMemo(() =>
     conversationBase.map((c, i) => ({
@@ -75,10 +82,15 @@ export function Messages() {
   const [searchQuery, setSearchQuery] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
+  const [notifData, setNotifData] = useState<any[]>([]);
 
   useEffect(() => {
     const timer = setTimeout(() => setLoading(false), 400);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    notificationsApi.list(1).then((data: any[]) => setNotifData(data || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -100,9 +112,13 @@ export function Messages() {
       .map(c => ({ ...c, unread: allRead || clearedUnreadIds.has(c.id) ? 0 : c.unread })),
   [conversations, deletedConvIds, allRead, clearedUnreadIds]);
 
-  const notifs = useMemo(() =>
-    notifGroups.map(g => ({ ...g, count: allRead ? 0 : g.count })),
-  [notifGroups, allRead]);
+  const notifs = useMemo(() => {
+    const byType: Record<string, number> = {};
+    (notifData || []).forEach((n: any) => {
+      if (!n.is_read) byType[n.type] = (byType[n.type] || 0) + 1;
+    });
+    return notifGroups.map(g => ({ ...g, count: allRead ? 0 : (byType[g.key] || 0) }));
+  }, [notifGroups, allRead, notifData]);
 
   const totalUnread = notifs.reduce((s, g) => s + g.count, 0) + convs.reduce((s, c) => s + c.unread, 0);
 
@@ -114,6 +130,7 @@ export function Messages() {
   const markAllRead = () => {
     setAllRead(true);
     setShowMenu(false);
+    notificationsApi.markAllRead(1).catch(() => {});
   };
 
   const renderNotifIcon = (key: string) => {

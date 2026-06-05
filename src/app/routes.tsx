@@ -1,25 +1,42 @@
 import { createBrowserRouter, Outlet, useLocation, useNavigationType } from "react-router";
 import { motion, AnimatePresence } from "motion/react";
+import { lazy, Suspense } from "react";
 import { Home } from "./pages/Home";
-import { PostDetail } from "./pages/PostDetail";
+import { Messages } from "./pages/Messages";
 import { Profile } from "./pages/Profile";
-import { Discover } from "./pages/Discover";
 import { Search } from "./pages/Search";
 import { PostCreate } from "./pages/PostCreate";
-import { Messages } from "./pages/Messages";
-import { PetProfile } from "./pages/PetProfile";
-import { CheckIn } from "./pages/CheckIn";
-import { BowlRewards } from "./pages/BowlRewards";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
 import { Settings } from "./pages/Settings";
-import { FollowList } from "./pages/FollowList";
 import { ChatDetail } from "./pages/ChatDetail";
 import { Scan } from "./pages/Scan";
-import { PrivacyPolicy } from "./pages/PrivacyPolicy";
-import { UserProfile } from "./pages/UserProfile";
-import { BreedPage } from "./pages/BreedPage";
-import { NotificationDetail } from "./pages/NotificationDetail";
+
+// Route-level code splitting
+const PostDetail = lazy(() => import("./pages/PostDetail"));
+const Discover = lazy(() => import("./pages/Discover"));
+const PetProfile = lazy(() => import("./pages/PetProfile"));
+const CheckIn = lazy(() => import("./pages/CheckIn"));
+const BowlRewards = lazy(() => import("./pages/BowlRewards"));
+const FollowList = lazy(() => import("./pages/FollowList"));
+const PrivacyPolicy = lazy(() => import("./pages/PrivacyPolicy"));
+const UserProfile = lazy(() => import("./pages/UserProfile"));
+const BreedPage = lazy(() => import("./pages/BreedPage"));
+const NotificationDetail = lazy(() => import("./pages/NotificationDetail"));
+
+function PageSuspense({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={
+      <div className="h-full flex items-center justify-center bg-[#FAFAFA] dark:bg-gray-950">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-[#FF8C42] border-t-transparent rounded-full animate-spin" />
+        </div>
+      </div>
+    }>
+      {children}
+    </Suspense>
+  );
+}
 
 const TAB_ROUTES = new Set(["/", "/discover", "/messages", "/profile"]);
 
@@ -59,6 +76,10 @@ function Root() {
   );
 }
 
+function withSuspense(Component: React.ComponentType) {
+  return () => <PageSuspense><Component /></PageSuspense>;
+}
+
 export const router = createBrowserRouter([
   {
     path: "/",
@@ -66,26 +87,26 @@ export const router = createBrowserRouter([
     children: [
       { index: true, Component: Home },
       { path: "post", Component: PostCreate },
-      { path: "post/:id", Component: PostDetail },
+      { path: "post/:id", Component: withSuspense(PostDetail) },
       { path: "profile", Component: Profile },
-      { path: "discover", Component: Discover },
+      { path: "discover", Component: withSuspense(Discover) },
       { path: "search", Component: Search },
       { path: "messages", Component: Messages },
-      { path: "pet", Component: PetProfile },
-      { path: "checkin", Component: CheckIn },
-      { path: "bowl", Component: BowlRewards },
+      { path: "pet", Component: withSuspense(PetProfile) },
+      { path: "checkin", Component: withSuspense(CheckIn) },
+      { path: "bowl", Component: withSuspense(BowlRewards) },
       { path: "login", Component: Login },
       { path: "register", Component: Register },
       { path: "settings", Component: Settings },
-      { path: "follows", Component: FollowList },
+      { path: "follows", Component: withSuspense(FollowList) },
       { path: "export", Component: ChatDetail },
       { path: "scan", Component: Scan },
       { path: "chat/:id", Component: ChatDetail },
       { path: "post/edit/:id", Component: PostCreate },
-      { path: "privacy", Component: PrivacyPolicy },
-      { path: "user/:id", Component: UserProfile },
-      { path: "breed/:breed", Component: BreedPage },
-      { path: "notifications/:type", Component: NotificationDetail },
+      { path: "privacy", Component: withSuspense(PrivacyPolicy) },
+      { path: "user/:id", Component: withSuspense(UserProfile) },
+      { path: "breed/:breed", Component: withSuspense(BreedPage) },
+      { path: "notifications/:type", Component: withSuspense(NotificationDetail) },
     ],
   },
 ]);

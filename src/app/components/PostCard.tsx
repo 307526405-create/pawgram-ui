@@ -1,10 +1,10 @@
 import { Heart, MessageCircle, MapPin, Play, Footprints } from "lucide-react";
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, memo } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
-export function PostCard({ post, onLike, onFollow }: { post: any; onLike?: (e: any) => void; onFollow?: (e: any) => void }) {
+export const PostCard = memo(function PostCard({ post, onLike, onFollow }: { post: any; onLike?: (e: any) => void; onFollow?: (e: any) => void }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const user = post.user || { name: t('common.user'), avatar: '' };
@@ -116,9 +116,9 @@ export function PostCard({ post, onLike, onFollow }: { post: any; onLike?: (e: a
       </div>
     </div>
   );
-}
+});
 
-export function PostCardSkeleton() {
+export const PostCardSkeleton = memo(function PostCardSkeleton() {
   return (
     <div className="bg-white dark:bg-gray-900 rounded-xl mb-4 shadow-sm border border-gray-50 dark:border-gray-800 overflow-hidden animate-pulse">
       {/* Header: avatar + name + breed tag */}
@@ -149,4 +149,4 @@ export function PostCardSkeleton() {
       </div>
     </div>
   );
-}
+});

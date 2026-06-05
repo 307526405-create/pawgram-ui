@@ -1,13 +1,13 @@
 import { Search, Bell, X } from "lucide-react";
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { Link, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { PostCard, PostCardSkeleton } from "../components/PostCard";
 import { BottomNav } from "../components/BottomNav";
 import { Toast, toast } from "../components/Toast";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { postsApi, usersApi } from "../api/client";
-import { sendLikeNotification, sendFollowNotification, sendNewNotification } from "../utils/notifications";
+import { postsApi, usersApi, notificationsApi } from "../api/client";
+import { sendLikeNotification, sendFollowNotification } from "../utils/notifications";
 import { useScrollRestore } from "../hooks/useScrollRestore";
 
 const storyAvatars = [
@@ -34,13 +34,6 @@ const recommendUserAvatars = [
   "https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=150",
 ];
 
-const notificationAvatars = [
-  "https://images.unsplash.com/photo-1592194996308-7b43878e84a6?w=80",
-  "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80",
-  "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=80",
-];
-
-const notificationUnread = [true, true, false];
 
 export function Home() {
   const navigate = useNavigate();
@@ -67,13 +60,35 @@ export function Home() {
     })),
   [mockData]);
 
-  const notifications = useMemo(() =>
-    (mockData.notifications || []).map((n: any, i: number) => ({
-      ...n,
-      avatar: notificationAvatars[i],
-      unread: notificationUnread[i],
-    })),
-  [mockData]);
+  const [notifications, setNotifications] = useState<any[]>([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+
+  const fetchUnreadCount = async () => {
+    try {
+      const { count } = await notificationsApi.unreadCount(1);
+      setUnreadCount(count);
+    } catch {}
+  };
+
+  const fetchNotifications = async () => {
+    try {
+      const data = await notificationsApi.list(1);
+      setNotifications((data || []).slice(0, 10));
+    } catch {}
+  };
+
+  useEffect(() => {
+    fetchUnreadCount();
+    fetchNotifications();
+    const interval = setInterval(fetchUnreadCount, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    const handler = () => { fetchUnreadCount(); fetchNotifications(); };
+    window.addEventListener('pawgram:refresh-notifs', handler);
+    return () => window.removeEventListener('pawgram:refresh-notifs', handler);
+  }, []);
   const [posts, setPosts] = useState<any[]>([]);
   const [page, setPage] = useState(2);
   const [hasMore, setHasMore] = useState(true);
@@ -131,16 +146,15 @@ export function Home() {
     setViewedStories(prev => new Set([...prev, s.id]));
   };
   const handleOpenNotifications = () => {
+    fetchNotifications();
     setShowNotifications(true);
     setNotifViewed(true);
-    const unread = notifications.filter(n => n.unread);
-    if (unread.length > 0) sendNewNotification(unread[0].text);
   };
   const toggleBookmark = (postId: number) => {
     setBookmarkedPosts(prev => { const next = new Set(prev); if (next.has(postId)) next.delete(postId); else next.add(postId); return next; });
   };
 
-  const toggleLike = async (postId: number, userName?: string) => {
+  const toggleLike = useCallback(async (postId: number, userName?: string) => {
     const wasLiked = likedPosts.has(postId);
     setLikedPosts(prev => {
       const next = new Set(prev);
@@ -159,8 +173,8 @@ export function Home() {
       });
       toast(wasLiked ? '取消点赞失败' : '点赞失败');
     }
-  };
-  const toggleFollow = async (userId: number, userName?: string) => {
+  }, [likedPosts]);
+  const toggleFollow = useCallback(async (userId: number, userName?: string) => {
     const wasFollowed = followedUsers.has(userId);
     setFollowedUsers(prev => {
       const next = new Set(prev);
@@ -179,7 +193,7 @@ export function Home() {
       });
       toast(wasFollowed ? '取消关注失败' : '关注失败');
     }
-  };
+  }, [followedUsers]);
   const handleShare = (post: any) => {
     const text = `${t('common.brandName')}\n${post.user?.name ? post.user.name + ': ' : ''}${post.content}`;
     if (navigator.share) navigator.share({ title: t('common.brandName'), text }).catch(() => {});
@@ -246,18 +260,41 @@ export function Home() {
               <button onClick={() => setShowNotifications(false)}><X className="w-5 h-5 text-[#999] dark:text-gray-400"/></button>
             </div>
             <div className="space-y-2">
-              {notifications.map(n => (
-                <div key={n.id} className="flex items-center gap-3 p-3 rounded-xl bg-[#F8F8F8] dark:bg-gray-800">
-                  <ImageWithFallback src={n.avatar} className="w-10 h-10 rounded-full object-cover shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <div className="text-[13px] text-[#333] dark:text-gray-100 flex items-center gap-1.5">
-                      {n.text}
-                      {n.unread && <span className="w-2 h-2 rounded-full bg-[#FF8C42] shrink-0"/>}
+              {notifications.length === 0 ? (
+                <p className="text-center text-[13px] text-[#999] dark:text-gray-400 py-6">{t('messages.noMessagesTitle')}</p>
+              ) : (
+                notifications.map(n => (
+                  <div key={n.id} onClick={() => {
+                    if (!n.is_read) {
+                      notificationsApi.markRead(n.id).then(() => fetchUnreadCount()).catch(() => {});
+                      setNotifications(prev => prev.map(i => i.id === n.id ? { ...i, is_read: 1 } : i));
+                    }
+                    if (n.post_id) navigate(`/post/${n.post_id}`);
+                    else if (n.from_user_id) navigate(`/user/${n.from_user_id}`);
+                    setShowNotifications(false);
+                  }} className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer active:opacity-80 ${n.is_read ? 'bg-[#F8F8F8] dark:bg-gray-800' : 'bg-[#FFF8F0] dark:bg-orange-900/10'}`}>
+                    <ImageWithFallback src={n.from_user_avatar || ''} className="w-10 h-10 rounded-full object-cover shrink-0 bg-gray-100 dark:bg-gray-700" />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] text-[#333] dark:text-gray-100 flex items-center gap-1.5">
+                        {n.content || n.from_user_name}
+                        {!n.is_read && <span className="w-2 h-2 rounded-full bg-[#FF8C42] shrink-0"/>}
+                      </div>
+                      <div className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">
+                        {(() => {
+                          if (!n.created_at) return '';
+                          const diff = Date.now() - new Date(n.created_at + 'Z').getTime();
+                          const mins = Math.floor(diff / 60000);
+                          if (mins < 1) return t('time.justNow');
+                          if (mins < 60) return t('time.minAgo', { n: mins });
+                          const hours = Math.floor(diff / 3600000);
+                          if (hours < 24) return t('time.hoursAgo', { n: hours });
+                          return t('time.daysAgo', { n: Math.floor(hours / 24) });
+                        })()}
+                      </div>
                     </div>
-                    <div className="text-[11px] text-[#999] dark:text-gray-400 mt-0.5">{n.time}</div>
                   </div>
-                </div>
-              ))}
+                ))
+              )}
             </div>
             <button onClick={() => setShowNotifications(false)} className="w-full h-10 mt-4 text-[#999] dark:text-gray-400 text-[13px]">{t('common.close')}</button>
           </div>
@@ -279,8 +316,10 @@ export function Home() {
               <Link to="/search" className="active:scale-95"><Search className="w-5 h-5 text-[#333] dark:text-gray-100" /></Link>
               <button onClick={handleOpenNotifications} className="active:scale-95 relative">
                 <Bell className="w-5 h-5 text-[#333] dark:text-gray-100" />
-                {!notifViewed && notifications.some(n => n.unread) && (
-                  <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border border-white dark:border-gray-900"></span>
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 min-w-[16px] h-4 bg-red-500 rounded-full flex items-center justify-center px-1 border border-white dark:border-gray-900">
+                    <span className="text-[9px] text-white font-bold leading-none">{unreadCount > 99 ? '99+' : unreadCount}</span>
+                  </span>
                 )}
               </button>
             </div>

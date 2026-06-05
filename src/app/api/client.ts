@@ -45,6 +45,14 @@ export const placesApi = {
   discoverFeed: (limit?: number) => apiGet(`/places/feed/discover${limit ? `?limit=${limit}` : ''}`),
 };
 
+// Notifications
+export const notificationsApi = {
+  list: (userId = 1) => apiGet(`/notifications?userId=${userId}`),
+  unreadCount: (userId = 1) => apiGet(`/notifications/unread-count?userId=${userId}`),
+  markRead: (id: number) => fetch(`${API_BASE}/notifications/${id}/read`, { method: 'PUT' }),
+  markAllRead: (userId = 1) => apiPost('/notifications/read-all', { userId }),
+};
+
 // Discover (LBS)
 export const discoverApi = {
   nearby: (lat: number, lon: number, limit?: number) =>
