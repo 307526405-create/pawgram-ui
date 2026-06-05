@@ -61,6 +61,16 @@ export function ChatDetail() {
   const cameraInputRef = useRef<HTMLInputElement>(null);
   const [keyboardOffset, setKeyboardOffset] = useState(0);
   const [overlayUser, setOverlayUser] = useState<number | null>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  // Block WKWebView gesture on overlay
+  useEffect(() => {
+    if (!overlayUser) return;
+    const el = overlayRef.current;
+    if (!el) return;
+    const block = (e: TouchEvent) => e.preventDefault();
+    el.addEventListener('touchstart', block, { passive: false });
+    return () => el.removeEventListener('touchstart', block);
+  }, [overlayUser]);
 
   const messages = [...mockMessages, ...sentMessages];
 
@@ -253,7 +263,7 @@ export function ChatDetail() {
         </button>
       </div>
       {overlayUser !== null && createPortal(
-        <div className="fixed inset-0 z-[2000]">
+        <div ref={overlayRef} className="fixed inset-0 z-[2000]">
           <UserProfile userId={overlayUser} onBack={() => setOverlayUser(null)} />
         </div>,
         document.body
