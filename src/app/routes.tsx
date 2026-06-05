@@ -1,5 +1,4 @@
 import { createBrowserRouter, Outlet, useLocation } from "react-router";
-import { motion, AnimatePresence } from "motion/react";
 import { Home } from "./pages/Home";
 import { PostDetail } from "./pages/PostDetail";
 import { Profile } from "./pages/Profile";
