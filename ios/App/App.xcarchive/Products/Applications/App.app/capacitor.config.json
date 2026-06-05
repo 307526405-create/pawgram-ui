@@ -1,0 +1,15 @@
+{
+	"appId": "com.pawgram.app",
+	"appName": "爪印",
+	"webDir": "dist",
+	"server": {
+		"iosScheme": "http"
+	},
+	"packageClassList": [
+		"CAPBrowserPlugin",
+		"CAPCameraPlugin",
+		"CapacitorGoogleMapsPlugin",
+		"LocalNotificationsPlugin",
+		"PushNotificationsPlugin"
+	]
+}
