@@ -155,17 +155,6 @@ export function Messages() {
       </div>
 
       <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden" ref={scrollRef} onScroll={onScroll}>
-        {/* 1. New Friends — horizontal scroll */}
-        <div className="bg-white dark:bg-gray-900 mb-2">
-          <div className="flex gap-3 px-4 py-3 overflow-x-auto [&::-webkit-scrollbar]:hidden">
-            {newFriends.map(f => (
-              <div key={f.id} className="shrink-0 flex flex-col items-center gap-1.5 w-[52px]">
-                <ImageWithFallback src={f.avatar} onClick={() => navigate(`/user/${f.id}`)} className="w-[52px] h-[52px] rounded-full object-cover cursor-pointer active:opacity-70"/>
-                <span className="text-[11px] text-[#333] dark:text-gray-100 text-center leading-tight line-clamp-2">{f.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
 
         {/* 2. Notification Groups — white card */}
         <div className="bg-white dark:bg-gray-900 mb-2">
