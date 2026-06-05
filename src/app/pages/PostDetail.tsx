@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
-import { postsApi } from "../api/client";
+import { postsApi, usersApi } from "../api/client";
 import { sendLikeNotification, sendCommentNotification, sendFollowNotification } from "../utils/notifications";
 import { usePageTransition } from "../hooks/usePageTransition";
 
@@ -25,6 +25,7 @@ interface Comment {
   content: string;
   created_at: string;
   parent_id?: number | null;
+  likes_count?: number;
   replies: Comment[];
 }
 
@@ -48,7 +49,7 @@ function flattenComments(comments: Comment[], t: any, lang: string, depth: numbe
       user: c.user,
       text: c.content,
       time: formatTime(c.created_at, t, lang),
-      likes: 0,
+      likes: c.likes_count || 0,
       isLiked: false,
       parentId: c.parent_id || null,
       depth,
@@ -66,6 +67,7 @@ export function PostDetail() {
   const [post, setPost] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [isFaved, setIsFaved] = useState(false);
   const [isFollowing, setIsFollowing] = useState(false);
   const [isPrivate, setIsPrivate] = useState(false);
@@ -90,15 +92,23 @@ export function PostDetail() {
 
   useEffect(() => {
     if (!id) return;
-    postsApi.detail(Number(id)).then(p => { setPost(p); setIsPrivate(p.is_private||false); setLoading(false); }).catch(() => setLoading(false));
+    postsApi.detail(Number(id)).then(p => { setPost(p); setIsLiked(p.is_liked||false); setLikeCount(p.like_count||0); setIsFollowing(p.user?.followed||false); setIsPrivate(p.is_private||false); setLoading(false); }).catch(() => setLoading(false));
     fetchComments();
   }, [id, fetchComments]);
 
-  const handleLike = () => {
-    setIsLiked(prev => {
-      if (!prev && post?.user?.name) sendLikeNotification(post.user.name);
-      return !prev;
-    });
+  const handleLike = async () => {
+    const wasLiked = isLiked;
+    const prevCount = likeCount;
+    setIsLiked(!wasLiked);
+    setLikeCount(wasLiked ? prevCount - 1 : prevCount + 1);
+    if (!wasLiked && post?.user?.name) sendLikeNotification(post.user.name);
+    try {
+      if (wasLiked) await postsApi.unlike(post.id);
+      else await postsApi.like(post.id);
+    } catch {
+      setIsLiked(wasLiked);
+      setLikeCount(prevCount);
+    }
   };
   const handleShare = () => {
     if (!post) return;
@@ -137,16 +147,42 @@ export function PostDetail() {
     }
   };
 
-  const toggleCommentLike = (cid: number) => {
+  const toggleCommentLike = async (cid: number) => {
+    // Find current state
+    let wasLiked = false;
+    for (const c of comments) {
+      if (c.id === cid) { wasLiked = c.isLiked; break; }
+      for (const r of c.replies) {
+        if (r.id === cid) { wasLiked = r.isLiked; break; }
+      }
+    }
+
+    // Optimistic update
     setComments(prev => {
       if (prev.some(c => c.id === cid)) {
-        return prev.map(c => c.id === cid ? {...c, isLiked:!c.isLiked, likes: c.isLiked ? c.likes-1 : c.likes+1} : c);
+        return prev.map(c => c.id === cid ? {...c, isLiked:!c.isLiked, likes: c.likes + (c.isLiked ? -1 : 1)} : c);
       }
       return prev.map(c => ({
         ...c,
-        replies: c.replies.map(r => r.id === cid ? {...r, isLiked:!r.isLiked, likes: r.isLiked ? r.likes-1 : r.likes+1} : r),
+        replies: c.replies.map(r => r.id === cid ? {...r, isLiked:!r.isLiked, likes: r.likes + (r.isLiked ? -1 : 1)} : r),
       }));
     });
+
+    // API call
+    try {
+      await postsApi.likeComment(Number(id!), cid);
+    } catch {
+      // Rollback
+      setComments(prev => {
+        if (prev.some(c => c.id === cid)) {
+          return prev.map(c => c.id === cid ? {...c, isLiked:wasLiked, likes: c.likes + (wasLiked ? 1 : -1)} : c);
+        }
+        return prev.map(c => ({
+          ...c,
+          replies: c.replies.map(r => r.id === cid ? {...r, isLiked:wasLiked, likes: r.likes + (wasLiked ? 1 : -1)} : r),
+        }));
+      });
+    }
   };
 
   const handleDelete = async () => {
@@ -264,11 +300,16 @@ export function PostDetail() {
             <ImageWithFallback src={post.user?.avatar} onClick={() => navigate(`/user/${post.user?.id}`)} className="w-9 h-9 rounded-full object-cover cursor-pointer active:opacity-70"/>
             <span className="text-[14px] font-bold text-[#333] dark:text-gray-100">{post.user?.name || t('common.user')}</span>
           </div>
-          <button onClick={() => {
-            setIsFollowing(prev => {
-              if (!prev && post?.user?.name) sendFollowNotification(post.user.name);
-              return !prev;
-            });
+          <button onClick={async () => {
+            const wasFollowing = isFollowing;
+            setIsFollowing(!wasFollowing);
+            if (!wasFollowing && post?.user?.name) sendFollowNotification(post.user.name);
+            try {
+              if (wasFollowing) await usersApi.unfollow(post.user?.id);
+              else await usersApi.follow(post.user?.id);
+            } catch {
+              setIsFollowing(wasFollowing);
+            }
           }}
             className={`text-[13px] font-bold px-3 py-1.5 rounded-full cursor-pointer active:opacity-80 ${isFollowing ? 'text-[#999] dark:text-gray-400 bg-[#F5F5F5] dark:bg-gray-800' : 'text-[#FF8C42] bg-[#FFF3E6] dark:bg-orange-900/30'}`}>
             {isFollowing ? t('common.followed') : t('common.follow')}
@@ -316,7 +357,7 @@ export function PostDetail() {
             <div className="flex items-center gap-6">
               <button onClick={handleLike} className={`flex items-center gap-1.5 ${isLiked ? 'text-[#FF4D4F]' : 'text-[#666] dark:text-gray-400'}`}>
                 <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`}/>
-                <span className="text-[14px] font-medium">{(post.like_count||0)+(isLiked?1:0)}</span>
+                <span className="text-[14px] font-medium">{likeCount}</span>
               </button>
               <button onClick={() => setIsFaved(!isFaved)} className={`flex items-center gap-1.5 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}>
                 <Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/>

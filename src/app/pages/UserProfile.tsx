@@ -6,6 +6,7 @@ import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { useSwipeBack } from "../hooks/useSwipeBack";
 import { users, posts } from "../data/mockData";
+import { usersApi } from "../api/client";
 
 export function UserProfile({ userId: propId, onBack }: { userId?: number; onBack?: () => void } = {}) {
   const navigate = useNavigate();
@@ -91,7 +92,16 @@ export function UserProfile({ userId: propId, onBack }: { userId?: number; onBac
           ) : (
             <>
               <button
-                onClick={() => setIsFollowing(!isFollowing)}
+                onClick={async () => {
+                  const wasFollowing = isFollowing;
+                  setIsFollowing(!wasFollowing);
+                  try {
+                    if (wasFollowing) await usersApi.unfollow(userId);
+                    else await usersApi.follow(userId);
+                  } catch {
+                    setIsFollowing(wasFollowing);
+                  }
+                }}
                 className={`flex-1 h-10 rounded-xl text-[14px] font-bold active:opacity-80 flex items-center justify-center gap-1.5 ${isFollowing ? 'bg-[#F0F0F0] dark:bg-gray-800 text-[#666] dark:text-gray-400' : 'bg-[#FF8C42] text-white'}`}
               >
                 <UserPlus className="w-4 h-4" />

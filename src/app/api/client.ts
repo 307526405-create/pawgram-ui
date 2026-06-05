@@ -26,6 +26,8 @@ export const postsApi = {
     apiPost(`/posts/${postId}/comments`, { content, parent_id: parentId || null }),
   like: (id: number) => apiPost(`/posts/${id}/like`),
   unlike: (id: number) => apiPost(`/posts/${id}/unlike`),
+  likeComment: (postId: number, commentId: number) =>
+    apiPost(`/posts/${postId}/comments/${commentId}/like`, { userId: 1 }),
 };
 
 // Users

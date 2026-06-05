@@ -74,6 +74,12 @@ export function Messages() {
   const [showSearch, setShowSearch] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setLoading(false), 400);
+    return () => clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -156,7 +162,35 @@ export function Messages() {
 
       <div className="flex-1 overflow-y-auto pb-[calc(var(--app-bottom-nav-height)+6px)] [&::-webkit-scrollbar]:hidden" ref={scrollRef} onScroll={onScroll}>
 
-        {/* 2. Notification Groups — white card */}
+        {loading && (
+          <div className="space-y-3 px-4 pt-4">
+            {/* Notification skeleton */}
+            <div className="animate-pulse bg-white dark:bg-gray-900 rounded-xl p-3 space-y-3">
+              {[1,2,3].map(i => (
+                <div key={i} className="flex items-center gap-3 pb-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 last:pb-0">
+                  <div className="w-6 h-6 rounded-full bg-gray-200 dark:bg-gray-700" />
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-12" />
+                  <div className="flex-1 h-4 bg-gray-100 dark:bg-gray-800 rounded" />
+                </div>
+              ))}
+            </div>
+            {/* Conversation skeleton */}
+            <div className="animate-pulse bg-white dark:bg-gray-900 rounded-xl p-3 space-y-3">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24 mb-2" />
+              {[1,2,3,4].map(i => (
+                <div key={i} className="flex items-center gap-3 pb-3 border-b border-[#F5F5F5] dark:border-gray-700 last:border-b-0 last:pb-0">
+                  <div className="w-12 h-12 rounded-full bg-gray-200 dark:bg-gray-700 shrink-0" />
+                  <div className="flex-1 space-y-1.5">
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-1/3" />
+                    <div className="h-3 bg-gray-100 dark:bg-gray-800 rounded w-2/3" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {!loading && (
+        <>
         <div className="bg-white dark:bg-gray-900 mb-2">
           {notifs.map(g => {
             const cfg = NOTIF_ICON_MAP[g.key];
@@ -226,6 +260,8 @@ export function Messages() {
         </div>
 
         <div className="h-6"/>
+        </>
+        )}
       </div>
 
       <BottomNav />
