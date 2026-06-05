@@ -1,9 +1,8 @@
 import { useEffect, useRef } from "react";
-import { useNavigate, useLocation } from "react-router";
+import { useNavigate } from "react-router";
 
-export function useSwipeBack(containerRef: React.RefObject<HTMLDivElement | null>) {
+export function useSwipeBack(containerRef: React.RefObject<HTMLDivElement | null>, onSwipeBack?: () => void) {
   const navigate = useNavigate();
-  const location = useLocation();
   const state = useRef({ startX: 0, startY: 0, swiping: false, offset: 0 });
 
   useEffect(() => {
@@ -16,14 +15,14 @@ export function useSwipeBack(containerRef: React.RefObject<HTMLDivElement | null
       s.startX = e.touches[0].clientX;
       s.startY = e.touches[0].clientY;
       s.offset = 0;
-      s.swiping = s.startX < 24; // only from left edge
+      s.swiping = s.startX < 24;
     };
 
     const onTouchMove = (e: TouchEvent) => {
       if (!s.swiping) return;
       const dx = e.touches[0].clientX - s.startX;
       const dy = Math.abs(e.touches[0].clientY - s.startY);
-      if (dy > dx * 1.5) { s.swiping = false; return; } // vertical scroll wins
+      if (dy > dx * 1.5) { s.swiping = false; return; }
       if (dx < 0) { s.swiping = false; return; }
       s.offset = Math.min(dx, el.offsetWidth);
       el.style.transform = `translateX(${s.offset}px)`;
@@ -39,7 +38,7 @@ export function useSwipeBack(containerRef: React.RefObject<HTMLDivElement | null
         setTimeout(() => {
           el.style.transform = '';
           el.style.transition = '';
-          navigate(-1);
+          if (onSwipeBack) onSwipeBack(); else navigate(-1);
         }, 250);
       } else {
         el.style.transform = '';
@@ -56,8 +55,5 @@ export function useSwipeBack(containerRef: React.RefObject<HTMLDivElement | null
       el.removeEventListener('touchmove', onTouchMove);
       el.removeEventListener('touchend', onTouchEnd);
     };
-  }, [navigate, containerRef]);
-
-  // Don't show back gesture on home page
-  return location.pathname !== '/';
+  }, [navigate, containerRef, onSwipeBack]);
 }

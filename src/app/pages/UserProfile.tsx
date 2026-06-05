@@ -15,7 +15,7 @@ export function UserProfile({ userId: propId, onBack }: { userId?: number; onBac
   const userId = propId ?? Number(id);
   const user = users[userId as keyof typeof users];
   const swipeRef = useRef<HTMLDivElement>(null);
-  useSwipeBack(swipeRef);
+  useSwipeBack(swipeRef, onBack);
   const isOwnProfile = userId === 1;
   const [isFollowing, setIsFollowing] = useState(false);
   const goBack = () => onBack ? onBack() : handleBack(() => navigate(-1));
