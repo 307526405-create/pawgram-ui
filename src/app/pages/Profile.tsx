@@ -27,16 +27,14 @@ export function Profile() {
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
   const [countdown, setCountdown] = useState(0);
-  const [error, setError] = useState('');
-  const timerRef = useRef<ReturnType<typeof setInterval>>();
 
   const handleSendCode = async () => {
     if (!phone || countdown > 0) return;
     try {
       await authApi.sendCode(phone);
       setCountdown(60);
-      timerRef.current = setInterval(() => {
-        setCountdown(prev => { if (prev <= 1) { clearInterval(timerRef.current); return 0; } return prev - 1; });
+      timerRef.current = window.setInterval(() => {
+        setCountdown(prev => { if (prev <= 1) { clearInterval(timerRef.current!); return 0; } return prev - 1; });
       }, 1000);
     } catch (err: any) { setError(err.message || '发送失败'); }
   };
