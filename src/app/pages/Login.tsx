@@ -82,6 +82,36 @@ export function Login() {
     }
   };
 
+  const handleAppleLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const result = await authApi.appleLogin("mock_apple_token");
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || 'Apple登录失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      const result = await authApi.googleLogin("mock_google_token");
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      navigate('/');
+    } catch (err: any) {
+      setError(err.message || 'Google登录失败');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleWechatLogin = async () => {
     setError('');
     setLoading(true);
@@ -197,12 +227,12 @@ export function Login() {
                 <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.004.142.04.198a.226.226 0 0 0 .321.045l2.126-1.364a.74.74 0 0 1 .497-.129 10.8 10.8 0 0 0 2.882.413c4.8 0 8.691-3.288 8.691-7.342 0-4.054-3.891-7.342-8.69-7.342zm-2.95 5.557a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42zm5.897 0a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42z"/>
               </svg>
             </button>
-            <button className="w-[48px] h-[48px] rounded-full bg-black flex items-center justify-center active:scale-95 transition-transform shadow-sm">
+            <button onClick={handleAppleLogin} className="w-[48px] h-[48px] rounded-full bg-black flex items-center justify-center active:scale-95 transition-transform shadow-sm">
               <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white">
                 <path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.38 15.98 2.85 9.75 7.88 9.5c1.24.06 2.12.7 2.92.72.8.02 2.06-.86 3.6-.72 1.24.12 2.18.5 2.84 1.08-2.56 1.54-2.12 4.98.42 6-.5 1.1-1.1 2.2-2.1 3.2-.12.12-.26.26-.5.5zM14.52 7.6c.22-2.66 2.14-4.34 4.2-4.1.32 2.66-2.14 4.72-4.2 4.1z"/>
               </svg>
             </button>
-            <button className="w-[48px] h-[48px] rounded-full border-2 border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:scale-95 transition-transform shadow-sm">
+            <button onClick={handleGoogleLogin} className="w-[48px] h-[48px] rounded-full border-2 border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:scale-95 transition-transform shadow-sm">
               <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#333">
                 <path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 12.5l-5-3-5 3v-7l5 3 5-3v7z"/>
               </svg>

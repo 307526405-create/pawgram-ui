@@ -92,6 +92,8 @@ export const authApi = {
   sendCode: (phone: string) => apiPost('/auth/send-code', { phone }),
   login: (phone: string, code: string) => apiPost('/auth/login', { phone, code }),
   wechatLogin: (code: string) => apiPost('/auth/wechat-login', { code }),
+  appleLogin: (identityToken: string) => apiPost('/auth/apple-login', { identityToken }),
+  googleLogin: (idToken: string) => apiPost('/auth/google-login', { idToken }),
 };
 
 // Upload

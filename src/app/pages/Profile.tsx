@@ -75,6 +75,30 @@ export function Profile() {
     }
   };
 
+  const handleAppleLogin = async () => {
+    setLoggedIn(false);
+    try {
+      const result = await authApi.appleLogin('mock_apple_token');
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      doLogin();
+    } catch (err: any) {
+      console.error('Apple login failed:', err);
+    }
+  };
+
+  const handleGoogleLogin = async () => {
+    setLoggedIn(false);
+    try {
+      const result = await authApi.googleLogin('mock_google_token');
+      localStorage.setItem('token', result.token);
+      localStorage.setItem('user', JSON.stringify(result.user));
+      doLogin();
+    } catch (err: any) {
+      console.error('Google login failed:', err);
+    }
+  };
+
   const handleShare = () => {
     const text = `${t('common.brandName')} — ${myUser.name}\n${myUser.bio}\n${t('profile.following')}/${t('profile.followers')} ${myUser.following}/${myUser.followers}\n${mockData.shareProfileSuffix || ''}`;
     if (navigator.share) navigator.share({ title: myUser.name, text }).catch(() => {});
@@ -111,10 +135,10 @@ export function Profile() {
           <button onClick={handleWechatLogin} className="w-[48px] h-[48px] rounded-full bg-[#07C160] flex items-center justify-center active:scale-95 transition-transform shadow-sm">
             <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white"><path d="M18.575 13.711a.91.91 0 0 0 .898-.898.895.895 0 0 0-.898-.898.894.894 0 0 0-.898.898c0 .5.4.898.898.898m-4.425 0a.91.91 0 0 0 .898-.898c0-.498-.4-.898-.898-.898a.894.894 0 0 0-.898.898c0 .5.399.898.898.898m6.567 5.04a.35.35 0 0 0-.172.37c0 .048 0 .098.025.147.098.417.294 1.081.294 1.106 0 .073.025.122.025.172a.22.22 0 0 1-.221.22c-.05 0-.074-.024-.123-.048l-1.449-.836a.8.8 0 0 0-.344-.098c-.073 0-.147 0-.196.024-.688.197-1.4.295-2.161.295-3.66 0-6.607-2.457-6.607-5.505s2.947-5.505 6.607-5.505c3.659 0 6.606 2.458 6.606 5.505 0 1.647-.884 3.146-2.284 4.154M16.674 8.099a9 9 0 0 0-.28-.005c-4.174 0-7.606 2.86-7.606 6.505 0 .554.08 1.09.228 1.6h-.089a10 10 0 0 1-2.584-.368c-.074-.025-.148-.025-.222-.025a.83.83 0 0 0-.419.123l-1.747 1.005a.35.35 0 0 1-.148.05.273.273 0 0 1-.27-.27c0-.074.024-.123.049-.197.024-.024.246-.834.369-1.324 0-.05.024-.123.024-.172a.56.56 0 0 0-.221-.441C2.059 13.376 1 11.586 1 9.599 1.001 5.944 4.571 3 8.951 3c3.765 0 6.93 2.169 7.723 5.098m-5.154.418c.573 0 1.026-.477 1.026-1.026s-.453-1.026-1.026-1.026-1.026.453-1.026 1.026.453 1.026 1.026 1.026m-5.26 0c.573 0 1.027-.477 1.027-1.026s-.454-1.026-1.027-1.026c-.572 0-1.026.453-1.026 1.026s.454 1.026 1.026 1.026"/></svg>
           </button>
-          <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-black flex items-center justify-center active:scale-95 transition-transform shadow-sm">
+          <button onClick={handleAppleLogin} className="w-[48px] h-[48px] rounded-full bg-black flex items-center justify-center active:scale-95 transition-transform shadow-sm">
             <svg viewBox="0 0 24 24" className="w-5 h-5" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
           </button>
-          <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-white dark:bg-gray-800 border-2 border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:scale-95 transition-transform shadow-sm">
+          <button onClick={handleGoogleLogin} className="w-[48px] h-[48px] rounded-full bg-white dark:bg-gray-800 border-2 border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:scale-95 transition-transform shadow-sm">
             <span className="text-[18px] font-bold text-[#4285F4]">G</span>
           </button>
         </div>
