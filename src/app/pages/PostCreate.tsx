@@ -1,5 +1,5 @@
 import { ChevronLeft, MapPin, Hash, AtSign } from "lucide-react";
-import { useState, useMemo, useEffect, useRef } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { usePageTransition } from "../hooks/usePageTransition";
@@ -49,46 +49,14 @@ export function PostCreate() {
     } catch {}
   }, []);
 
-  const draftRef = useRef({ content, images });
-  useEffect(() => { draftRef.current = { content, images }; });
-
-  const [showExitPrompt, setShowExitPrompt] = useState(false);
-  const hasContent = !!(content || images.length);
-  const contentRef = useRef(hasContent);
-  const exitingRef = useRef(false);
-  useEffect(() => { contentRef.current = hasContent; });
-
-  // History guard for swipe-back interception
+  // Draft auto-save on unmount
   useEffect(() => {
-    history.pushState({ pawgramGuard: 1 }, '', location.href);
-    const onPop = () => {
-      if (exitingRef.current) { exitingRef.current = false; return; }
-      if (contentRef.current) {
-        history.pushState({ pawgramGuard: 1 }, '', location.href);
-        setShowExitPrompt(true);
+    return () => {
+      if (content || images.length) {
+        localStorage.setItem('pawgram_draft', JSON.stringify({content, images, tags, loc}));
       }
     };
-    window.addEventListener('popstate', onPop);
-    return () => window.removeEventListener('popstate', onPop);
-  }, []);
-
-  const handleBack = () => {
-    if (hasContent) {
-      setShowExitPrompt(true);
-    } else {
-      navigate('/', { replace: true });
-    }
-  };
-
-  const doExit = () => {
-    exitingRef.current = true;
-    navigate(-1);
-  };
-
-  const saveDraft = () => {
-    localStorage.setItem('pawgram_draft', JSON.stringify({content, images, tags, loc}));
-    doExit();
-  };
+  }, [content, images, tags, loc]);
 
   const restoreDraft = () => {
     try {
@@ -169,8 +137,7 @@ export function PostCreate() {
         breed: selectedPet?.type || '',
         location: loc,
       });
-      localStorage.removeItem("pawgram_draft");
-      doExit();
+      localStorage.removeItem("pawgram_draft");navigate("/");
     } catch {
       setPublishing(false);
     }
@@ -199,20 +166,8 @@ export function PostCreate() {
         </div>
       )}
 
-      {showExitPrompt && (
-        <div className="fixed inset-0 z-[200] bg-black/40 flex items-end" onClick={() => setShowExitPrompt(false)}>
-          <div className="w-full bg-white dark:bg-gray-900 rounded-t-[16px] p-5" onClick={e=>e.stopPropagation()}>
-            <h3 className="text-[15px] font-bold text-center mb-4">是否保留草稿？</h3>
-            <p className="text-[13px] text-[#999] text-center mb-4">退出后当前内容将被清除</p>
-            <button onClick={saveDraft} className="w-full h-11 bg-[#FF8C42] text-white rounded-xl text-[14px] font-bold mb-2">保留</button>
-            <button onClick={doExit} className="w-full h-11 text-[#FF8C42] text-[14px] mb-2">不保留</button>
-            <button onClick={() => setShowExitPrompt(false)} className="w-full h-11 text-[#999] text-[13px]">继续编辑</button>
-          </div>
-        </div>
-      )}
-
       <div className="flex items-center justify-between px-4 pt-[var(--app-safe-top)] h-[var(--app-header-height)] shrink-0 border-b border-[#F0F0F0] dark:border-gray-700">
-        <button onClick={handleBack} className="p-1 ml-1 cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100" /></button>
+        <button onClick={() => handleBack(() => navigate(-1))} className="p-1 -ml-1 cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100" /></button>
         <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('common.publish')}</h1>
         <button onClick={handlePublish} disabled={publishing || (!content.trim() && images.length === 0)}
           className={`text-[14px] font-bold px-4 py-1.5 rounded-full ${content.trim() || images.length > 0 ? 'bg-[#FF8C42] text-white' : 'bg-[#F0F0F0] dark:bg-gray-700 text-[#BBB] dark:text-gray-500'}`}>
