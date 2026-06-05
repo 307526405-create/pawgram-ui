@@ -343,9 +343,9 @@ export function PostDetail() {
               )}
             </div>
           )}
-          <button onClick={handleShare} className=\"p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70\"><Share2 className=\"w-5 h-5\"/></button>
+          <button onClick={handleShare} className="p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70"><Share2 className="w-5 h-5"/></button>
           {!isOwner && (
-            <button onClick={() => setShowReport(true)} className=\"p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70\"><Flag className=\"w-5 h-5\"/></button>
+            <button onClick={() => setShowReport(true)} className="p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70"><Flag className="w-5 h-5"/></button>
           )}
           <button onClick={handleFavorite} className={`p-1 cursor-pointer active:opacity-70 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}><Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/></button>
         </div>
