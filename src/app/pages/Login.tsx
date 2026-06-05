@@ -14,6 +14,7 @@ export function Login() {
 
   const [phone, setPhone] = useState('');
   const [code, setCode] = useState('');
+  const [codeSent, setCodeSent] = useState(false);
   const [countdown, setCountdown] = useState(0);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -58,6 +59,8 @@ export function Login() {
     try {
       await authApi.sendCode(phone);
       setCountdown(60);
+      setCode('');
+      setCodeSent(true);
     } catch (err: any) {
       setError(err.message || '发送失败，请稍后再试');
     } finally {
@@ -182,54 +185,20 @@ export function Login() {
           <p className="text-[13px] text-[#999999] dark:text-gray-400 mt-1">{t('login.tagline')}</p>
         </div>
 
-        <div className="w-full max-w-[320px] space-y-4">
-          {/* Phone input */}
+        <div className="w-full max-w-[320px] space-y-3">
           <div className="relative">
             <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[14px] text-[#333] dark:text-gray-100 font-medium border-r border-[#E5E5E5] dark:border-gray-700 pr-2">+86</span>
-            <input
-              type="tel"
-              placeholder={t('login.enterPhone')}
-              value={phone}
-              onChange={(e) => { setPhone(e.target.value); setError(''); }}
-              className="w-full h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 pl-[52px] pr-3 text-[15px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] dark:placeholder:text-gray-400 transition-colors"
-            />
+            <input type="tel" placeholder={t('login.enterPhone')} value={phone} onChange={(e) => { setPhone(e.target.value); setError(''); }} className="w-full h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 pl-[52px] pr-3 text-[15px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] dark:placeholder:text-gray-400 transition-colors" />
           </div>
-
-          {/* Verification code input */}
-          <div className="relative">
-            <input
-              type="tel"
-              maxLength={6}
-              pattern="[0-9]*"
-              inputMode="numeric"
-              placeholder={t('login.enterCode')}
-              value={code}
-              onChange={(e) => { setCode(e.target.value.replace(/\D/g, '')); setError(''); }}
-              className="w-full h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 pl-3 pr-[100px] text-[15px] text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] dark:placeholder:text-gray-400 transition-colors"
-            />
-            <button
-              onClick={handleSendCode}
-              disabled={countdown > 0 || loading}
-              className={`absolute right-3 top-1/2 -translate-y-1/2 text-[14px] font-medium bg-transparent cursor-pointer active:opacity-70 transition-opacity ${
-                countdown > 0 ? 'text-[#BBBBBB] dark:text-gray-500' : 'text-[#FF8C42]'
-              }`}
-            >
-              {countdown > 0 ? `${t('login.resend') || '重新发送'}(${countdown}s)` : t('login.getCode')}
+          <div className="flex gap-2">
+            <input type="tel" maxLength={6} pattern="[0-9]*" inputMode="numeric" placeholder={t('login.enterCode')} value={code}
+              onChange={(e) => { const v = e.target.value.replace(/\\D/g, ''); setCode(v); setError(''); if (v.length === 6) handleLogin(); }}
+              className="flex-1 h-[50px] rounded-[12px] border border-[#E5E5E5] dark:border-gray-700 px-3 text-[15px] text-center tracking-[8px] font-bold text-[#333333] dark:text-gray-100 outline-none focus:border-[#FF8C42] bg-white dark:bg-gray-900 placeholder:text-[#BBBBBB] dark:placeholder:text-gray-400 transition-colors" />
+            <button onClick={handleSendCode} disabled={countdown > 0 || loading || !phone} className="h-[50px] px-5 bg-[#FF8C42] rounded-[12px] text-white text-[14px] font-bold active:bg-[#F27E36] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed shrink-0">
+              {countdown > 0 ? `${countdown}s` : (t('login.getCode') || '获取验证码')}
             </button>
           </div>
-
-          {/* Error message */}
-          {error && (
-            <p className="text-[12px] text-red-500 text-center">{error}</p>
-          )}
-
-          <button
-            onClick={() => handleLogin()}
-            disabled={loading || !phone || !code || code.length < 6}
-            className="w-full h-[50px] bg-[#FF8C42] rounded-[12px] text-white text-[16px] font-bold active:bg-[#F27E36] transition-colors flex items-center justify-center shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? (t('common.loading')) : t('login.title')}
-          </button>
+          {error && <p className="text-[12px] text-red-500 text-center">{error}</p>}
         </div>
 
         <div className="mt-4 flex flex-col items-center">
