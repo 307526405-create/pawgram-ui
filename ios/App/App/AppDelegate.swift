@@ -19,6 +19,8 @@ class PawgramViewController: CAPBridgeViewController {
     
     @objc func handleSwipeBack(_ gesture: UIScreenEdgePanGestureRecognizer) {
         if gesture.state == .ended {
+            // Don't allow back swipe on Discover page
+            if webView?.url?.path == "/discover" { return }
             let translation = gesture.translation(in: view)
             let velocity = gesture.velocity(in: view)
             if translation.x > 100 || velocity.x > 500 {
