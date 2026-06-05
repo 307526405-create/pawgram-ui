@@ -18,7 +18,7 @@ export function BreedPage() {
       </div>
       <div className="flex-1 overflow-y-auto p-4">
         {breedPosts.length === 0 ? (
-          <div className="flex flex-col items-center justify-center h-full text-[#999]">暂无{decodeURIComponent(breed)}的帖子</div>
+          <div className="flex flex-col items-center justify-center h-full text-[#999] dark:text-gray-400">暂无{decodeURIComponent(breed)}的帖子</div>
         ) : (
           <div className="grid grid-cols-3 gap-1">
             {breedPosts.map(p => (

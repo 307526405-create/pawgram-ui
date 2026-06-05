@@ -283,6 +283,7 @@ export function Discover() {
   const [feedPage, setFeedPage] = useState(1);
   const [feedHasMore, setFeedHasMore] = useState(false);
   const [feedLoading, setFeedLoading] = useState(false);
+  const [feedError, setFeedError] = useState('');
   const [initialLoading, setInitialLoading] = useState(true);
   const [mapFilter, setMapFilter] = useState('全部');
   const [favoritesOnly, setFavoritesOnly] = useState(false);
@@ -348,7 +349,10 @@ export function Discover() {
         setFeed(prev => [...prev, ...feedItems]);
       }
       setFeedHasMore(d.pagination?.hasMore || false);
-    } catch {}
+      setFeedError('');
+    } catch {
+      setFeedError('加载失败，请下拉刷新');
+    }
     setFeedLoading(false);
     setInitialLoading(false);
   };
@@ -646,6 +650,12 @@ export function Discover() {
                 <div className="h-40 bg-gray-200 dark:bg-gray-700 rounded-lg" />
               </div>
             ))}
+          </div>
+        )}
+
+        {feedError && (
+          <div className="mx-4 mt-3 px-4 py-2.5 bg-[#FFF0F0] dark:bg-red-900/20 border border-[#FFCCCC] dark:border-red-800/40 rounded-xl text-[13px] text-[#E53E3E] dark:text-red-400 text-center">
+            {feedError}
           </div>
         )}
         {!initialLoading && !feedLoading && feed.length === 0 && (

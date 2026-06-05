@@ -2,6 +2,9 @@ const API_BASE = 'http://192.168.3.52:3000/api';
 
 export async function apiGet(path: string) {
   const res = await fetch(`${API_BASE}${path}`);
+  if (!res.ok) {
+    return { code: -1, msg: `网络错误(${res.status})` };
+  }
   const data = await res.json();
   if (data.code !== 0) throw new Error(data.message);
   return data.data;
@@ -9,6 +12,9 @@ export async function apiGet(path: string) {
 
 export async function apiPost(path: string, body?: any) {
   const res = await fetch(`${API_BASE}${path}`, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  if (!res.ok) {
+    return { code: -1, msg: `网络错误(${res.status})` };
+  }
   const data = await res.json();
   if (data.code !== 0) throw new Error(data.message);
   return data.data;
@@ -37,6 +43,9 @@ export const postsApi = {
 
 async function apiPut(path: string, body?: any) {
   const res = await fetch(`${API_BASE}${path}`, { method: 'PUT', headers: { 'Content-Type': 'application/json' }, body: body ? JSON.stringify(body) : undefined });
+  if (!res.ok) {
+    return { code: -1, msg: `网络错误(${res.status})` };
+  }
   const data = await res.json();
   if (data.code !== 0) throw new Error(data.message);
   return data.data;
@@ -84,7 +93,8 @@ export const discoverApi = {
 
 // Search
 export const searchApi = {
-  search: (q: string) => apiGet(`/posts/search?q=${encodeURIComponent(q)}`),
+  search: (q: string, type = 'all') => apiGet(`/search?q=${encodeURIComponent(q)}&type=${type}`),
+  hot: () => apiGet('/search/hot'),
 };
 
 // Auth

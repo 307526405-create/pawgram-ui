@@ -6,7 +6,7 @@ import { usePageTransition } from "../hooks/usePageTransition";
 import { searchApi } from "../api/client";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 
-const hotSearches = ["金毛", "柯基", "布偶猫", "新手养宠", "自制猫饭", "哈士奇", "泰迪"];
+const defaultHotSearches = ["金毛", "柯基", "布偶猫", "新手养宠", "自制猫饭", "哈士奇", "泰迪"];
 
 const recommendUsers = [
   { id:1, name:"大黄铲屎官", avatar:"https://images.unsplash.com/photo-1761933808230-9a2e78956daa?w=150", bio:"金毛&柯基铲屎官", followers:"2.3k" },
@@ -35,6 +35,8 @@ export function Search() {
   const [searchPosts, setSearchPosts] = useState<any[]>([]);
   const [searchUsers, setSearchUsers] = useState<any[]>([]);
   const [searchLoading, setSearchLoading] = useState(false);
+  const [searchError, setSearchError] = useState('');
+  const [hotSearches, setHotSearches] = useState<string[]>(defaultHotSearches);
   const inputRef = useRef<HTMLInputElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout>>();
 
@@ -42,20 +44,23 @@ export function Search() {
     if (!q.trim()) {
       setSearchPosts([]);
       setSearchUsers([]);
+      setSearchError('');
       return;
     }
     setSearchLoading(true);
+    setSearchError('');
     try {
-      const data = await searchApi.search(q);
+      const data = await searchApi.search(q, 'all');
       setSearchPosts(data.posts || []);
-      setSearchUsers(data.users || []);
-    } catch {
+      setSearchUsers(data.pets || []);
+    } catch (err: any) {
       setSearchPosts([]);
       setSearchUsers([]);
+      setSearchError(err?.message || t('common.loadingFailed') || '搜索失败，请稍后重试');
     } finally {
       setSearchLoading(false);
     }
-  }, []);
+  }, [t]);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -71,6 +76,18 @@ export function Search() {
     if (inputRef.current) {
       inputRef.current.focus();
     }
+  }, []);
+
+  // Fetch hot search terms from API, fallback to defaults
+  useEffect(() => {
+    searchApi.hot().then((data: any) => {
+      const list = data?.hotSearch;
+      if (Array.isArray(list) && list.length > 0) {
+        setHotSearches(list);
+      }
+    }).catch(() => {
+      // Keep default hot searches
+    });
   }, []);
 
   const filteredUsers = searchUsers;
@@ -201,6 +218,11 @@ export function Search() {
               {searchLoading && (
                 <div className="flex items-center justify-center py-8 text-[14px] text-[#999] dark:text-gray-400">
                   {t('common.loading') || '搜索中...'}
+                </div>
+              )}
+              {!searchLoading && searchError && (
+                <div className="flex items-center justify-center py-8 text-[14px] text-[#E53E3E] dark:text-red-400">
+                  {searchError}
                 </div>
               )}
               {!searchLoading && activeTab === 0 && (

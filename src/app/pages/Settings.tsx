@@ -93,10 +93,16 @@ export function Settings() {
   const [notifToggles, setNotifToggles] = useState({ push: true, interaction: true, system: true, sound: false });
   const [privacyItems, setPrivacyItems] = useState({ whoCanSee: 'everyone', hideLocation: false, hideFavorites: false, hideLikes: false });
   const [blockedUsers, setBlockedUsers] = useState<any[]>([]);
+  const [blockError, setBlockError] = useState('');
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const loadBlockedList = () => {
-    usersApi.blockedList().then(d => setBlockedUsers(d.list || [])).catch(() => {});
+    usersApi.blockedList().then(d => {
+      setBlockedUsers(d.list || []);
+      setBlockError('');
+    }).catch(() => {
+      setBlockError('加载失败，请重试');
+    });
   };
 
   useEffect(() => { loadBlockedList(); }, []);
@@ -202,7 +208,12 @@ export function Settings() {
       case 'blockList': return (
         <SubPage title={t('settings.blockList')} onClose={() => setPage(null)}>
           <div className="divide-y divide-[#F5F5F5] dark:divide-gray-700">
-            {blockedUsers.length === 0 ? (
+            {blockError && (
+              <div className="px-4 py-3 text-[12px] text-[#E53E3E] dark:text-red-400 text-center bg-[#FFF0F0] dark:bg-red-900/20">
+                {blockError}
+              </div>
+            )}
+            {blockedUsers.length === 0 && !blockError ? (
               <div className="flex flex-col items-center justify-center py-16 text-center">
                 <div className="w-16 h-16 rounded-full bg-[#F5F5F5] dark:bg-gray-800 flex items-center justify-center mb-4">
                   <Ban className="w-8 h-8 text-[#CCC] dark:text-gray-600" />
@@ -223,7 +234,10 @@ export function Settings() {
                       try {
                         await usersApi.unblock(u.id);
                         setBlockedUsers(prev => prev.filter(b => b.id !== u.id));
-                      } catch {}
+                        setBlockError('');
+                      } catch {
+                        setBlockError('解除失败，请重试');
+                      }
                     }}
                     className="text-[12px] font-medium text-[#FF4D4F] border border-[#FF4D4F] rounded-full px-3 py-1 active:bg-[#FFF0F0]"
                   >

@@ -89,6 +89,8 @@ export function PostDetail() {
   const [showReport, setShowReport] = useState(false);
   const [reportReason, setReportReason] = useState('');
   const [reportSent, setReportSent] = useState(false);
+  const [commentsError, setCommentsError] = useState('');
+  const [sendError, setSendError] = useState('');
   const lastTap = useRef(0);
   const heartIdRef = useRef(0);
 
@@ -109,7 +111,7 @@ export function PostDetail() {
       setHasMoreComments(pagination?.hasMore ?? false);
       setTotalComments(pagination?.total ?? 0);
     } catch {
-      // fallback to empty
+      setCommentsError('评论加载失败');
     } finally {
       setLoadingComments(false);
     }
@@ -169,9 +171,10 @@ export function PostDetail() {
       await postsApi.addComment(Number(id), commentText.trim());
       if (post?.user?.name) sendCommentNotification(post.user.name, commentText.trim());
       setCommentText("");
+      setSendError('');
       fetchComments(1, false);
     } catch {
-      // ignore
+      setSendError('发送失败，请重试');
     }
   };
 
@@ -182,9 +185,10 @@ export function PostDetail() {
       if (post?.user?.name) sendCommentNotification(post.user.name, replyText.trim());
       setReplyText("");
       setReplyTarget(null);
+      setSendError('');
       fetchComments(1, false);
     } catch {
-      // ignore
+      setSendError('回复失败，请重试');
     }
   };
 
@@ -427,6 +431,11 @@ export function PostDetail() {
 
         <div className="bg-white dark:bg-gray-900 mt-2 px-4 py-4 min-h-[200px]">
           <h3 className="text-[14px] font-bold text-[#333] dark:text-gray-100 mb-4">{t('postDetail.commentsCount', { count: totalComments })}</h3>
+          {commentsError && (
+            <div className="mb-3 px-3 py-2 bg-[#FFF0F0] dark:bg-red-900/20 border border-[#FFCCCC] dark:border-red-800/40 rounded-lg text-[12px] text-[#E53E3E] dark:text-red-400 text-center">
+              {commentsError}
+            </div>
+          )}
           <div className="space-y-4">
             {comments.map(c => renderCommentItem(c))}
           </div>
@@ -445,12 +454,17 @@ export function PostDetail() {
       </div>
 
       {!replyTarget && (
-      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 p-3 z-40 flex items-center gap-3" style={{paddingBottom: 'calc(12px + env(safe-area-inset-bottom))'}}>
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-900 border-t border-[#EEE] dark:border-gray-700 p-3 z-40 flex flex-col gap-1.5" style={{paddingBottom: 'calc(12px + env(safe-area-inset-bottom))'}}>
+        {sendError && (
+          <div className="text-[11px] text-[#E53E3E] dark:text-red-400 text-center">{sendError}</div>
+        )}
+        <div className="flex items-center gap-3">
         <input value={commentText} onChange={e => setCommentText(e.target.value)} onKeyDown={e => e.key==='Enter'&&handleSendComment()}
           placeholder={t('common.saySomething')} className="flex-1 bg-[#F5F5F5] dark:bg-gray-800 dark:text-gray-100 rounded-lg px-3 h-9 outline-none text-[14px] placeholder:text-[#999] dark:placeholder:text-gray-400"/>
         <button onClick={handleSendComment} className="w-9 h-9 bg-[#FF8C42] text-white rounded-lg flex items-center justify-center active:bg-[#E67A35]">
           <Send className="w-4 h-4"/>
         </button>
+        </div>
       </div>
       )}
 

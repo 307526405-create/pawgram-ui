@@ -42,14 +42,18 @@ export function Home() {
     try {
       const { count } = await notificationsApi.unreadCount(1);
       setUnreadCount(count);
-    } catch {}
+    } catch {
+      // 静默失败：轮询不需要提示用户
+    }
   };
 
   const fetchNotifications = async () => {
     try {
       const data = await notificationsApi.list(1);
       setNotifications((data || []).slice(0, 10));
-    } catch {}
+    } catch {
+      // 静默失败：后台刷新通知
+    }
   };
 
   useEffect(() => {
@@ -69,6 +73,7 @@ export function Home() {
   const [hasMore, setHasMore] = useState(true);
   const [loading, setLoading] = useState(false);
   const [loadMoreLoading, setLoadMoreLoading] = useState(false);
+  const [error, setError] = useState('');
   const [likedPosts, setLikedPosts] = useState<Set<number>>(new Set());
   const [favedPosts, setBookmarkedPosts] = useState<Set<number>>(new Set());
   const [followedUsers, setFollowedUsers] = useState<Set<number>>(new Set());
@@ -103,7 +108,10 @@ export function Home() {
       if (p === 1) { setPosts(d.list); setPage(2); }
       else { setPosts(prev => [...prev, ...d.list]); setPage(prev => prev + 1); }
       setHasMore(d.pagination.hasMore);
-    } catch {}
+      setError('');
+    } catch {
+      setError('加载失败，请下拉刷新');
+    }
     setLoading(false);
     setLoadMoreLoading(false);
     fetchingRef.current = false;
@@ -263,6 +271,12 @@ export function Home() {
           {pullState==='loading'&&<span className="w-3.5 h-3.5 border-2 border-[#FF8C42] border-t-transparent rounded-full animate-spin"/>}
           {pullLabels[pullState]}
         </div>)}
+
+        {error && (
+          <div className="mx-4 mt-2 px-4 py-2.5 bg-[#FFF0F0] dark:bg-red-900/20 border border-[#FFCCCC] dark:border-red-800/40 rounded-xl text-[13px] text-[#E53E3E] dark:text-red-400 text-center">
+            {error}
+          </div>
+        )}
 
         <div className="sticky top-0 bg-[#FAFAFA]/90 dark:bg-gray-950/90 backdrop-blur-md z-40 px-4 pt-[var(--app-safe-top)] pb-2">
           <div className="flex items-center justify-between h-[var(--app-nav-height)]">
