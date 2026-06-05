@@ -157,6 +157,16 @@
     "views": "views",
     "edit": "Edit"
   },
+  "shareCard": {
+    "title": "Share",
+    "preview": "Share Preview",
+    "saveToAlbum": "Save to Album",
+    "saving": "Saving...",
+    "saved": "Saved to Album",
+    "saveFailed": "Save Failed",
+    "scanToDownload": "Scan to Download PawGram",
+    "sharedFrom": "Shared from PawGram"
+  },
   "messages": {
     "title": "Messages",
     "searchChats": "Search messages",

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { ChevronLeft, MapPin, Heart, MessageCircle, Plus, UserPlus, Send } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -19,7 +19,10 @@ export function UserProfile({ userId: propId, onBack }: { userId?: number; onBac
   useSwipeBack(swipeRef, onBack);
   const isOwnProfile = userId === 1;
   const [isFollowing, setIsFollowing] = useState(false);
+  const [profileLevel, setProfileLevel] = useState<any>(null);
   const goBack = () => onBack ? onBack() : handleBack(() => navigate(-1));
+
+  useEffect(() => { usersApi.level(userId).then(d => setProfileLevel(d)).catch(() => {}); }, [userId]);
 
   if (!user) {
     return (
@@ -58,11 +61,16 @@ export function UserProfile({ userId: propId, onBack }: { userId?: number; onBac
       <div className="flex-1 overflow-y-auto pb-[var(--app-bottom-nav-height)] [&::-webkit-scrollbar]:hidden">
         {/* Big avatar + name + bio */}
         <div className="flex flex-col items-center pt-8 pb-4 px-4">
-          <ImageWithFallback
-            src={user.avatar}
-            alt={user.name}
-            className="w-28 h-28 rounded-full object-cover border-[3px] border-white dark:border-gray-700 shadow-lg"
-          />
+          <div className="relative">
+            <ImageWithFallback
+              src={user.avatar}
+              alt={user.name}
+              className="w-28 h-28 rounded-full object-cover border-[3px] border-white dark:border-gray-700 shadow-lg"
+            />
+            {profileLevel && (
+              <span className={`absolute -bottom-0 -right-0 text-[11px] px-2 py-0.5 rounded-full font-bold border-2 border-white dark:border-gray-900 ${profileLevel.level === 'KOL' ? 'bg-purple-500 text-white' : profileLevel.level === '达人' ? 'bg-[#FF8C42] text-white' : 'bg-teal-400 text-white'}`}>{profileLevel.level}</span>
+            )}
+          </div>
           <h2 className="text-[22px] font-bold text-[#333] dark:text-gray-100 mt-4">{user.name}</h2>
           <p className="text-[13px] text-[#999] dark:text-gray-400 mt-1.5 text-center px-6">{user.bio}</p>
         </div>

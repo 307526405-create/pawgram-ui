@@ -157,6 +157,16 @@
     "views": "次浏览",
     "edit": "编辑"
   },
+  "shareCard": {
+    "title": "分享到",
+    "preview": "分享预览",
+    "saveToAlbum": "保存到相册",
+    "saving": "保存中...",
+    "saved": "已保存到相册",
+    "saveFailed": "保存失败",
+    "scanToDownload": "扫码下载爪印",
+    "sharedFrom": "来自爪印的分享"
+  },
   "messages": {
     "title": "消息",
     "searchChats": "搜索聊天记录",

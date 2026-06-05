@@ -3,6 +3,7 @@ import { useNavigate, useParams } from "react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { ShareCard } from "../components/ShareCard";
 import { postsApi, usersApi } from "../api/client";
 import { sendLikeNotification, sendCommentNotification, sendFollowNotification } from "../utils/notifications";
 import { usePageTransition } from "../hooks/usePageTransition";
@@ -75,12 +76,14 @@ export function PostDetail() {
   const [commentText, setCommentText] = useState("");
   const [replyTarget, setReplyTarget] = useState<number | null>(null);
   const [replyText, setReplyText] = useState("");
-  const [showHeart, setShowHeart] = useState(false);
+  const [hearts, setHearts] = useState<{id: number; x: number; y: number}[]>([]);
   const [showMeetup, setShowMeetup] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [pawShakeCount, setPawShakeCount] = useState(0);
   const [pawShakeBounce, setPawShakeBounce] = useState(false);
+  const [showShareCard, setShowShareCard] = useState(false);
   const lastTap = useRef(0);
+  const heartIdRef = useRef(0);
 
   const fetchComments = useCallback(async () => {
     if (!id) return;
@@ -123,13 +126,20 @@ export function PostDetail() {
   };
   const handleShare = () => {
     if (!post) return;
-    const text = `${t('common.brandName')}\n${post.user?.name}: ${post.content}`;
-    if (navigator.share) navigator.share({ title: t('common.brandName'), text }).catch(() => {});
-    else navigator.clipboard?.writeText(text);
+    setShowShareCard(true);
   };
-  const handleDoubleTap = () => {
+  const handleDoubleTap = (e: React.MouseEvent) => {
     const now = Date.now();
-    if (now - lastTap.current < 300) { setShowHeart(true); setTimeout(() => setShowHeart(false), 800); handleLike(); }
+    if (now - lastTap.current < 300) {
+      lastTap.current = 0;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const id = ++heartIdRef.current;
+      setHearts(prev => [...prev, { id, x, y }]);
+      setTimeout(() => setHearts(prev => prev.filter(h => h.id !== id)), 1000);
+      handleLike();
+    }
     lastTap.current = now;
   };
 
@@ -355,11 +365,18 @@ export function PostDetail() {
               </div>
             ))}
           </div>
-          {showHeart && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none" style={{marginTop:'-60%'}}>
-              <Heart className="w-24 h-24 text-white fill-white opacity-80 animate-ping"/>
+          {hearts.map(h => (
+            <div
+              key={h.id}
+              className="absolute pointer-events-none z-50"
+              style={{ left: h.x, top: h.y }}
+            >
+              <Heart
+                className="w-24 h-24 text-[#FF4D4F] fill-current drop-shadow-lg"
+                style={{ animation: 'float-heart 1s ease-out forwards' }}
+              />
             </div>
-          )}
+          ))}
           {isPrivate && (
             <div className="absolute top-4 left-4 bg-black/50 text-white text-[11px] px-2 py-1 rounded-full flex items-center gap-1">
               <Lock className="w-3 h-3"/>{t('postDetail.private')}
@@ -414,6 +431,12 @@ export function PostDetail() {
         </button>
       </div>
       )}
+
+      <ShareCard
+        open={showShareCard}
+        onClose={() => setShowShareCard(false)}
+        post={post}
+      />
 
     </div>
   );

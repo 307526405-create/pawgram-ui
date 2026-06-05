@@ -9,10 +9,11 @@ export const PostCard = memo(function PostCard({ post, onLike, onFollow, onFavor
   const { t } = useTranslation();
   const user = post.user || { name: t('common.user'), avatar: '' };
   const followed = user.followed || false;
-  const [showHeart, setShowHeart] = useState(false);
+  const [hearts, setHearts] = useState<{id: number; x: number; y: number}[]>([]);
   const [showMeetup, setShowMeetup] = useState(false);
   const [isFaved, setIsFaved] = useState(false);
   const lastTap = useRef(0);
+  const heartIdRef = useRef(0);
 
   const timeAgo = (dateStr: string) => {
     if (!dateStr) return '';
@@ -36,8 +37,15 @@ export const PostCard = memo(function PostCard({ post, onLike, onFollow, onFavor
     const now = Date.now();
     if (now - lastTap.current < 300) {
       e.preventDefault(); e.stopPropagation();
-      setShowHeart(true); setTimeout(() => setShowHeart(false), 800); onLike?.(e);
-      lastTap.current = 0; return;
+      lastTap.current = 0;
+      const rect = e.currentTarget.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const id = ++heartIdRef.current;
+      setHearts(prev => [...prev, { id, x, y }]);
+      setTimeout(() => setHearts(prev => prev.filter(h => h.id !== id)), 1000);
+      onLike?.(e);
+      return;
     }
     lastTap.current = now;
   }, [onLike]);
@@ -46,7 +54,12 @@ export const PostCard = memo(function PostCard({ post, onLike, onFollow, onFavor
     <div className="bg-white dark:bg-gray-900 rounded-xl mb-4 shadow-sm border border-gray-50 dark:border-gray-800 overflow-hidden">
       <div className="flex items-center justify-between p-3">
         <div className="flex items-center gap-2">
-          <ImageWithFallback src={user.avatar} alt={user.name} onClick={(e) => { e.stopPropagation(); navigate(`/user/${post.user_id}`); }} className="w-10 h-10 rounded-full object-cover border border-gray-100 dark:border-gray-700 cursor-pointer active:opacity-70" />
+          <div className="relative">
+            <ImageWithFallback src={user.avatar} alt={user.name} onClick={(e) => { e.stopPropagation(); navigate(`/user/${post.user_id}`); }} className="w-10 h-10 rounded-full object-cover border border-gray-100 dark:border-gray-700 cursor-pointer active:opacity-70" />
+            {user.level && (
+              <span className={`absolute -bottom-0.5 -right-0.5 text-[9px] px-1 py-0 rounded-full font-bold border border-white dark:border-gray-900 ${user.level === 'KOL' ? 'bg-purple-500 text-white' : user.level === '达人' ? 'bg-[#FF8C42] text-white' : 'bg-teal-400 text-white'}`}>{user.level}</span>
+            )}
+          </div>
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100">{user.name}</h3>
@@ -70,7 +83,7 @@ export const PostCard = memo(function PostCard({ post, onLike, onFollow, onFavor
       </div>
 
       <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.id}`); }} className="block relative w-full aspect-square bg-gray-50 dark:bg-gray-800 overflow-hidden cursor-pointer">
-        <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden" onClick={handleDoubleTap}>
+        <div className="flex w-full h-full overflow-x-auto snap-x snap-mandatory [&::-webkit-scrollbar]:hidden relative" onClick={handleDoubleTap}>
           {(post.images||[]).map((img: string, idx: number) => (
             <div key={idx} className="w-full h-full shrink-0 snap-center relative">
               <ImageWithFallback src={getMediaUrl(img)} className="w-full h-full object-cover"/>
@@ -86,11 +99,18 @@ export const PostCard = memo(function PostCard({ post, onLike, onFollow, onFavor
                   ))}
                 </div>
               )}
-              {idx===0 && showHeart && (
-                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                  <Heart className="w-20 h-20 text-white fill-white animate-ping opacity-80"/>
-                </div>
-              )}
+            </div>
+          ))}
+          {hearts.map(h => (
+            <div
+              key={h.id}
+              className="absolute pointer-events-none z-50"
+              style={{ left: h.x, top: h.y }}
+            >
+              <Heart
+                className="w-20 h-20 text-[#FF4D4F] fill-current drop-shadow-lg"
+                style={{ animation: 'float-heart 1s ease-out forwards' }}
+              />
             </div>
           ))}
         </div>

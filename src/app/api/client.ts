@@ -47,6 +47,7 @@ export const usersApi = {
   follow: (id: number) => apiPost(`/users/${id}/follow`),
   unfollow: (id: number) => apiPost(`/users/${id}/unfollow`),
   update: (id: number, data: any) => apiPut(`/users/${id}`, data),
+  level: (id: number) => apiGet(`/users/${id}/level`),
 };
 
 // Places
