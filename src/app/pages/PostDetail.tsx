@@ -323,31 +323,20 @@ export function PostDetail() {
         <div className="w-6" />
         <div className="flex items-center gap-1">
           {isOwner && (
-            <div className="relative">
-              <button onClick={() => setShowMenu(!showMenu)} className="p-1 cursor-pointer active:opacity-70"><MoreHorizontal className="w-5 h-5 text-[#333] dark:text-gray-100"/></button>
-              {showMenu && (
-                <>
-                  <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)}/>
-                  <div className="absolute right-0 top-10 bg-white dark:bg-gray-900 rounded-xl shadow-lg border border-[#F0F0F0] dark:border-gray-700 py-1 z-50 min-w-[140px]">
-                    <button onClick={() => { navigate(`/post/edit/${post.id}`); setShowMenu(false); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">
-                      <Edit3 className="w-4 h-4"/>{t('common.edit')}
-                    </button>
-                    <button onClick={togglePrivacy} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">
-                      {isPrivate ? <><Eye className="w-4 h-4"/>{t('postDetail.setPublic')}</> : <><Lock className="w-4 h-4"/>{t('postDetail.setPrivate')}</>}
-                    </button>
-                    <button onClick={handleDelete} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#FF4D4F] active:bg-[#F9F9F9] dark:active:bg-gray-800">
-                      <Trash2 className="w-4 h-4"/>{t('common.delete')}
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
-          )}
-          <button onClick={handleShare} className="p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70"><Share2 className="w-5 h-5"/></button>
-          {!isOwner && (
-            <button onClick={() => setShowReport(true)} className="p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70"><Flag className="w-5 h-5"/></button>
-          )}
-          <button onClick={handleFavorite} className={`p-1 cursor-pointer active:opacity-70 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}><Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/></button>
+          <div className="relative">
+            <button onClick={() => setShowMenu(!showMenu)} className="p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70"><MoreHorizontal className="w-5 h-5" /></button>
+            {showMenu && (
+              <>
+                <div className="fixed inset-0 z-40" onClick={() => setShowMenu(false)} />
+                <div className="absolute right-0 top-8 z-50 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-[#F0F0F0] dark:border-gray-700 py-1 min-w-[140px] animate-in fade-in slide-in-from-top-2">
+                  <button onClick={() => { setShowMenu(false); handleShare(); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800"><Share2 className="w-4 h-4" />{t('postDetail.share')}</button>
+                  {!isOwner && <button onClick={() => { setShowMenu(false); setShowReport(true); }} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800"><Flag className="w-4 h-4" />{t('postDetail.report')}</button>}
+                  {isOwner && <button onClick={togglePrivacy} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#333] dark:text-gray-100 active:bg-[#F9F9F9] dark:active:bg-gray-800">{isPrivate ? <><Eye className="w-4 h-4" />{t('postDetail.setPublic')}</> : <><Lock className="w-4 h-4" />{t('postDetail.setPrivate')}</>}</button>}
+                  {isOwner && <button onClick={handleDelete} className="w-full flex items-center gap-2 px-4 py-2.5 text-[13px] text-[#FF4D4F] active:bg-[#F9F9F9] dark:active:bg-gray-800"><Trash2 className="w-4 h-4" />{t('common.delete')}</button>}
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
