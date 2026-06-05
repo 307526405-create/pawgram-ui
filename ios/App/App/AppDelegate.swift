@@ -2,27 +2,38 @@ import UIKit
 import Capacitor
 import WebKit
 
-class PawgramViewController: CAPBridgeViewController {
+class PawgramViewController: CAPBridgeViewController, UIGestureRecognizerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Disable built-in gestures, use custom one
-        webView?.allowsBackForwardNavigationGestures = false
+        webView?.allowsBackForwardNavigationGestures = true
         webView?.isOpaque = false
         webView?.backgroundColor = UIColor(red: 1.0, green: 0.549, blue: 0.259, alpha: 1.0)
         webView?.scrollView.backgroundColor = UIColor(red: 1.0, green: 0.549, blue: 0.259, alpha: 1.0)
         
-        // Custom left-edge back gesture (disabled on Discover)
-        let edgeSwipe = UIScreenEdgePanGestureRecognizer(target: self, action: #selector(handleSwipeBack(_:)))
-        edgeSwipe.edges = .left
-        webView?.addGestureRecognizer(edgeSwipe)
+        DispatchQueue.main.async { [weak self] in
+            guard let self, let wv = self.webView else { return }
+            self.configureGestures(in: wv)
+        }
     }
     
-    @objc func handleSwipeBack(_ gesture: UIScreenEdgePanGestureRecognizer) {
-        if gesture.state == .recognized {
-            let url = webView?.url?.absoluteString ?? ""
-            if url.contains("discover") { return }
-            webView?.goBack()
+    func configureGestures(in view: UIView) {
+        for gr in view.gestureRecognizers ?? [] {
+            if let edge = gr as? UIScreenEdgePanGestureRecognizer {
+                if edge.edges == .right || edge.edges.contains(.right) {
+                    edge.isEnabled = false // disable forward
+                } else {
+                    edge.delegate = self // intercept back on Discover
+                }
+            }
         }
+        for sv in view.subviews {
+            configureGestures(in: sv)
+        }
+    }
+    
+    func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
+        let url = webView?.url?.absoluteString ?? ""
+        return !url.contains("discover")
     }
 }
 
