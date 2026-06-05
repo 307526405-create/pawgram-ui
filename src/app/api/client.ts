@@ -17,6 +17,7 @@ export async function apiPost(path: string, body?: any) {
 // Posts
 export const postsApi = {
   list: (page = 1) => apiGet(`/posts?page=${page}&pageSize=10`),
+  featured: () => apiGet('/posts?featured=1'),
   detail: (id: number) => apiGet(`/posts/${id}`),
   create: (data: any) => apiPost('/posts', data),
   delete: (id: number) =>
@@ -28,6 +29,9 @@ export const postsApi = {
   unlike: (id: number) => apiPost(`/posts/${id}/unlike`),
   likeComment: (postId: number, commentId: number) =>
     apiPost(`/posts/${postId}/comments/${commentId}/like`, { userId: 1 }),
+  pawShake: (id: number) => apiPost(`/posts/${id}/pawshake`),
+  favorite: (id: number) => apiPost(`/posts/${id}/favorite`),
+  favorites: (userId = 1) => apiGet(`/posts?favorites=1&userId=${userId}`),
 };
 
 async function apiPut(path: string, body?: any) {

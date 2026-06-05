@@ -80,7 +80,8 @@
     "goExplore": "Check out what's nearby",
     "goDiscover": "Go Discover",
     "followers": "Followers",
-    "views": "views"
+    "views": "views",
+    "featured": "Featured"
   },
   "discover": {
     "title": "Discover",

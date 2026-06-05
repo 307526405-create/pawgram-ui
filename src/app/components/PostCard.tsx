@@ -1,16 +1,17 @@
-import { Heart, MessageCircle, MapPin, Play, Footprints } from "lucide-react";
+import { Heart, MessageCircle, MapPin, Play, Footprints, Star } from "lucide-react";
 import { useState, useRef, useCallback, memo } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "./figma/ImageWithFallback";
 
-export const PostCard = memo(function PostCard({ post, onLike, onFollow }: { post: any; onLike?: (e: any) => void; onFollow?: (e: any) => void }) {
+export const PostCard = memo(function PostCard({ post, onLike, onFollow, onFavorite }: { post: any; onLike?: (e: any) => void; onFollow?: (e: any) => void; onFavorite?: (e: any) => void }) {
   const navigate = useNavigate();
   const { t } = useTranslation();
   const user = post.user || { name: t('common.user'), avatar: '' };
   const followed = user.followed || false;
   const [showHeart, setShowHeart] = useState(false);
   const [showMeetup, setShowMeetup] = useState(false);
+  const [isFaved, setIsFaved] = useState(false);
   const lastTap = useRef(0);
 
   const timeAgo = (dateStr: string) => {
@@ -99,6 +100,9 @@ export const PostCard = memo(function PostCard({ post, onLike, onFollow }: { pos
         <div className="flex items-center gap-4">
           <button onClick={onLike} className={`flex items-center gap-1.5 cursor-pointer active:opacity-70 ${post.is_liked?'text-[#FF8C42]':'text-gray-600 dark:text-gray-400'}`}>
             <Heart className={`w-6 h-6 ${post.is_liked?'fill-current':''}`}/><span className="text-sm font-medium">{post.like_count}</span>
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); const newState = !isFaved; setIsFaved(newState); onFavorite?.(e); }} className={`flex items-center gap-1.5 cursor-pointer active:opacity-70 ${isFaved?'text-[#FF8C42]':'text-gray-600 dark:text-gray-400'}`}>
+            <Star className={`w-6 h-6 ${isFaved?'fill-current':''}`}/>
           </button>
           <div onClick={(e) => { e.stopPropagation(); navigate(`/post/${post.id}`); }} className="flex items-center gap-1.5 text-gray-600 dark:text-gray-400 cursor-pointer">
             <MessageCircle className="w-6 h-6"/><span className="text-sm font-medium">{post.comment_count}</span>

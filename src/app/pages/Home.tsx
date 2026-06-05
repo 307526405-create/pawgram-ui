@@ -111,6 +111,7 @@ export function Home() {
   const pullRefreshing = useRef(false);
   const scrollTopBeforeRefresh = useRef(0);
   const [showPetOnboarding, setShowPetOnboarding] = useState(false);
+  const [featuredPosts, setFeaturedPosts] = useState<any[]>([]);
 
   // Check if user needs pet onboarding
   useEffect(() => {
@@ -120,6 +121,11 @@ export function Home() {
       const user = data.user;
       if (!user.pet_breed) setShowPetOnboarding(true);
     }).catch(() => {});
+  }, []);
+
+  // Fetch featured posts
+  useEffect(() => {
+    postsApi.featured().then(data => setFeaturedPosts(data.list || [])).catch(() => {});
   }, []);
 
   const fetchingRef = useRef(false);
@@ -344,6 +350,24 @@ export function Home() {
               </button>
             </div>
           </div>
+
+          {featuredPosts.length > 0 && (
+            <div className="flex gap-2.5 overflow-x-auto pt-2 pb-1 [&::-webkit-scrollbar]:hidden">
+              {featuredPosts.slice(0, 5).map((post: any) => {
+                const coverImg = typeof post.images?.[0] === 'string' ? post.images[0] : post.images?.[0]?.poster || '';
+                return (
+                  <div key={post.id} onClick={() => navigate(`/post/${post.id}`)} className="shrink-0 w-[140px] rounded-xl overflow-hidden border-2 border-[#FF8C42] relative cursor-pointer active:opacity-80 bg-white dark:bg-gray-900">
+                    <div className="absolute top-1.5 left-1.5 z-10 bg-[#FF8C42] text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full">{t('home.featured')}</div>
+                    <ImageWithFallback src={coverImg} className="w-full h-[90px] object-cover" />
+                    <div className="p-2 flex items-center gap-1.5">
+                      <ImageWithFallback src={post.user?.avatar || ''} className="w-5 h-5 rounded-full object-cover shrink-0 border border-white/50" />
+                      <span className="text-[12px] text-[#333] dark:text-gray-100 truncate leading-tight">{post.content?.slice(0, 16) || ''}</span>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
           <div className="flex items-center gap-6 mt-1">
             <button onClick={()=>setActiveTab('hot')} className={`text-[17px] font-bold relative pb-2 cursor-pointer active:opacity-70 ${activeTab==='hot'?'text-[#333] dark:text-gray-100':'text-[#999] dark:text-gray-400'}`}>

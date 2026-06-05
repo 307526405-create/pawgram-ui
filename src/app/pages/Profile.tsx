@@ -43,6 +43,7 @@ export function Profile() {
     })),
   [mockData]);
   const [posts, setPosts] = useState<any[]>([]);
+  const [favPosts, setFavPosts] = useState<any[]>([]);
   const [profileData, setProfileData] = useState<any>(null);
   const [loggedIn, setLoggedIn] = useState(isLoggedIn());
   const [showQR, setShowQR] = useState(false);
@@ -59,6 +60,8 @@ export function Profile() {
   }, []);
 
   useEffect(() => { if (loggedIn) { postsApi.list(1).then(d => setPosts(d.list)).catch(() => {}); fetch('http://192.168.3.52:3000/api/posts/user/1').then(r=>r.json()).then(d=>setProfileData(d.data.user)).catch(()=>{}); } }, [loggedIn]);
+
+  useEffect(() => { if (tab === 'favs' && loggedIn) { postsApi.favorites(1).then(d => setFavPosts(d.list)).catch(() => {}); } }, [tab, loggedIn]);
 
   const handleShare = () => {
     const text = `${t('common.brandName')} — ${myUser.name}\n${myUser.bio}\n${t('profile.following')}/${t('profile.followers')} ${myUser.following}/${myUser.followers}\n${mockData.shareProfileSuffix || ''}`;
@@ -99,7 +102,6 @@ export function Profile() {
 
   const myPosts = posts.filter(p => p.user?.id === myUser.id);
   const likedPosts = posts.filter((_, i) => i % 3 === 0);
-  const favPosts = posts.filter((_, i) => i % 4 === 0);
 
   return (
     <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">

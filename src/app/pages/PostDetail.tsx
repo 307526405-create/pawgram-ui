@@ -78,6 +78,8 @@ export function PostDetail() {
   const [showHeart, setShowHeart] = useState(false);
   const [showMeetup, setShowMeetup] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
+  const [pawShakeCount, setPawShakeCount] = useState(0);
+  const [pawShakeBounce, setPawShakeBounce] = useState(false);
   const lastTap = useRef(0);
 
   const fetchComments = useCallback(async () => {
@@ -92,7 +94,7 @@ export function PostDetail() {
 
   useEffect(() => {
     if (!id) return;
-    postsApi.detail(Number(id)).then(p => { setPost(p); setIsLiked(p.is_liked||false); setLikeCount(p.like_count||0); setIsFollowing(p.user?.followed||false); setIsPrivate(p.is_private||false); setLoading(false); }).catch(() => setLoading(false));
+    postsApi.detail(Number(id)).then(p => { setPost(p); setIsLiked(p.is_liked||false); setLikeCount(p.like_count||0); setIsFollowing(p.user?.followed||false); setIsPrivate(p.is_private||false); setPawShakeCount(p.paw_shake_count||0); setLoading(false); }).catch(() => setLoading(false));
     fetchComments();
   }, [id, fetchComments]);
 
@@ -108,6 +110,15 @@ export function PostDetail() {
     } catch {
       setIsLiked(wasLiked);
       setLikeCount(prevCount);
+    }
+  };
+  const handleFavorite = async () => {
+    const wasFaved = isFaved;
+    setIsFaved(!wasFaved);
+    try {
+      await postsApi.favorite(post.id);
+    } catch {
+      setIsFaved(wasFaved);
     }
   };
   const handleShare = () => {
@@ -194,6 +205,19 @@ export function PostDetail() {
   const togglePrivacy = () => {
     setIsPrivate(!isPrivate);
     setShowMenu(false);
+  };
+
+  const handlePawShake = async () => {
+    if (!post) return;
+    const prev = pawShakeCount;
+    setPawShakeCount(prev + 1);
+    setPawShakeBounce(true);
+    setTimeout(() => setPawShakeBounce(false), 600);
+    try {
+      await postsApi.pawShake(post.id);
+    } catch {
+      setPawShakeCount(prev);
+    }
   };
 
   const isOwner = post?.user?.id === 1;
@@ -290,7 +314,7 @@ export function PostDetail() {
             </div>
           )}
           <button onClick={handleShare} className="p-1 text-[#666] dark:text-gray-400 cursor-pointer active:opacity-70"><Share2 className="w-5 h-5"/></button>
-          <button onClick={() => setIsFaved(!isFaved)} className={`p-1 cursor-pointer active:opacity-70 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}><Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/></button>
+          <button onClick={handleFavorite} className={`p-1 cursor-pointer active:opacity-70 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}><Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/></button>
         </div>
       </div>
 
@@ -359,12 +383,15 @@ export function PostDetail() {
                 <Heart className={`w-5 h-5 ${isLiked ? 'fill-current' : ''}`}/>
                 <span className="text-[14px] font-medium">{likeCount}</span>
               </button>
-              <button onClick={() => setIsFaved(!isFaved)} className={`flex items-center gap-1.5 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}>
+              <button onClick={handleFavorite} className={`flex items-center gap-1.5 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}>
                 <Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/>
                 <span className="text-[14px] font-medium">{isFaved ? 1 : 0}</span>
               </button>
               <button onClick={(e) => { e.stopPropagation(); setShowMeetup(true); setTimeout(()=>setShowMeetup(false),2000); }} className={`flex items-center gap-1.5 ${showMeetup?'text-[#FF8C42]':'text-[#666] dark:text-gray-400'}`}>
                 <Footprints className="w-5 h-5"/><span className="text-[14px] font-medium">{showMeetup?'已发送':'约遛'}</span>
+              </button>
+              <button onClick={handlePawShake} className={`flex items-center gap-1.5 text-[#666] dark:text-gray-400 ${pawShakeBounce ? 'animate-bounce' : ''}`}>
+                <span className="text-[16px]">🐾</span><span className="text-[14px] font-medium">{pawShakeCount > 0 ? pawShakeCount : '握爪'}</span>
               </button>
             </div>
           </div>
