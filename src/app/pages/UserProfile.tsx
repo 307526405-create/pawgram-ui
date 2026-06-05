@@ -1,12 +1,12 @@
-import { useState, useRef } from "react";
-import { ChevronLeft, MapPin, Heart, MessageCircle, Plus, UserPlus, Send } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { ChevronLeft, MapPin, Heart, MessageCircle, Plus, UserPlus, Send, Bookmark } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import { useTranslation } from "react-i18next";
 import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { useSwipeBack } from "../hooks/useSwipeBack";
 import { users, posts } from "../data/mockData";
-import { usersApi } from "../api/client";
+import { usersApi, postsApi } from "../api/client";
 
 export function UserProfile({ userId: propId, onBack }: { userId?: number; onBack?: () => void } = {}) {
   const navigate = useNavigate();
@@ -19,7 +19,17 @@ export function UserProfile({ userId: propId, onBack }: { userId?: number; onBac
   useSwipeBack(swipeRef, onBack);
   const isOwnProfile = userId === 1;
   const [isFollowing, setIsFollowing] = useState(false);
+  const [tab, setTab] = useState<'posts'|'favs'>('posts');
+  const [favPosts, setFavPosts] = useState<any[]>([]);
+  const [userPrivacy, setUserPrivacy] = useState<{ hide_favorites: number; hide_likes: number } | null>(null);
   const goBack = () => onBack ? onBack() : handleBack(() => navigate(-1));
+
+  useEffect(() => {
+    if (!isOwnProfile) {
+      usersApi.get(userId).then(d => setUserPrivacy(d.user)).catch(() => {});
+      postsApi.favorites(userId).then(d => setFavPosts(d.list || [])).catch(() => {});
+    }
+  }, [userId, isOwnProfile]);
 
   if (!user) {
     return (
@@ -149,7 +159,20 @@ export function UserProfile({ userId: propId, onBack }: { userId?: number; onBac
           </div>
         )}
 
-        {/* Posts grid - 3 columns */}
+        {/* Tab bar */}
+        <div className="flex justify-around px-4 py-3 border-t border-[#F0F0F0] dark:border-gray-800">
+          {[
+            {key:'posts' as const, label:t('profile.posts')},
+            {key:'favs' as const, label:t('profile.favorites')},
+          ].map(tabItem => (
+            <button key={tabItem.key} onClick={() => setTab(tabItem.key)} className={`text-[14px] font-bold relative pb-2 ${tab===tabItem.key?'text-[#333] dark:text-gray-100':'text-[#999] dark:text-gray-400'}`}>
+              {tabItem.label}{tab===tabItem.key && <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-5 h-0.5 bg-[#FF8C42] rounded-full"/>}
+            </button>
+          ))}
+        </div>
+
+        {/* Posts tab */}
+        {tab === 'posts' && (
         <div className="px-2">
           <h3 className="px-2 text-[14px] font-bold text-[#333] dark:text-gray-100 mb-3">
             {t('profile.posts')} ({userPosts.length})
@@ -196,6 +219,36 @@ export function UserProfile({ userId: propId, onBack }: { userId?: number; onBac
             </div>
           )}
         </div>
+        )}
+
+        {/* Favorites tab */}
+        {tab === 'favs' && (
+        <div className="px-2">
+          {userPrivacy?.hide_favorites === 1 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 rounded-full bg-[#F5F5F5] dark:bg-gray-800 flex items-center justify-center mb-4">
+                <Bookmark className="w-8 h-8 text-[#CCC] dark:text-gray-600" />
+              </div>
+              <p className="text-[14px] text-[#999] dark:text-gray-400">{t('profile.privacySet')}</p>
+            </div>
+          ) : favPosts.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-center">
+              <div className="w-16 h-16 rounded-full bg-[#FFF3E6] dark:bg-orange-900/30 flex items-center justify-center mb-4">
+                <Bookmark className="w-6 h-6 text-[#FF8C42]" />
+              </div>
+              <p className="text-[14px] text-[#999] dark:text-gray-400">{t('common.noData')}</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-3 gap-1">
+              {favPosts.map((p: any) => (
+                <div key={p.id} className="aspect-square bg-[#F0F0F0] dark:bg-gray-800 relative" onClick={() => navigate(`/post/${p.id}`)}>
+                  <ImageWithFallback src={typeof p.images?.[0] === 'string' ? p.images[0] : (p.images?.[0]?.poster || p.images?.[0]?.url || '')} className="w-full h-full object-cover"/>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        )}
       </div>
     </div>
   );

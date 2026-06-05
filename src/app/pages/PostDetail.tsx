@@ -76,6 +76,10 @@ export function PostDetail() {
   const [commentText, setCommentText] = useState("");
   const [replyTarget, setReplyTarget] = useState<number | null>(null);
   const [replyText, setReplyText] = useState("");
+  const [commentPage, setCommentPage] = useState(1);
+  const [hasMoreComments, setHasMoreComments] = useState(false);
+  const [loadingComments, setLoadingComments] = useState(false);
+  const [totalComments, setTotalComments] = useState(0);
   const [hearts, setHearts] = useState<{id: number; x: number; y: number}[]>([]);
   const [showMeetup, setShowMeetup] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -85,20 +89,33 @@ export function PostDetail() {
   const lastTap = useRef(0);
   const heartIdRef = useRef(0);
 
-  const fetchComments = useCallback(async () => {
+  const fetchComments = useCallback(async (page: number = 1, append: boolean = false) => {
     if (!id) return;
+    setLoadingComments(true);
     try {
-      const data = await postsApi.comments(Number(id));
-      setComments(flattenComments(data || [], t, i18n.language));
+      const data = await postsApi.comments(Number(id), page);
+      const list = data?.list || [];
+      const pagination = data?.pagination;
+      const flat = flattenComments(list || [], t, i18n.language);
+      if (append) {
+        setComments(prev => [...prev, ...flat]);
+      } else {
+        setComments(flat);
+      }
+      setCommentPage(page);
+      setHasMoreComments(pagination?.hasMore ?? false);
+      setTotalComments(pagination?.total ?? 0);
     } catch {
       // fallback to empty
+    } finally {
+      setLoadingComments(false);
     }
   }, [id, t]);
 
   useEffect(() => {
     if (!id) return;
     postsApi.detail(Number(id)).then(p => { setPost(p); setIsLiked(p.is_liked||false); setLikeCount(p.like_count||0); setIsFollowing(p.user?.followed||false); setIsPrivate(p.is_private||false); setPawShakeCount(p.paw_shake_count||0); setLoading(false); }).catch(() => setLoading(false));
-    fetchComments();
+    fetchComments(1, false);
   }, [id, fetchComments]);
 
   const handleLike = async () => {
@@ -149,7 +166,7 @@ export function PostDetail() {
       await postsApi.addComment(Number(id), commentText.trim());
       if (post?.user?.name) sendCommentNotification(post.user.name, commentText.trim());
       setCommentText("");
-      fetchComments();
+      fetchComments(1, false);
     } catch {
       // ignore
     }
@@ -162,7 +179,7 @@ export function PostDetail() {
       if (post?.user?.name) sendCommentNotification(post.user.name, replyText.trim());
       setReplyText("");
       setReplyTarget(null);
-      fetchComments();
+      fetchComments(1, false);
     } catch {
       // ignore
     }
@@ -415,10 +432,21 @@ export function PostDetail() {
         </div>
 
         <div className="bg-white dark:bg-gray-900 mt-2 px-4 py-4 min-h-[200px]">
-          <h3 className="text-[14px] font-bold text-[#333] dark:text-gray-100 mb-4">{t('postDetail.commentsCount', { count: comments.length })}</h3>
+          <h3 className="text-[14px] font-bold text-[#333] dark:text-gray-100 mb-4">{t('postDetail.commentsCount', { count: totalComments })}</h3>
           <div className="space-y-4">
             {comments.map(c => renderCommentItem(c))}
           </div>
+          {hasMoreComments && (
+            <div className="flex justify-center mt-4 pb-2">
+              <button
+                onClick={() => fetchComments(commentPage + 1, true)}
+                disabled={loadingComments}
+                className="text-[13px] font-medium text-[#FF8C42] bg-[#FFF3E6] dark:bg-orange-900/30 px-5 py-2 rounded-full active:bg-[#FFE4CC] disabled:opacity-50"
+              >
+                {loadingComments ? t('common.loading') : t('postDetail.loadMoreComments')}
+              </button>
+            </div>
+          )}
         </div>
       </div>
 

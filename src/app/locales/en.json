@@ -155,7 +155,8 @@
     "setPrivate": "Make Private",
     "private": "Private",
     "views": "views",
-    "edit": "Edit"
+    "edit": "Edit",
+    "loadMoreComments": "Load More Comments"
   },
   "shareCard": {
     "title": "Share",
@@ -203,7 +204,8 @@
     "followers": "Followers",
     "likes": "Likes",
     "editProfile": "Edit Profile",
-    "message": "Message"
+    "message": "Message",
+    "privacySet": "This user has set their profile to private"
   },
   "settings": {
     "title": "Settings",
@@ -237,6 +239,8 @@
     "whoCanSee": "Who can see my posts",
     "everyone": "Everyone",
     "hideLocation": "Hide My Location",
+    "hideFavorites": "Hide My Favorites",
+    "hideLikes": "Hide My Likes",
     "off": "Off",
     "pushNotifications": "Push Notifications",
     "interactionReminder": "Activity Alerts",

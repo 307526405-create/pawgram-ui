@@ -22,7 +22,7 @@ export const postsApi = {
   create: (data: any) => apiPost('/posts', data),
   delete: (id: number) =>
     fetch(`${API_BASE}/posts/${id}`, { method: 'DELETE' }),
-  comments: (id: number) => apiGet(`/posts/${id}/comments?lang=${localStorage.getItem("i18nextLng")?.startsWith("en") ? "en" : "zh"}`),
+  comments: (id: number, page = 1, pageSize = 10) => apiGet(`/posts/${id}/comments?page=${page}&pageSize=${pageSize}&lang=${localStorage.getItem("i18nextLng")?.startsWith("en") ? "en" : "zh"}`),
   addComment: (postId: number, content: string, parentId?: number) =>
     apiPost(`/posts/${postId}/comments`, { content, parent_id: parentId || null }),
   like: (id: number) => apiPost(`/posts/${id}/like`),
@@ -47,6 +47,7 @@ export const usersApi = {
   follow: (id: number) => apiPost(`/users/${id}/follow`),
   unfollow: (id: number) => apiPost(`/users/${id}/unfollow`),
   update: (id: number, data: any) => apiPut(`/users/${id}`, data),
+  privacy: (id: number, data: { hide_favorites?: number; hide_likes?: number }) => apiPut(`/users/${id}/privacy`, data),
 };
 
 // Places

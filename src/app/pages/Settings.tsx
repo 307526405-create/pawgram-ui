@@ -4,6 +4,7 @@ import { useState, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "motion/react";
 import { logout } from "../api/auth";
+import { usersApi } from "../api/client";
 import { useDarkMode } from "../hooks/useDarkMode";
 import { usePageTransition } from "../hooks/usePageTransition";
 
@@ -90,7 +91,7 @@ export function Settings() {
   const [bio, setBio] = useState("金毛&布偶猫铲屎官 | 爱生活爱宠物");
   const [saved, setSaved] = useState(false);
   const [notifToggles, setNotifToggles] = useState({ push: true, interaction: true, system: true, sound: false });
-  const [privacyItems, setPrivacyItems] = useState({ whoCanSee: 'everyone', hideLocation: false });
+  const [privacyItems, setPrivacyItems] = useState({ whoCanSee: 'everyone', hideLocation: false, hideFavorites: false, hideLikes: false });
   const avatarInputRef = useRef<HTMLInputElement>(null);
 
   const languages = [
@@ -174,6 +175,18 @@ export function Settings() {
               <div><div className="text-[14px] text-[#333] dark:text-gray-100">{t('settings.hideLocation')}</div><div className="text-[12px] text-[#999] dark:text-gray-400">{privacyItems.hideLocation ? t('common.confirm') : t('settings.off')}</div></div>
               <div className={`w-11 h-6 rounded-full relative transition-colors ${privacyItems.hideLocation ? 'bg-[#FF8C42]' : 'bg-[#E5E5E5] dark:bg-gray-700'}`}>
                 <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${privacyItems.hideLocation ? 'left-[22px]' : 'left-0.5'}`}/>
+              </div>
+            </div>
+            <div onClick={() => { const v = !privacyItems.hideFavorites; setPrivacyItems(prev => ({...prev, hideFavorites: v})); usersApi.privacy(1, { hide_favorites: v ? 1 : 0 }).catch(() => {}); }} className="px-4 py-4 flex items-center justify-between cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
+              <div><div className="text-[14px] text-[#333] dark:text-gray-100">{t('settings.hideFavorites')}</div><div className="text-[12px] text-[#999] dark:text-gray-400">{privacyItems.hideFavorites ? t('common.confirm') : t('settings.off')}</div></div>
+              <div className={`w-11 h-6 rounded-full relative transition-colors ${privacyItems.hideFavorites ? 'bg-[#FF8C42]' : 'bg-[#E5E5E5] dark:bg-gray-700'}`}>
+                <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${privacyItems.hideFavorites ? 'left-[22px]' : 'left-0.5'}`}/>
+              </div>
+            </div>
+            <div onClick={() => { const v = !privacyItems.hideLikes; setPrivacyItems(prev => ({...prev, hideLikes: v})); usersApi.privacy(1, { hide_likes: v ? 1 : 0 }).catch(() => {}); }} className="px-4 py-4 flex items-center justify-between cursor-pointer active:bg-[#F9F9F9] dark:active:bg-gray-800">
+              <div><div className="text-[14px] text-[#333] dark:text-gray-100">{t('settings.hideLikes')}</div><div className="text-[12px] text-[#999] dark:text-gray-400">{privacyItems.hideLikes ? t('common.confirm') : t('settings.off')}</div></div>
+              <div className={`w-11 h-6 rounded-full relative transition-colors ${privacyItems.hideLikes ? 'bg-[#FF8C42]' : 'bg-[#E5E5E5] dark:bg-gray-700'}`}>
+                <div className={`absolute top-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${privacyItems.hideLikes ? 'left-[22px]' : 'left-0.5'}`}/>
               </div>
             </div>
           </div>
