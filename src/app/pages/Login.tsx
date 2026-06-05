@@ -11,7 +11,7 @@ export function Login() {
   const splashImg = i18n.language === 'en' ? '/splash-en.png' : '/splash-zh.png';
 
   return (
-    <div className={`h-full relative flex flex-col bg-red-500 ${className}`}>
+    <div className={`h-full relative flex flex-col ${className}`}>
       <img src={splashImg} className="absolute inset-0 w-full h-full object-cover" alt="" />
       <div className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-10">
         <button onClick={() => handleBack(() => navigate(-1))} className="text-[#333333] dark:text-gray-100 active:scale-95 transition-transform p-1 -ml-1">
@@ -27,7 +27,6 @@ export function Login() {
             <span className="text-[36px]">🐾</span>
           </div>
           <h2 className="text-[22px] font-bold text-[#FF8C42]">{t('login.brandName')}</h2>
-          <p className="text-[11px] text-[#FF8C42]/50 mt-0.5">v1.1</p>
           <p className="text-[13px] text-[#999999] dark:text-gray-400 mt-1">{t('login.tagline')}</p>
         </div>
 
