@@ -167,7 +167,6 @@ export function ChatDetail() {
   const moreActions = [
     { icon:Image, label:t('chat.photo'), onClick:pickFromAlbum },
     { icon:Camera, label:t('chat.takePhoto'), onClick:takePhoto },
-    { icon:MapPin, label:t('chat.location'), onClick:sendLocation },
   ];
 
   return (
