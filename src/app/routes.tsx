@@ -14,6 +14,7 @@ import { CheckIn } from "./pages/CheckIn";
 import { BowlRewards } from "./pages/BowlRewards";
 import { Login } from "./pages/Login";
 import { Register } from "./pages/Register";
+import { WelcomeGuide } from "./pages/WelcomeGuide";
 import { Settings } from "./pages/Settings";
 import { FollowList } from "./pages/FollowList";
 import { ChatDetail } from "./pages/ChatDetail";
@@ -83,6 +84,7 @@ export const router = createBrowserRouter([
       { path: "bowl", Component: BowlRewards },
       { path: "login", Component: Login },
       { path: "register", Component: Register },
+      { path: "welcome", Component: WelcomeGuide },
       { path: "settings", Component: Settings },
       { path: "follows", Component: FollowList },
       { path: "export", Component: ChatDetail },

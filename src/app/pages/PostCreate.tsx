@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
 import { postsApi } from "../api/client";
+import { Toast, toast } from "../components/Toast";
 
 const myPetsBase = [
   { id:1, avatar:"https://images.unsplash.com/photo-1633722715463-d30f4f325e24?w=80" },
@@ -149,6 +150,7 @@ export function PostCreate() {
       localStorage.removeItem("pawgram_draft");
       navigate(from, { replace: true });
     } catch {
+      toast('发布失败，请检查网络后重试');
       setPublishing(false);
     }
   };
@@ -294,6 +296,7 @@ export function PostCreate() {
           </div>
         )}
       </div>
+      <Toast />
     </div>
   );
 }

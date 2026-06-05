@@ -49,7 +49,7 @@ export function Register() {
           </div>
 
           <button
-            onClick={() => navigate('/')}
+            onClick={() => navigate('/welcome')}
             className="w-full h-[50px] bg-[#FF8C42] rounded-[12px] text-white text-[16px] font-bold active:bg-[#F27E36] transition-colors flex items-center justify-center shadow-md"
           >
             {t('register.registerBtn')}
