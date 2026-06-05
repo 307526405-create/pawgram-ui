@@ -1,4 +1,4 @@
-import { Settings, QrCode, Share2, Scan, Heart, MessageCircle, Eye } from "lucide-react";
+import { Settings, QrCode, Share2, Scan, Heart, MessageCircle, Eye, Smartphone } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -83,10 +83,13 @@ export function Profile() {
           <div className="w-px h-5 bg-[#DDD] dark:bg-gray-600 mr-3"/>
           <input placeholder={t('profile.enterPhone')} className="flex-1 bg-transparent text-[15px] dark:text-gray-100 outline-none"/>
         </div>
-        <button onClick={doLogin} className="w-full h-[50px] bg-[#FF8C42] text-white rounded-xl text-[16px] font-bold active:bg-[#E67A35] shadow-md">{t('profile.login')}</button>
+        <button onClick={doLogin} className="w-full h-[50px] bg-[#FF8C42] text-white rounded-xl text-[16px] font-bold active:bg-[#E67A35] shadow-md flex items-center justify-center gap-2">
+          <Smartphone className="w-5 h-5" />
+          {t('profile.login')}
+        </button>
       </div>
 
-      <div className="mt-12 w-full max-w-[320px]">
+      <div className="mt-10 w-full max-w-[320px]">
         <div className="flex items-center gap-4 mb-6">
           <div className="flex-1 h-[0.5px] bg-[#E5E5E5] dark:bg-gray-700"/>
           <span className="text-[12px] text-[#BBB] dark:text-gray-500">{t('profile.otherLogin')}</span>
@@ -94,13 +97,13 @@ export function Profile() {
         </div>
         <div className="flex justify-center gap-8">
           <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-[#07C160] flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white"><path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.004.142.04.198a.226.226 0 0 0 .321.045l2.126-1.364a.74.74 0 0 1 .497-.129 10.8 10.8 0 0 0 2.882.413c4.8 0 8.691-3.288 8.691-7.342 0-4.054-3.891-7.342-8.69-7.342zm-2.95 5.557a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42zm5.897 0a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42z"/></svg>
+            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 12l-3-1.5v-1l3 1.5 7-3.5v1L10 14zm0-4l-3-1.5v-1l3 1.5 7-3.5v1L10 10z"/></svg>
           </button>
           <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full bg-black dark:bg-white flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-            <svg viewBox="0 0 24 24" className="w-6 h-6" fill="white"><path d="M17.05 20.28c-.98.95-2.05.88-3.08.4-1.09-.5-2.08-.48-3.24 0-1.44.62-2.2.44-3.06-.4C2.38 15.98 2.85 9.75 7.88 9.5c1.24.06 2.12.7 2.92.72.8.02 2.06-.86 3.6-.72 1.24.12 2.18.5 2.84 1.08-2.56 1.54-2.12 4.98.42 6-.5 1.1-1.1 2.2-2.1 3.2-.12.12-.26.26-.5.5zM14.52 7.6c.22-2.66 2.14-4.34 4.2-4.1.32 2.66-2.14 4.72-4.2 4.1z"/></svg>
+            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="white"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
           </button>
           <button onClick={doLogin} className="w-[48px] h-[48px] rounded-full border-2 border-[#E5E5E5] dark:border-gray-600 flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-            <svg viewBox="0 0 24 24" className="w-5 h-5" fill="#333"><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm4.5 12.5l-5-3-5 3v-7l5 3 5-3v7z"/></svg>
+            <Smartphone className="w-5 h-5 text-[#666] dark:text-gray-400" />
           </button>
         </div>
       </div>
