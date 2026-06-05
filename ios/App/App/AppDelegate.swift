@@ -33,7 +33,9 @@ class PawgramViewController: CAPBridgeViewController, UIGestureRecognizerDelegat
     
     func gestureRecognizerShouldBegin(_ gestureRecognizer: UIGestureRecognizer) -> Bool {
         let url = webView?.url?.absoluteString ?? ""
-        if url.contains("discover") || url.contains("/post") { return false }
+        // Only disable on Discover tab and PostCreate (exact /post, not /post/:id)
+        if url.contains("discover") { return false }
+        if url.hasSuffix("/post") || url.contains("/post?") { return false }
         return true
     }
 }
