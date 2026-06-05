@@ -27,7 +27,7 @@ export function Profile() {
   const [code, setCode] = useState('');
   const [countdown, setCountdown] = useState(0);
   const [smsLoading, setSmsLoading] = useState(false);
-  const countdownRef = useRef<NodeJS.Timeout>();
+  const countdownRef = useRef<ReturnType<typeof setInterval>>();
 
   const handleSendCode = async () => {
     if (!phone || countdown > 0) return;
