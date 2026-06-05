@@ -4,7 +4,7 @@ import { useNavigate, useLocation } from "react-router";
 import { useTranslation } from "react-i18next";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
-import { postsApi } from "../api/client";
+import { postsApi, uploadApi } from "../api/client";
 import { Toast, toast } from "../components/Toast";
 
 const myPetsBase = [
@@ -140,9 +140,21 @@ export function PostCreate() {
     if (!content.trim() && images.length === 0) return;
     setPublishing(true);
     try {
+      // Upload base64 images to server first, get back URLs
+      let uploadedUrls: string[] = [];
+      if (images.length > 0) {
+        const uploadPromises = images.map((img) => {
+          if (img.startsWith('data:')) {
+            return uploadApi.uploadImage(img).then(r => r.url);
+          }
+          return Promise.resolve(img); // already a URL
+        });
+        uploadedUrls = await Promise.all(uploadPromises);
+      }
+
       await postsApi.create({
         content: content.trim(),
-        images,
+        images: uploadedUrls,
         tags,
         breed: selectedPet?.type || '',
         location: loc,

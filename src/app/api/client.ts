@@ -91,4 +91,10 @@ export const searchApi = {
 export const authApi = {
   sendCode: (phone: string) => apiPost('/auth/send-code', { phone }),
   login: (phone: string, code: string) => apiPost('/auth/login', { phone, code }),
+  wechatLogin: (code: string) => apiPost('/auth/wechat-login', { code }),
+};
+
+// Upload
+export const uploadApi = {
+  uploadImage: (base64: string): Promise<{ url: string }> => apiPost('/upload', { image: base64 }),
 };
