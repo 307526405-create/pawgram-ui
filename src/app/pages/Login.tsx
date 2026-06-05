@@ -1,4 +1,4 @@
-import { ChevronLeft, MessageCircle } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { usePageTransition } from "../hooks/usePageTransition";
@@ -57,11 +57,12 @@ export function Login() {
           </button>
         </div>
 
-        <div className="mt-12 flex flex-col items-center shrink-0">
-          <p className="text-[12px] text-[#999999] dark:text-gray-400 mb-5">{t('login.otherLogin')}</p>
+        <div className="mt-6 flex flex-col items-center shrink-0">
+          <p className="text-[12px] text-[#999999] dark:text-gray-400 mb-4">{t('login.otherLogin')}</p>
 
-          <button className="w-[44px] h-[44px] rounded-full bg-[#07C160] flex items-center justify-center active:scale-95 transition-transform shadow-sm">
-            <MessageCircle className="w-6 h-6 text-white fill-current" />
+          <button className="w-[52px] h-[52px] rounded-full bg-[#07C160] flex items-center justify-center active:scale-95 transition-transform shadow-md">
+            <svg viewBox="0 0 24 24" className="w-7 h-7" fill="white">
+              <path d="M8.691 2.188C3.891 2.188 0 5.476 0 9.53c0 2.212 1.17 4.203 3.002 5.55a.59.59 0 0 1 .213.665l-.39 1.48c-.019.07-.004.142.04.198a.226.226 0 0 0 .321.045l2.126-1.364a.74.74 0 0 1 .497-.129 10.8 10.8 0 0 0 2.882.413c4.8 0 8.691-3.288 8.691-7.342 0-4.054-3.891-7.342-8.69-7.342zm-2.95 5.557a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42zm5.897 0a1.21 1.21 0 1 1 0 2.42 1.21 1.21 0 0 1 0-2.42z"/>
           </button>
         </div>
 
