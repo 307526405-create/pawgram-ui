@@ -1,6 +1,6 @@
 import { ChevronLeft, MapPin, Hash, AtSign } from "lucide-react";
-import { useState, useMemo, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router";
+import { useState, useMemo } from "react";
+import { useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { usePageTransition } from "../hooks/usePageTransition";
 import { Camera, CameraResultType, CameraSource } from "@capacitor/camera";
@@ -31,11 +31,6 @@ export function PostCreate() {
   [mockData]);
   const [content, setContent] = useState("");
   const [images, setImages] = useState<string[]>([]);
-  const location = useLocation();
-  useEffect(() => {
-    const photoUri = (location.state as any)?.photoUri;
-    if (photoUri) setImages([photoUri]);
-  }, []);
   const [petId, setPetId] = useState<number | null>(null);
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
