@@ -27,6 +27,7 @@ export function Login() {
             <span className="text-[36px]">🐾</span>
           </div>
           <h2 className="text-[22px] font-bold text-[#FF8C42]">{t('login.brandName')}</h2>
+          <p className="text-[11px] text-[#FF8C42]/50 mt-0.5">v1.1</p>
           <p className="text-[13px] text-[#999999] dark:text-gray-400 mt-1">{t('login.tagline')}</p>
         </div>
 
