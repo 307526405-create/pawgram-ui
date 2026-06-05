@@ -11,7 +11,7 @@ export function Login() {
   const splashImg = i18n.language === 'en' ? '/splash-en.png' : '/splash-zh.png';
 
   return (
-    <div className={`h-full relative flex flex-col ${className}`}>
+    <div className={`h-full relative flex flex-col bg-red-500 ${className}`}>
       <img src={splashImg} className="absolute inset-0 w-full h-full object-cover" alt="" />
       <div className="bg-white/80 dark:bg-gray-950/80 backdrop-blur-md pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-between px-4 shrink-0 relative z-10">
         <button onClick={() => handleBack(() => navigate(-1))} className="text-[#333333] dark:text-gray-100 active:scale-95 transition-transform p-1 -ml-1">
