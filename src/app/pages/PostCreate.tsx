@@ -157,7 +157,7 @@ export function PostCreate() {
   return (
     <div className={`h-full bg-white dark:bg-gray-900 relative flex flex-col ${className}`}>
       {/* 阻止 WKWebView 原生右滑返回/前进手势 */}
-      <div className="fixed left-0 top-0 w-6 h-full z-[1500]" onTouchStart={e => e.preventDefault()} onTouchMove={e => e.preventDefault()} />
+      <div className="fixed left-0 top-0 w-5 h-full z-[1500]" onTouchStart={e => e.preventDefault()} onTouchMove={e => e.preventDefault()} />
       {showPicker && (
         <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/40" onClick={() => setShowPicker(false)}>
           <div className="bg-white dark:bg-gray-900 rounded-t-[16px]" onClick={e => e.stopPropagation()}>
@@ -192,7 +192,7 @@ export function PostCreate() {
       )}
 
       <div className="flex items-center justify-between px-4 pt-[var(--app-safe-top)] h-[var(--app-header-height)] shrink-0 border-b border-[#F0F0F0] dark:border-gray-700">
-        <button onClick={handleBack} className="p-1 -ml-1 cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100" /></button>
+        <button onClick={handleBack} className="p-1 ml-1 cursor-pointer active:opacity-70"><ChevronLeft className="w-6 h-6 text-[#333] dark:text-gray-100" /></button>
         <h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('common.publish')}</h1>
         <button onClick={handlePublish} disabled={publishing || (!content.trim() && images.length === 0)}
           className={`text-[14px] font-bold px-4 py-1.5 rounded-full ${content.trim() || images.length > 0 ? 'bg-[#FF8C42] text-white' : 'bg-[#F0F0F0] dark:bg-gray-700 text-[#BBB] dark:text-gray-500'}`}>

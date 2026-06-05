@@ -45,7 +45,7 @@ export function BottomNav() {
 
           <button
             type="button"
-            onClick={() => navigate("/post")}
+            onClick={() => navigate("/post", { replace: true })}
             className="flex flex-col items-center justify-center w-[20%] h-full relative cursor-pointer active:opacity-70"
           >
             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[44px] h-[44px] rounded-full flex items-center justify-center shadow-sm z-10 bg-[#FF9A5C]">
