@@ -1,4 +1,4 @@
-import { ChevronLeft, Heart, Share2, Send, MoreHorizontal, Trash2, Lock, Eye, Edit3, Star } from "lucide-react";
+import { ChevronLeft, Heart, Share2, Send, MoreHorizontal, Trash2, Lock, Eye, Edit3, Star, Footprints } from "lucide-react";
 import { useNavigate, useParams } from "react-router";
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useTranslation } from "react-i18next";
@@ -74,6 +74,7 @@ export function PostDetail() {
   const [replyTarget, setReplyTarget] = useState<number | null>(null);
   const [replyText, setReplyText] = useState("");
   const [showHeart, setShowHeart] = useState(false);
+  const [showMeetup, setShowMeetup] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const lastTap = useRef(0);
 
@@ -320,6 +321,9 @@ export function PostDetail() {
               <button onClick={() => setIsFaved(!isFaved)} className={`flex items-center gap-1.5 ${isFaved ? 'text-[#FF8C42]' : 'text-[#666] dark:text-gray-400'}`}>
                 <Star className={`w-5 h-5 ${isFaved ? 'fill-current' : ''}`}/>
                 <span className="text-[14px] font-medium">{isFaved ? 1 : 0}</span>
+              </button>
+              <button onClick={(e) => { e.stopPropagation(); setShowMeetup(true); setTimeout(()=>setShowMeetup(false),2000); }} className={`flex items-center gap-1.5 ${showMeetup?'text-[#FF8C42]':'text-[#666] dark:text-gray-400'}`}>
+                <Footprints className="w-5 h-5"/><span className="text-[14px] font-medium">{showMeetup?'已发送':'约遛'}</span>
               </button>
             </div>
           </div>
