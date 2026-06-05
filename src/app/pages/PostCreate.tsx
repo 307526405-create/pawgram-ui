@@ -54,6 +54,23 @@ export function PostCreate() {
 
   const [showExitPrompt, setShowExitPrompt] = useState(false);
   const hasContent = !!(content || images.length);
+  const contentRef = useRef(hasContent);
+  const exitingRef = useRef(false);
+  useEffect(() => { contentRef.current = hasContent; });
+
+  // History guard for swipe-back interception
+  useEffect(() => {
+    history.pushState({ pawgramGuard: 1 }, '', location.href);
+    const onPop = () => {
+      if (exitingRef.current) { exitingRef.current = false; return; }
+      if (contentRef.current) {
+        history.pushState({ pawgramGuard: 1 }, '', location.href);
+        setShowExitPrompt(true);
+      }
+    };
+    window.addEventListener('popstate', onPop);
+    return () => window.removeEventListener('popstate', onPop);
+  }, []);
 
   const handleBack = () => {
     if (hasContent) {
@@ -63,9 +80,14 @@ export function PostCreate() {
     }
   };
 
+  const doExit = () => {
+    exitingRef.current = true;
+    navigate(-1);
+  };
+
   const saveDraft = () => {
     localStorage.setItem('pawgram_draft', JSON.stringify({content, images, tags, loc}));
-    navigate('/', { replace: true });
+    doExit();
   };
 
   const restoreDraft = () => {
@@ -148,7 +170,7 @@ export function PostCreate() {
         location: loc,
       });
       localStorage.removeItem("pawgram_draft");
-      navigate("/", { replace: true });
+      doExit();
     } catch {
       setPublishing(false);
     }
@@ -156,8 +178,6 @@ export function PostCreate() {
 
   return (
     <div className={`h-full bg-white dark:bg-gray-900 relative flex flex-col ${className}`}>
-      {/* 阻止 WKWebView 原生右滑返回/前进手势 */}
-      <div className="fixed left-0 top-0 w-5 h-full z-[1500]" onTouchStart={e => e.preventDefault()} onTouchMove={e => e.preventDefault()} />
       {showPicker && (
         <div className="fixed inset-0 z-[90] flex flex-col justify-end bg-black/40" onClick={() => setShowPicker(false)}>
           <div className="bg-white dark:bg-gray-900 rounded-t-[16px]" onClick={e => e.stopPropagation()}>
@@ -185,7 +205,7 @@ export function PostCreate() {
             <h3 className="text-[15px] font-bold text-center mb-4">是否保留草稿？</h3>
             <p className="text-[13px] text-[#999] text-center mb-4">退出后当前内容将被清除</p>
             <button onClick={saveDraft} className="w-full h-11 bg-[#FF8C42] text-white rounded-xl text-[14px] font-bold mb-2">保留</button>
-            <button onClick={() => navigate('/', { replace: true })} className="w-full h-11 text-[#FF8C42] text-[14px] mb-2">不保留</button>
+            <button onClick={doExit} className="w-full h-11 text-[#FF8C42] text-[14px] mb-2">不保留</button>
             <button onClick={() => setShowExitPrompt(false)} className="w-full h-11 text-[#999] text-[13px]">继续编辑</button>
           </div>
         </div>

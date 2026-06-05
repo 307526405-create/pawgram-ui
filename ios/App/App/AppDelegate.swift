@@ -9,6 +9,18 @@ class PawgramViewController: CAPBridgeViewController {
         webView?.isOpaque = false
         webView?.backgroundColor = UIColor(red: 1.0, green: 0.549, blue: 0.259, alpha: 1.0)
         webView?.scrollView.backgroundColor = UIColor(red: 1.0, green: 0.549, blue: 0.259, alpha: 1.0)
+        
+        // Disable forward (right-edge) swipe, keep back (left-edge) swipe
+        DispatchQueue.main.async { [weak self] in
+            guard let webView = self?.webView else { return }
+            for subview in webView.scrollView.subviews {
+                for gr in subview.gestureRecognizers ?? [] {
+                    if let edgePan = gr as? UIScreenEdgePanGestureRecognizer, edgePan.edges == .right {
+                        edgePan.isEnabled = false
+                    }
+                }
+            }
+        }
     }
 }
 
