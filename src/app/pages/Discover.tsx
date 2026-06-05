@@ -302,8 +302,8 @@ export function Discover() {
   const [pullState, setPullState] = useState<'idle' | 'pulling' | 'ready' | 'loading'>('idle');
   const [pullDist, setPullDist] = useState(0);
   const touchStartY = useRef(0);
-  const [dragOffset, setDragOffset] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef({ startX: 0, dragging: false, offset: 0 });
+  const mapOverlayRef = useRef<HTMLDivElement>(null);
 
   const mapTypes = ['全部', ...Array.from(new Set(places.map(p => p.type)))];
   let filteredPlaces = mapFilter === '全部' ? places : places.filter(p => p.type === mapFilter);
@@ -484,7 +484,7 @@ export function Discover() {
   return (
     <div className="h-full bg-[#FAFAFA] dark:bg-gray-950 relative flex flex-col">
       <div className="bg-[#FAFAFA]/90 dark:bg-gray-950/90 pt-[var(--app-safe-top)] h-[var(--app-header-height)] flex items-center justify-center shrink-0"><h1 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('discover.title')}</h1></div>
-      {showMap&&(<div className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col" style={{paddingBottom:'calc(50px + env(safe-area-inset-bottom))',transform:`translateX(${dragOffset}px)`,transition:isDragging?'none':'transform 0.3s ease'}} onTouchStart={(e)=>{if(e.touches[0].clientX<30){setIsDragging(true);setDragOffset(0);}}} onTouchMove={(e)=>{if(!isDragging)return;setDragOffset(Math.min(e.touches[0].clientX,window.innerWidth/3));}} onTouchEnd={()=>{if(dragOffset>100)setShowMap(false);setDragOffset(0);setIsDragging(false);}}>
+      {showMap&&(<div ref={mapOverlayRef} className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col" style={{paddingBottom:'calc(50px + env(safe-area-inset-bottom))'}} onTouchStart={(e)=>{if(e.touches[0].clientX<30){dragRef.current={startX:e.touches[0].clientX,dragging:true,offset:0};}}} onTouchMove={(e)=>{if(!dragRef.current.dragging)return;const d=e.touches[0].clientX;dragRef.current.offset=Math.max(0,Math.min(d-dragRef.current.startX,280));if(mapOverlayRef.current)mapOverlayRef.current.style.transform=`translateX(${dragRef.current.offset}px)`;}} onTouchEnd={()=>{dragRef.current.dragging=false;if(dragRef.current.offset>100){setShowMap(false);}if(mapOverlayRef.current){mapOverlayRef.current.style.transition='transform 0.3s ease';mapOverlayRef.current.style.transform='translateX(0)';}setTimeout(()=>{if(mapOverlayRef.current)mapOverlayRef.current.style.transition='';},300);}}>
         <div className="flex items-center justify-between px-5 bg-white dark:bg-gray-900 shrink-0" style={{paddingTop:'calc(env(safe-area-inset-top) + 4px)',paddingBottom:'2px'}}><button onClick={()=>setShowMap(false)} className="text-[#FF8C42] text-[15px] font-medium py-1 px-1">{t('discover.backToMap')}</button><h2 className="text-[17px] font-bold text-[#333] dark:text-gray-100">{t('discover.petMap')}</h2><button onClick={() => setMarkMode(!markMode)} className={`w-9 h-9 rounded-full flex items-center justify-center ${markMode ? 'bg-[#FF8C42] text-white' : 'bg-[#F5F5F5] dark:bg-gray-800 text-[#333] dark:text-gray-100'}`}><Plus className="w-5 h-5" /></button></div>
         <div className="flex gap-2 px-4 py-1.5 overflow-x-auto bg-white dark:bg-gray-900 border-b border-[#F0F0F0] dark:border-gray-700 shrink-0">
           <button onClick={() => { setFavoritesOnly(!favoritesOnly); if (!favoritesOnly) setMapFilter('全部'); }} className={`shrink-0 px-3 py-1 rounded-full text-[12px] font-medium flex items-center gap-1 ${favoritesOnly ? 'bg-[#FF4444] text-white' : 'bg-[#F5F5F5] dark:bg-gray-800 text-[#666] dark:text-gray-400'}`}>
