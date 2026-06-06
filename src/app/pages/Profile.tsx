@@ -45,7 +45,6 @@ export function Profile() {
     const clean = v.replace(/\D/g, '');
     setCode(clean);
     setError('');
-    if (clean.length === 6) handlePhoneLogin();
   };
 
   const handlePhoneLogin = async () => {
@@ -181,15 +180,19 @@ export function Profile() {
                     onChange={(e) => { setPhone(e.target.value); setError(''); }}
                     className="flex-1 bg-transparent text-[15px] dark:text-gray-100 outline-none" />
                 </div>
-                <div className="flex gap-2 items-center">
+                <div className="relative bg-[#F5F5F5] dark:bg-gray-800 rounded-xl h-[50px] flex items-center px-4">
                   <input type="tel" maxLength={6} inputMode="numeric" placeholder="请输入验证码" value={code}
                     onChange={(e) => { handleCodeChange(e.target.value); }}
-                    className="w-[55%] bg-[#F5F5F5] dark:bg-gray-800 rounded-xl h-[50px] px-3 text-[15px] text-center font-bold dark:text-gray-100 outline-none shrink-0 placeholder:tracking-normal placeholder:font-normal" />
+                    className="flex-1 bg-transparent text-[15px] tracking-[4px] font-bold dark:text-gray-100 outline-none" />
                   <button onClick={handleSendCode} disabled={countdown > 0 || !phone}
-                    className="flex-1 h-[50px] bg-[#FF8C42] rounded-xl text-white text-[15px] font-medium active:bg-[#E67A35] transition-colors disabled:opacity-50">
+                    className="text-[14px] font-medium text-[#FF8C42] active:text-[#E67A35] transition-colors disabled:text-gray-400 dark:disabled:text-gray-500 shrink-0 ml-2">
                     {countdown > 0 ? `${countdown}s` : (t('login.getCode') || '获取验证码')}
                   </button>
                 </div>
+                <button onClick={handlePhoneLogin} disabled={!code || code.length !== 6}
+                  className="w-full h-[50px] bg-[#FF8C42] rounded-xl text-white text-[16px] font-bold active:bg-[#E67A35] transition-colors disabled:opacity-40">
+                  {t('common.login') || '登录'}
+                </button>
               </>
             ) : (
               <>
@@ -198,15 +201,19 @@ export function Profile() {
                     onChange={(e) => { setEmail(e.target.value); setError(''); }}
                     className="flex-1 bg-transparent text-[15px] dark:text-gray-100 outline-none" />
                 </div>
-                <div className="flex gap-2 items-center">
+                <div className="relative bg-[#F5F5F5] dark:bg-gray-800 rounded-xl h-[50px] flex items-center px-4">
                   <input type="tel" maxLength={6} inputMode="numeric" placeholder="请输入验证码" value={code}
                     onChange={(e) => { handleCodeChange(e.target.value); }}
-                    className="w-[55%] bg-[#F5F5F5] dark:bg-gray-800 rounded-xl h-[50px] px-3 text-[15px] text-center font-bold dark:text-gray-100 outline-none shrink-0 placeholder:tracking-normal placeholder:font-normal" />
+                    className="flex-1 bg-transparent text-[15px] tracking-[4px] font-bold dark:text-gray-100 outline-none" />
                   <button onClick={handleSendCode} disabled={countdown > 0 || !email}
-                    className="flex-1 h-[50px] bg-[#FF8C42] rounded-xl text-white text-[15px] font-medium active:bg-[#E67A35] transition-colors disabled:opacity-50">
+                    className="text-[14px] font-medium text-[#FF8C42] active:text-[#E67A35] transition-colors disabled:text-gray-400 dark:disabled:text-gray-500 shrink-0 ml-2">
                     {countdown > 0 ? `${countdown}s` : (t('login.getCode') || '获取验证码')}
                   </button>
                 </div>
+                <button onClick={handlePhoneLogin} disabled={!code || code.length !== 6}
+                  className="w-full h-[50px] bg-[#FF8C42] rounded-xl text-white text-[16px] font-bold active:bg-[#E67A35] transition-colors disabled:opacity-40">
+                  {t('common.login') || '登录'}
+                </button>
               </>
             )}
             {error && <p className="text-[12px] text-red-500 text-center">{error}</p>}
