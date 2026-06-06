@@ -181,11 +181,11 @@ export function Profile() {
                     className="flex-1 bg-transparent text-[15px] dark:text-gray-100 outline-none" />
                 </div>
                 <div className="bg-[#F5F5F5] dark:bg-gray-800 rounded-xl h-[50px] flex items-center px-4">
-                  <input type="tel" maxLength={6} inputMode="numeric" placeholder="验证码" value={code}
+                  <input type="tel" maxLength={6} inputMode="numeric" placeholder="请输入验证码" value={code}
                     onChange={(e) => { handleCodeChange(e.target.value); }}
-                    className="min-w-0 flex-1 bg-transparent text-[15px] tracking-[4px] font-bold dark:text-gray-100 outline-none" />
+                    className="min-w-0 flex-1 bg-transparent text-[15px] font-bold dark:text-gray-100 outline-none" />
                   <button onClick={handleSendCode} disabled={countdown > 0 || !phone}
-                    className="text-[14px] font-medium text-[#FF8C42] active:text-[#E67A35] transition-colors disabled:text-gray-400 dark:disabled:text-gray-500 shrink-0 ml-2 whitespace-nowrap">
+                    className="text-[15px] font-medium text-[#FF8C42] active:text-[#E67A35] transition-colors disabled:text-gray-400 dark:disabled:text-gray-500 shrink-0 ml-2 whitespace-nowrap">
                     {countdown > 0 ? `${countdown}s` : (t('login.getCode') || '获取验证码')}
                   </button>
                 </div>
@@ -202,11 +202,11 @@ export function Profile() {
                     className="flex-1 bg-transparent text-[15px] dark:text-gray-100 outline-none" />
                 </div>
                 <div className="bg-[#F5F5F5] dark:bg-gray-800 rounded-xl h-[50px] flex items-center px-4">
-                  <input type="tel" maxLength={6} inputMode="numeric" placeholder="验证码" value={code}
+                  <input type="tel" maxLength={6} inputMode="numeric" placeholder="请输入验证码" value={code}
                     onChange={(e) => { handleCodeChange(e.target.value); }}
-                    className="min-w-0 flex-1 bg-transparent text-[15px] tracking-[4px] font-bold dark:text-gray-100 outline-none" />
+                    className="min-w-0 flex-1 bg-transparent text-[15px] font-bold dark:text-gray-100 outline-none" />
                   <button onClick={handleSendCode} disabled={countdown > 0 || !email}
-                    className="text-[14px] font-medium text-[#FF8C42] active:text-[#E67A35] transition-colors disabled:text-gray-400 dark:disabled:text-gray-500 shrink-0 ml-2 whitespace-nowrap">
+                    className="text-[15px] font-medium text-[#FF8C42] active:text-[#E67A35] transition-colors disabled:text-gray-400 dark:disabled:text-gray-500 shrink-0 ml-2 whitespace-nowrap">
                     {countdown > 0 ? `${countdown}s` : (t('login.getCode') || '获取验证码')}
                   </button>
                 </div>
